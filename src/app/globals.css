@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+body {
+   background-color: #c4c4c4;
+   font-family: "Montserrat", sans-serif;
+}
+
+h2 {
+   font-family: "bungee", cursive;
+}
+
 .custom-container {
    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
 }
