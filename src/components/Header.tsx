@@ -7,15 +7,15 @@ const Header = () => {
    const navItems = [
       { name: "Home", href: "/" },
       { name: "Services", href: "#services" },
-      { name: "About", href: "#about" },
-      { name: "Contact", href: "#contact" },
+      { name: "About Us", href: "/about" },
+      { name: "Contact", href: "/contact" },
    ];
 
    return (
-      <header className="w-full z-50 bg-transparent text-white">
+      <header className="w-full relative z-50 bg-transparent text-white">
          {/* Desktop */}
          <div className="hidden md:flex custom-container items-center justify-between py-6">
-            <Link href={"/"}>
+            <Link href={"/"} className="flex items-center gap-2">
                <Image
                   src={"/images/logo.png"}
                   width={70}
@@ -23,6 +23,9 @@ const Header = () => {
                   alt="logo"
                   className="cursor-pointer"
                />
+               <p className="text-gray-300 font-medium">
+                  Global Cooperation llc
+               </p>
             </Link>
 
             <nav className="w-1/2">
@@ -52,7 +55,7 @@ const Header = () => {
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 0.5 }}
             >
-               <Link href="/">
+               <Link href="/" className="flex flex-col items-center">
                   <Image
                      src="/images/logo.png"
                      alt="logo"
@@ -60,6 +63,9 @@ const Header = () => {
                      height={70}
                      className="cursor-pointer"
                   />
+                  <p className="text-gray-300 font-medium">
+                     Global Cooperation llc
+                  </p>
                </Link>
             </motion.div>
 

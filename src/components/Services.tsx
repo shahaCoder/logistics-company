@@ -52,7 +52,7 @@ const services = [
 
 const Services = () => {
    return (
-      <div>
+      <div id="services">
          <motion.h2
             className="text-5xl text-center font-bold text-red-600"
             initial={{ opacity: 0, y: 30 }}

@@ -5,21 +5,21 @@ import { motion } from "framer-motion";
 const features = [
    {
       icon: <FaShieldAlt className="text-4xl text-red-600" />,
-      title: "Seguridad",
+      title: "Safety",
       description:
-         "Realizamos la Certificación del Sistema de Gestión de Calidad de Operaciones de energía (ISO) junto al timel.",
+         "We are certified in Quality Management Systems (ISO) to ensure safe and reliable energy operations.",
    },
    {
       icon: <FaHandshake className="text-4xl text-red-600" />,
-      title: "Compromiso",
+      title: "Commitment",
       description:
-         "Brindamos servicios logísticos orientados a la industria Automotriz, con más de 40 años en el mercado.",
+         "We provide logistics services focused on the automotive industry, backed by over 40 years of experience.",
    },
    {
       icon: <FaTruck className="text-4xl text-red-600" />,
-      title: "A todo el país",
+      title: "Nationwide Service",
       description:
-         "Somos una empresa de transporte internacional que opera principalmente en el corredor Argentino.",
+         "We are an international transport company operating mainly along the Argentine corridor and across the country.",
    },
 ];
 

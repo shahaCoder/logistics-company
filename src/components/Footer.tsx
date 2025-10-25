@@ -7,19 +7,30 @@ import {
    FaEnvelope,
 } from "react-icons/fa";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
    return (
       <footer className="bg-[#111] text-gray-300 border-t border-[#2c2c2c]">
          <div className="custom-container py-14 flex flex-col md:flex-row justify-between gap-10">
-            {/* Left section */}
             <motion.div
                initial={{ opacity: 0, y: 20 }}
                whileInView={{ opacity: 1, y: 0 }}
                transition={{ duration: 0.5 }}
                className="space-y-4"
             >
-               <h2 className="text-2xl font-bold text-white">TruckMotion</h2>
+               <Link href="/" className="flex items-center">
+                  <Image
+                     src="/images/logo.png"
+                     alt="logo"
+                     width={70}
+                     height={70}
+                     className="cursor-pointer"
+                  />
+                  <p className="text-gray-300 font-medium text-2xl">
+                     Global Cooperation llc
+                  </p>
+               </Link>
                <p className="text-sm max-w-sm text-gray-400 leading-relaxed">
                   Reliable, fast, and safe transportation services across the
                   country. We deliver your cargo on time, every time.
@@ -52,7 +63,6 @@ export default function Footer() {
                </div>
             </motion.div>
 
-            {/* Center links */}
             <motion.div
                initial={{ opacity: 0, y: 20 }}
                whileInView={{ opacity: 1, y: 0 }}
@@ -96,14 +106,17 @@ export default function Footer() {
                <h3 className="text-lg font-semibold text-white mb-1">
                   Contact Info
                </h3>
-               <p className="text-sm text-gray-400">123 Main Street, Texas</p>
+               <p className="text-sm text-gray-400">
+                  10901 Reed Hartman Hwy, Blue Ash, OH 45242
+               </p>
                <p className="text-sm text-gray-400">+1 (234) 567-890</p>
                <p className="text-sm text-gray-400">info@truckmotion.com</p>
             </motion.div>
          </div>
 
          <div className="border-t border-[#2c2c2c] text-center py-6 text-sm text-gray-500">
-            © {new Date().getFullYear()} TruckMotion. All rights reserved.
+            © {new Date().getFullYear()} Global Cooperation llc. All rights
+            reserved.
          </div>
       </footer>
    );

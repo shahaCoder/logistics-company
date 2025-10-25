@@ -58,7 +58,7 @@ const Hero = () => {
                transition={{ duration: 0.6, delay: 0.8 }}
                className="mt-12 py-3 px-10 bg-red-600 hover:bg-red-700 transition-all duration-300 font-semibold rounded-sm shadow-md"
             >
-               Get a Quote
+               Join us
             </motion.button>
          </div>
       </section>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Montserrat, Bungee } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const bungee = Bungee({
    weight: "400",
@@ -28,7 +30,9 @@ export default function RootLayout({
          <body
             className={`${montserrat.variable} ${bungee.variable} antialiased`}
          >
+            <Header />
             {children}
+            <Footer />
          </body>
       </html>
    );
