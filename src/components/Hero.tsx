@@ -1,7 +1,8 @@
-"use client"
+"use client";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import React from "react";
+import Link from "next/link";
 
 const Hero = () => {
    return (
@@ -52,14 +53,19 @@ const Hero = () => {
                country. Trusted by hundreds of clients.
             </motion.p>
 
-            <motion.button
+            <motion.div
+               className="mt-10"
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 0.6, delay: 0.8 }}
-               className="mt-12 py-3 px-10 bg-red-600 hover:bg-red-700 transition-all duration-300 font-semibold rounded-sm shadow-md"
             >
-               Join us
-            </motion.button>
+               <Link
+                  href="/contact"
+                  className="py-3 px-10 bg-red-600 hover:bg-red-700 transition-all duration-300 font-semibold rounded-sm shadow-md"
+               >
+                  Join us
+               </Link>
+            </motion.div>
          </div>
       </section>
    );
