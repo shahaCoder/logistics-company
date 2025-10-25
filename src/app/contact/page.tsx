@@ -9,7 +9,6 @@ const Page = () => {
          {/* Верхняя фото-зона */}
          <div className="h-[250px] md:h-[500px]" />
          <div className="absolute top-0 w-full h-[400px] md:h-[500px]">
-            {/* Добавляем отступ сверху, чтобы не пересекался с Header */}
             <Image
                src="/images/brian-stalter-arotxe540N4-unsplash.jpg"
                alt="Apply for a job"
@@ -42,7 +41,7 @@ const Page = () => {
             </h2>
 
             <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               {/* Name */}
+               {/* First Name */}
                <div className="flex flex-col">
                   <label className="text-gray-700 mb-2 font-medium">
                      First Name
@@ -99,12 +98,15 @@ const Page = () => {
                   <label className="text-gray-700 mb-2 font-medium">
                      Experience
                   </label>
-                  <textarea
-                     rows={4}
-                     placeholder="Describe your work experience"
-                     className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all resize-none"
+                  <select
+                     className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all"
                      required
-                  ></textarea>
+                  >
+                     <option value="">Select experience</option>
+                     <option value="1">1 year</option>
+                     <option value="2">2 years</option>
+                     <option value="3+">3+ years</option>
+                  </select>
                </div>
 
                {/* Type */}

@@ -71,28 +71,28 @@ export default function Footer() {
             >
                <h3 className="text-lg font-semibold text-white mb-1">Links</h3>
                <Link
-                  href="#"
+                  href="/"
+                  className="hover:text-red-600 transition-colors text-sm"
+               >
+                  Home
+               </Link>
+               <Link
+                  href="/about"
                   className="hover:text-red-600 transition-colors text-sm"
                >
                   About Us
                </Link>
                <Link
-                  href="#"
+                  href="#services"
                   className="hover:text-red-600 transition-colors text-sm"
                >
                   Services
                </Link>
                <Link
-                  href="#"
+                  href="/contact"
                   className="hover:text-red-600 transition-colors text-sm"
                >
                   Contact
-               </Link>
-               <Link
-                  href="#"
-                  className="hover:text-red-600 transition-colors text-sm"
-               >
-                  Careers
                </Link>
             </motion.div>
 
