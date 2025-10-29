@@ -13,13 +13,13 @@ const features = [
       icon: <FaHandshake className="text-4xl text-red-600" />,
       title: "Commitment",
       description:
-         "We provide logistics services focused on the automotive industry, backed by over 40 years of experience.",
+         "We provide logistics services focused on the automotive industry, backed by over 7 years of experience.",
    },
    {
       icon: <FaTruck className="text-4xl text-red-600" />,
       title: "Nationwide Service",
       description:
-         "We are an international transport company operating mainly along the Argentine corridor and across the country.",
+         "We are a nationwide transport company operating across the United States.",
    },
 ];
 
