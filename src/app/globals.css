@@ -9,8 +9,10 @@ body {
    font-family: "Montserrat", sans-serif;
 }
 
-h2 {
-   font-family: "bungee", cursive;
+h3,
+h2,
+h1 {
+   font-family: "cinzel", cursive;
 }
 
 .custom-container {

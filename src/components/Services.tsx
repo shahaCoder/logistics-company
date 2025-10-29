@@ -87,7 +87,7 @@ const Services = () => {
                   }`}
                >
                   {/* Icon */}
-                  <div className="flex-shrink-0 text-gray-900 text-6xl md:w-1/3 flex justify-center">
+                  <div className="flex-shrink-0 font-black text-gray-900 text-6xl md:w-1/3 flex justify-center">
                      {service.icon}
                   </div>
 

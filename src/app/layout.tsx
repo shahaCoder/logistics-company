@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Montserrat, Bungee } from "next/font/google";
+import { Montserrat, Bungee, Cinzel } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const bungee = Bungee({
+const cinzel = Cinzel({
    weight: "400",
-   variable: "--font-bungee",
+   variable: "--font-cinzel",
    subsets: ["latin"],
 });
 
@@ -28,7 +28,7 @@ export default function RootLayout({
    return (
       <html lang="en">
          <body
-            className={`${montserrat.variable} ${bungee.variable} antialiased`}
+            className={`${montserrat.variable} ${cinzel.variable} antialiased`}
          >
             <Header />
             {children}
