@@ -109,8 +109,8 @@ export default function Footer() {
                <p className="text-sm text-gray-400">
                   10901 Reed Hartman Hwy, Blue Ash, OH 45242
                </p>
-               <p className="text-sm text-gray-400">+1 (234) 567-890</p>
-               <p className="text-sm text-gray-400">info@truckmotion.com</p>
+               <p className="text-sm text-gray-400">+1 (786) 585-2420</p>
+               <p className="text-sm text-gray-400">GlobalCooperationllc@gmail.com</p>
             </motion.div>
          </div>
 
