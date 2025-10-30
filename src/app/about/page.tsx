@@ -5,7 +5,6 @@ import Image from "next/image";
 const Page = () => {
   return (
     <section id="about" className="bg-[#1b1b1b]  text-white">
-      {/* ==== Background Image ==== */}
       <div className="absolute top-0 -z-0 w-full h-[500px]">
         <Image
           src="/images/brian-stalter-arotxe540N4-unsplash.jpg"
@@ -15,8 +14,7 @@ const Page = () => {
           priority
         />
       </div>
-
-      {/* ==== Overlay Content ==== */}
+      
       <div className="relative z-10 flex flex-col items-center justify-center text-center h-[400px] md:h-[500px]">
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
@@ -27,8 +25,7 @@ const Page = () => {
           About Us
         </motion.h1>
       </div>
-
-      {/* ==== Info Section ==== */}
+      
       <div className="relative z-20 bg-[#1b1b1b] mt-[-50px] rounded-t-3xl shadow-lg">
         <div className="custom-container py-16 px-6 md:px-0 max-w-4xl mx-auto text-center">
           <motion.h2
@@ -64,8 +61,7 @@ const Page = () => {
             our company.
           </motion.p>
         </div>
-
-        {/* ==== Map Section ==== */}
+        
         <div className="w-full h-[400px] md:h-[500px]">
           <iframe
             title="Company Location"
