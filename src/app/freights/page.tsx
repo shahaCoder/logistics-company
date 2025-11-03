@@ -1,39 +1,34 @@
 "use client";
+
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import emailjs from "@emailjs/browser";
 
-/**
- * Страница Freight Solutions с отправкой формы в EmailJS.
- * Требуются env-переменные (см. ниже в инструкции):
- *  - NEXT_PUBLIC_EMAILJS_SERVICE_ID
- *  - NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
- *  - NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
- */
+/* ---------------- Field вынесен из компонента страницы ---------------- */
+function Field({
+  label,
+  required,
+  children,
+  className = "",
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`flex flex-col ${className}`}>
+      <label className="text-sm font-medium text-gray-800 mb-1">
+        {label}
+        {required && <span className="text-red-600 ml-1">*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
 
+/* ---------------- Страница ---------------- */
 export default function FreightSolutionsPage() {
-  function Field({
-    label,
-    required,
-    children,
-    className = "",
-  }: {
-    label: string;
-    required?: boolean;
-    children: React.ReactNode;
-    className?: string;
-  }) {
-    return (
-      <div className={`flex flex-col ${className}`}>
-        <label className="text-sm font-medium text-gray-800 mb-1">
-          {label}
-          {required && <span className="text-red-600 ml-1">*</span>}
-        </label>
-        {children}
-      </div>
-    );
-  }
-
   const [form, setForm] = useState({
     companyName: "",
     contactName: "",
@@ -52,42 +47,62 @@ export default function FreightSolutionsPage() {
     deliveryTime: "",
     referenceId: "",
     notes: "",
-    website: "", // honeypot (должен оставаться пустым)
+    website: "", // honeypot (должен быть пустым)
   });
 
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+
+  // читаем env один раз (и красиво валидируем)
+  const emailConfig = useMemo(() => {
+    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "";
+    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "";
+    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "";
+    const ok = Boolean(serviceId && templateId && publicKey);
+    return { serviceId, templateId, publicKey, ok };
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, type, value, checked } = e.target as HTMLInputElement;
-    setForm((s) => ({ ...s, [name]: type === "checkbox" ? checked : value }));
+    const target = e.target as HTMLInputElement;
+    const { name, type } = target;
+    const value = type === "checkbox" ? (target as HTMLInputElement).checked : target.value;
+
+    // аккуратно обновляем только одно поле
+    setForm((s) => ({ ...s, [name]: value }));
   };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // honeypot: если заполнено — не отправляем
-    if (form.website.trim().length > 0) {
+    // honeypot
+    if (form.website.trim()) {
       setStatus("Spam detected. Submission ignored.");
       return;
     }
 
-    // минимальная проверка обязательных полей
-    const requiredFields = [
-      form.companyName,
-      form.contactName,
-      form.email,
-      form.phone,
-      form.equipment,
-      form.cargo,
-      form.pickupAddress,
-    ];
-    if (requiredFields.some((v) => !v || v.trim() === "")) {
+    // простая валидация
+    const requiredFilled =
+      form.companyName &&
+      form.contactName &&
+      form.email &&
+      form.phone &&
+      form.equipment &&
+      form.cargo &&
+      form.pickupAddress;
+
+    if (!requiredFilled) {
       setStatus("Please fill in all required fields.");
+      return;
+    }
+
+    if (!emailConfig.ok) {
+      setStatus(
+        "Email service is not configured. Please contact us by phone or try later."
+      );
       return;
     }
 
@@ -95,10 +110,6 @@ export default function FreightSolutionsPage() {
     setStatus(null);
 
     try {
-      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
-      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!;
-      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
-
       const templateParams = {
         companyName: form.companyName,
         contactName: form.contactName,
@@ -144,7 +155,12 @@ Notes:  ${form.notes || "-"}
         `.trim(),
       };
 
-      await emailjs.send(serviceId, templateId, templateParams, { publicKey });
+      await emailjs.send(
+        emailConfig.serviceId,
+        emailConfig.templateId,
+        templateParams,
+        { publicKey: emailConfig.publicKey }
+      );
 
       setStatus("Sent! Our dispatch will contact you shortly.");
       setForm({
@@ -167,9 +183,16 @@ Notes:  ${form.notes || "-"}
         notes: "",
         website: "",
       });
-    } catch (err) {
-      console.error(err);
-      setStatus("Failed to send. Please try again or contact us by phone.");
+    } catch (err: any) {
+      // более информативный лог
+      const msg =
+        err?.text ||
+        err?.message ||
+        (typeof err === "string" ? err : JSON.stringify(err));
+      console.error("EmailJS send error:", msg);
+      setStatus(
+        "Failed to send. Please try again or contact us by phone."
+      );
     } finally {
       setLoading(false);
     }
@@ -280,7 +303,7 @@ Notes:  ${form.notes || "-"}
           <h3 className="text-2xl md:text-3xl font-extrabold text-red-600 text-center mb-10">
             HOW IT WORKS
           </h3>
-          <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
             <Step
               number="01"
               title="Request a Quote"
@@ -300,7 +323,7 @@ Notes:  ${form.notes || "-"}
         </div>
       </section>
 
-      {/* QUOTE FORM — EmailJS */}
+      {/* QUOTE FORM */}
       <section id="quote" className="py-16">
         <div className="max-w-6xl mx-auto px-4 md:px-6">
           <h3 className="text-3xl md:text-4xl font-extrabold text-red-600 text-center mb-8">
@@ -315,7 +338,7 @@ Notes:  ${form.notes || "-"}
             className="bg-[#f2f2f2] rounded-2xl shadow-md border border-gray-200 p-6 md:p-8"
             onSubmit={onSubmit}
           >
-            {/* honeypot (скрытое поле) */}
+            {/* honeypot */}
             <input
               type="text"
               name="website"
@@ -326,7 +349,7 @@ Notes:  ${form.notes || "-"}
               autoComplete="off"
             />
 
-            {/* top: identity */}
+            {/* identity */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Field label="Company Name" required>
                 <input
@@ -334,6 +357,7 @@ Notes:  ${form.notes || "-"}
                   value={form.companyName}
                   onChange={handleChange}
                   placeholder="Global Cooperation LLC"
+                  autoComplete="organization"
                   className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
                 />
               </Field>
@@ -344,6 +368,7 @@ Notes:  ${form.notes || "-"}
                   value={form.contactName}
                   onChange={handleChange}
                   placeholder="John Doe"
+                  autoComplete="name"
                   className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
                 />
               </Field>
@@ -355,6 +380,7 @@ Notes:  ${form.notes || "-"}
                   value={form.email}
                   onChange={handleChange}
                   placeholder="dispatch@company.com"
+                  autoComplete="email"
                   className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
                 />
               </Field>
@@ -365,6 +391,7 @@ Notes:  ${form.notes || "-"}
                   value={form.phone}
                   onChange={handleChange}
                   placeholder="+1 (555) 555-5555"
+                  autoComplete="tel"
                   className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
                 />
               </Field>
@@ -452,6 +479,7 @@ Notes:  ${form.notes || "-"}
                       value={form.pickupAddress}
                       onChange={handleChange}
                       placeholder="Dallas, TX 75201"
+                      autoComplete="address-line1"
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
                     />
                   </Field>
@@ -485,6 +513,7 @@ Notes:  ${form.notes || "-"}
                       value={form.deliveryAddress}
                       onChange={handleChange}
                       placeholder="Atlanta, GA 30301"
+                      autoComplete="address-line1"
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
                     />
                   </Field>
@@ -523,7 +552,7 @@ Notes:  ${form.notes || "-"}
               </Field>
             </div>
 
-            {/* actions */}
+            {/* actions/status */}
             <div className="mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <p className="text-sm text-gray-600">
                 By submitting, you agree to be contacted by our dispatch team
@@ -542,10 +571,7 @@ Notes:  ${form.notes || "-"}
               </button>
             </div>
 
-            {/* status */}
-            {status && (
-              <p className="mt-4 text-sm text-gray-700">{status}</p>
-            )}
+            {status && <p className="mt-4 text-sm text-gray-700">{status}</p>}
           </form>
         </div>
       </section>
@@ -553,25 +579,13 @@ Notes:  ${form.notes || "-"}
       {/* BENEFITS */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 md:px-6 grid gap-6 md:grid-cols-3">
-          <Benefit
-            title="Transparent Pricing"
-            desc="Clear rates with no hidden fees. Quotes tailored to your lane."
-          />
-          <Benefit
-            title="Fast Response"
-            desc="We prioritize time-critical freight with 24/7 dispatch availability."
-          />
-          <Benefit
-            title="Documentation"
-            desc="All BOLs, PODs, and invoices delivered promptly to your inbox."
-          />
+          <Benefit title="Transparent Pricing" desc="Clear rates with no hidden fees. Quotes tailored to your lane." />
+          <Benefit title="Fast Response" desc="We prioritize time-critical freight with 24/7 dispatch availability." />
+          <Benefit title="Documentation" desc="All BOLs, PODs, and invoices delivered promptly to your inbox." />
         </div>
 
         <div className="max-w-6xl mx-auto px-4 md:px-6 text-center mt-12">
-          <a
-            href="#quote"
-            className="inline-block rounded-lg bg-red-600 hover:bg-red-700 transition text-white px-8 py-3 font-semibold"
-          >
+          <a href="#quote" className="inline-block rounded-lg bg-red-600 hover:bg-red-700 transition text-white px-8 py-3 font-semibold">
             Start Shipping Today
           </a>
         </div>
@@ -580,26 +594,15 @@ Notes:  ${form.notes || "-"}
       {/* FAQ */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 md:px-6">
-          <h3 className="text-2xl md:text-3xl font-extrabold text-red-600 text-center mb-10">
-            FAQ
-          </h3>
+          <h3 className="text-2xl md:text-3xl font-extrabold text-red-600 text-center mb-10">FAQ</h3>
           <div className="grid gap-6 md:grid-cols-2">
             <FAQ
               q="Do you work with both freight brokers and direct shippers?"
               a='Yes. Our page and form are designed for both — select "I’m a freight broker" if it applies.'
             />
-            <FAQ
-              q="Which equipment types do you provide?"
-              a="Dry Van, Reefer, Flatbed, Step Deck, and Power Only."
-            />
-            <FAQ
-              q="Do you operate nationwide?"
-              a="Yes, we cover all continental U.S. with 24/7 dispatch support."
-            />
-            <FAQ
-              q="How fast do you respond to requests?"
-              a="Usually within minutes during business hours — expedited loads get priority."
-            />
+            <FAQ q="Which equipment types do you provide?" a="Dry Van, Reefer, Flatbed, Step Deck, and Power Only." />
+            <FAQ q="Do you operate nationwide?" a="Yes, we cover all continental U.S. with 24/7 dispatch support." />
+            <FAQ q="How fast do you respond to requests?" a="Usually within minutes during business hours — expedited loads get priority." />
           </div>
         </div>
       </section>
@@ -608,15 +611,7 @@ Notes:  ${form.notes || "-"}
 }
 
 /* --------- UI helpers --------- */
-function Badge({
-  title,
-  desc,
-  icon,
-}: {
-  title: string;
-  desc: string;
-  icon: React.ReactNode;
-}) {
+function Badge({ title, desc, icon }: { title: string; desc: string; icon: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-start gap-4">
       <div className="text-red-500">{icon}</div>
@@ -637,15 +632,7 @@ function ServiceCard({ title, desc }: { title: string; desc: string }) {
   );
 }
 
-function Step({
-  number,
-  title,
-  desc,
-}: {
-  number: string;
-  title: string;
-  desc: string;
-}) {
+function Step({ number, title, desc }: { number: string; title: string; desc: string }) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-[#f2f2f2] p-6">
       <div className="text-red-600 font-extrabold text-xl">{number}</div>

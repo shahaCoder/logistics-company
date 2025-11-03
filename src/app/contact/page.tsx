@@ -39,8 +39,8 @@ const Page = () => {
     setLoading(true);
     try {
       await emailjs.send(
-        process.env.SECOND_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.SECOND_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID_SECOND!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_SECOND!,
         {
           title,
           name,
