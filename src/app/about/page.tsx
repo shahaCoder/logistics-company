@@ -107,12 +107,13 @@ const Page = () => {
             <div className="relative w-full aspect-[16/10] md:aspect-[16/9] overflow-hidden rounded-2xl ring-1 ring-white/10">
               <iframe
                 title="Company Location — Global Cooperation LLC"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7983.078315738132!2d-84.38277025641398!3d39.264101980382456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x884053d948eb01c7%3A0x9b3a80cc5349cb71!2zMTA5MDEgUmVlZCBIYXJ0bWFuIEh3eSwgQmx1ZSBBc2gsIE9IIDQ1MjQyLCDQodCo0JA!5e0!3m2!1sru!2s!4v1761347817836!5m2!1sru!2s"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d957.1970720201883!2d-84.38187095060668!3d39.26418706331613!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x884053d948eb01c7%3A0x9b3a80cc5349cb71!2s10901%20Reed%20Hartman%20Hwy%2C%20Blue%20Ash%2C%20OH%2045242!5e0!3m2!1sru!2sus!4v1762183735189!5m2!1sen!2sus"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="absolute inset-0 h-full w-full border-0"
                 aria-label="Interactive map with our office location"
               />
+              {/* <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d957.1970720201883!2d-84.38187095060668!3d39.26418706331613!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x884053d948eb01c7%3A0x9b3a80cc5349cb71!2s10901%20Reed%20Hartman%20Hwy%2C%20Blue%20Ash%2C%20OH%2045242!5e0!3m2!1sru!2sus!4v1762183735189!5m2!1sru!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> */}
             </div>
           </div>
         </section>

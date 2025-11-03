@@ -5,6 +5,7 @@ import { Pagination } from "swiper/modules";
 import { motion } from "framer-motion";
 import "swiper/css";
 import "swiper/css/pagination";
+import { FaUserCircle } from "react-icons/fa";
 
 export default function Reviews() {
   const reviews = [
@@ -80,11 +81,12 @@ export default function Reviews() {
               <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200 h-full flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-4 mb-4">
-                    <img
+                    {/* <img
                       src={r.avatar}
                       alt={r.name}
                       className="w-12 h-12 rounded-full object-cover"
-                    />
+                    /> */}
+                    <FaUserCircle className="w-12 h-12 rounded-full object-cover" />
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
                         {r.name}
