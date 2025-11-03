@@ -8,7 +8,7 @@ const Hero = () => {
    return (
       <section className="custom-container h-[80vh] max-md:h-[70vh] flex items-center text-white overflow-hidden">
          <Image
-            src="/images/truck.jpg"
+            src="/images/truck2.jpg"
             alt="Truck background"
             fill
             priority

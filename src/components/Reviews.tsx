@@ -2,6 +2,7 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
+import { motion } from "framer-motion";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -52,12 +53,18 @@ export default function Reviews() {
   ];
 
   return (
-    <section className="">
-      <h2 className="text-center text-3xl md:text-4xl font-extrabold text-red-600 mb-10">
+    <section className="w-full ">
+      <motion.h2 initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.1 }} className="text-center text-3xl md:text-4xl font-extrabold text-red-600 mb-10">
         REVIEWS FROM BELOVED CUSTOMERS
-      </h2>
+      </motion.h2>
 
-      <div className="">
+      <motion.div initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.1 }}>
         <Swiper
           modules={[Pagination]}
           spaceBetween={30}
@@ -112,7 +119,7 @@ export default function Reviews() {
             </SwiperSlide>
           ))}
         </Swiper>
-      </div>
+      </motion.div>
     </section>
   );
 }

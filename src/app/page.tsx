@@ -17,7 +17,7 @@ export default function Home() {
                <Services />
             </div>
          </section>
-         <section className="custom-container bg-[#C4C4C4] py-20">
+         <section className="w-full custom-container bg-[#C4C4C4] py-20">
             <Reviews />
          </section>
 
