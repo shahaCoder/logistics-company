@@ -39,7 +39,7 @@ const Header = () => {
 
    return (
       <header  className={clsx(
-      "w-full relative z-50 text-white",
+      "w-full  relative z-50 text-white",
       pathname === "/about"
         ? "bg-[#1b1b1b]" // ← фон для страницы About
         : "bg-transparent" // ← прозрачный для остальных

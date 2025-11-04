@@ -3,6 +3,7 @@
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
 import emailjs from "@emailjs/browser";
+import Seo from "@/components/Seo";
 
 /* ---------------- Field вынесен из компонента страницы ---------------- */
 function Field({
@@ -200,6 +201,11 @@ Notes:  ${form.notes || "-"}
 
   return (
     <div className="">
+      <Seo
+  title="Move Your Freight Across the USA | Logistics Solutions by Global Cooperation LLC"
+  description="Partner with Global Cooperation LLC to transport your freight safely and efficiently across the United States. Get customized logistics, 24/7 dispatch support, and real-time delivery tracking."
+/>
+
       {/* HERO */}
       <section className="custom-container h-[80vh] max-md:h-[70vh] flex items-center text-white overflow-hidden">
         <div className="absolute inset-0 -z-10">
