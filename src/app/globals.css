@@ -22,47 +22,63 @@ h1 {
    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
-
 /* ---------- LOGO GLOW ---------- */
 .gl-logo-glow {
-  /* мягкая пульсация подсветки в фирменных оттенках (красный + светло-серый) */
-  animation: glGlow 3.6s ease-in-out infinite;
-  /* чтобы подсветка выглядела аккуратно на PNG с прозрачностью */
-  filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+   /* мягкая пульсация подсветки в фирменных оттенках (красный + светло-серый) */
+   animation: glGlow 3.6s ease-in-out infinite;
+   /* чтобы подсветка выглядела аккуратно на PNG с прозрачностью */
+   filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
 }
 
 /* ---------- LOGO SHINE (блик) ---------- */
 .gl-logo-shine {
-  position: absolute;
-  inset: -20%;                     /* чуть больше контейнера, чтобы блик срезался мягко */
-  transform: translateX(-160%);    /* старт слева */
-  background: linear-gradient(
-    75deg,
-    rgba(255,255,255,0) 30%,
-    rgba(255,255,255,0.85) 50%,
-    rgba(255,255,255,0) 70%
-  );
-  mix-blend-mode: screen;          /* «световой» режим */
-  opacity: 0.75;
-  pointer-events: none;
-  animation: glShine 4s ease-in-out infinite;
+   position: absolute;
+   inset: -20%; /* чуть больше контейнера, чтобы блик срезался мягко */
+   transform: translateX(-160%); /* старт слева */
+   background: linear-gradient(
+      75deg,
+      rgba(255, 255, 255, 0) 30%,
+      rgba(255, 255, 255, 0.85) 50%,
+      rgba(255, 255, 255, 0) 70%
+   );
+   mix-blend-mode: screen; /* «световой» режим */
+   opacity: 0.75;
+   pointer-events: none;
+   animation: glShine 4s ease-in-out infinite;
 }
 
 /* ---------- Анимации ---------- */
 @keyframes glShine {
-  0%   { transform: translateX(-160%) rotate(0.001deg); } /* subpixel hack */
-  10%  { transform: translateX(160%); }
-  100% { transform: translateX(160%); }
+   0% {
+      transform: translateX(-160%) rotate(0.001deg);
+   } /* subpixel hack */
+   10% {
+      transform: translateX(160%);
+   }
+   100% {
+      transform: translateX(160%);
+   }
 }
 /* Пульс подсветки — в фирменной гамме */
 @keyframes glGlow {
-  0%,100% { filter: drop-shadow(0 0 0 rgba(220, 38, 38, 0)) drop-shadow(0 0 0 rgba(209,213,219,0)); }
-  50%     { filter: drop-shadow(0 0 14px rgba(220, 38, 38, .35)) drop-shadow(0 0 10px rgba(209,213,219,.25)); }
+   0%,
+   100% {
+      filter: drop-shadow(0 0 0 rgba(220, 38, 38, 0))
+         drop-shadow(0 0 0 rgba(209, 213, 219, 0));
+   }
+   50% {
+      filter: drop-shadow(0 0 14px rgba(220, 38, 38, 0.35))
+         drop-shadow(0 0 10px rgba(209, 213, 219, 0.25));
+   }
 }
 
 /* уважение к пользователю: если он отключил анимации — не шумим */
 @media (prefers-reduced-motion: reduce) {
-  .gl-logo-glow { animation: none; }
-  .gl-logo-shine { animation: none; opacity: .9; }
+   .gl-logo-glow {
+      animation: none;
+   }
+   .gl-logo-shine {
+      animation: none;
+      opacity: 0.9;
+   }
 }
-

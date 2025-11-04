@@ -41,11 +41,11 @@ const Page = () => {
           </motion.p>
         </div>
         {/* Подложка, если фон-картинка отключена */}
-        <div className="absolute inset-0 bg-[#1b1b1b]" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[#363636]" aria-hidden="true" />
       </div>
 
       {/* CONTENT */}
-      <div className="relative z-20 -mt-12 md:-mt-16 rounded-t-3xl bg-[#1b1b1b] shadow-2xl">
+      <div className="relative z-20 -mt-12 md:-mt-16 rounded-t-3xl bg-[#363636] shadow-2xl">
         <section className="custom-container max-w-4xl mx-auto px-6 md:px-0 py-14 md:py-16 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 18 }}

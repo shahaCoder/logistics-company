@@ -45,8 +45,8 @@ export default function Form() {
   };
 
   return (
-    <section className="flex flex-col md:flex-row min-h-screen bg-[#1b1b1b] text-white">
-      <div className="md:w-1/2 w-full flex items-center justify-center px-6 md:px-16 py-20 bg-[#1f1f1f]">
+    <section className="flex flex-col md:flex-row min-h-screen bg-[#363636] text-white">
+      <div className="md:w-1/2 w-full flex items-center justify-center px-6 md:px-16 py-20 bg-[#363636]">
         <div className="w-full max-w-md">
           <motion.h3 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-3xl font-semibold text-center mb-8">
             Contact Us

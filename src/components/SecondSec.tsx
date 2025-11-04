@@ -29,7 +29,7 @@ export default function Features() {
          {features.map((item, index) => (
             <div
                key={index}
-               className="flex flex-col items-center justify-center p-10 bg-[#1f1f1f] border border-[#2e2e2e]"
+               className="flex flex-col items-center justify-center p-10 bg-[#363636] border border-[#2e2e2e]"
             >
                <div className="mb-4">{item.icon}</div>
 
