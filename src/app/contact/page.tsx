@@ -4,9 +4,6 @@ import Image from "next/image";
 import React, { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { ToastContainer, toast } from 'react-toastify';
-const SERVICE_ID = "service_nr4zzlb";   // <-- подставь свой
-const TEMPLATE_ID = "template_ga1zusx"; // <-- подставь свой
-const PUBLIC_KEY  = "2Re32m-Jvm2IfgEYS"; // <-- подставь свой
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
@@ -42,8 +39,8 @@ const Page = () => {
     setLoading(true);
     try {
       await emailjs.send(
-        SERVICE_ID,
-        TEMPLATE_ID,
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID_SECOND!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_SECOND!,
         {
           title,
           name,
@@ -51,7 +48,7 @@ const Page = () => {
           message,
           email, // важно: чтобы сработал Reply-To = {{email}}
         },
-        { publicKey: PUBLIC_KEY }
+        { publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY! }
       );
       notify()
       form.reset();
@@ -69,7 +66,7 @@ const Page = () => {
       <div className="h-[250px] md:h-[500px]" />
       <div className="absolute top-0 w-full h-[400px] md:h-[500px]">
         <Image
-          src="/images/brian-stalter-arotxe540N4-unsplash.jpg"
+          src="/images/hiring.jpeg"
           alt="Apply for a job"
           fill
           className="object-cover brightness-[30%]"
