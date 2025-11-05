@@ -18,7 +18,6 @@ const montserrat = Montserrat({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   themeColor: "#000000",
 };
 
@@ -42,13 +41,18 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://glco.us",
   },
-  /** ✅ Иконка логотипа из public/images/logo.png */
+  /** ✅ Все иконки — одна из logo.png */
   icons: {
     icon: [
       { url: "/images/logo.png", type: "image/png" },
+      { url: "/manifest-icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/manifest-icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/images/logo.png", sizes: "180x180", type: "image/png" }],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     url: "https://glco.us",
