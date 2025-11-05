@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Cinzel } from "next/font/google";
 import "./globals.css";
@@ -16,7 +15,6 @@ const montserrat = Montserrat({
   subsets: ["latin"],
 });
 
-/** ✅ Вьюпорт задаём так (а не <meta> в разметке) */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -24,11 +22,6 @@ export const viewport: Viewport = {
   themeColor: "#000000",
 };
 
-/**
- * ✅ Глобальные метаданные
- * favicon берём из public/favicon.ico (у тебя он есть),
- * плюс укажем apple-touch-icon и OpenGraph/Twitter с превью
- */
 export const metadata: Metadata = {
   metadataBase: new URL("https://glco.us"),
   title: {
@@ -49,14 +42,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://glco.us",
   },
-  /** ✅ Favicon и иконки */
+  /** ✅ Иконка логотипа из public/images/logo.png */
   icons: {
     icon: [
-      { url: "/favicon.ico" }, // из public/
-      { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/images/logo.png", type: "image/png" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    apple: [{ url: "/images/logo.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     type: "website",
@@ -67,10 +58,10 @@ export const metadata: Metadata = {
       "Reliable trucking & logistics company providing fast and safe freight delivery across the United States.",
     images: [
       {
-        url: "/images/preview.jpg", // положи 1200x630 в /public/images/preview.jpg
+        url: "/images/logo.png",
         width: 1200,
         height: 630,
-        alt: "Global Cooperation LLC trucks",
+        alt: "Global Cooperation LLC logo",
       },
     ],
   },
@@ -79,7 +70,7 @@ export const metadata: Metadata = {
     title: "Global Cooperation LLC — Trucking & Freight",
     description:
       "Reliable trucking & logistics company providing fast and safe freight delivery across the US.",
-    images: ["/images/preview.jpg"],
+    images: ["/images/logo.png"],
   },
 };
 
@@ -88,7 +79,6 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      {/* head заполняется автоматически из metadata/viewport */}
       <body className={`${montserrat.variable} ${cinzel.variable} antialiased`}>
         <Header />
         {children}
