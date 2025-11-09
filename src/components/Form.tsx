@@ -45,8 +45,8 @@ export default function Form() {
   };
 
   return (
-    <section className="flex flex-col md:flex-row min-h-screen bg-[#363636] text-white">
-      <div className="md:w-1/2 w-full flex items-center justify-center px-6 md:px-16 py-20 bg-[#363636]">
+    <section className="flex flex-col lg:flex-row min-h-screen bg-[#363636] text-white">
+      <div className="lg:w-1/2 w-full flex items-center justify-center px-6 md:px-16 py-20 bg-[#363636]">
         <div className="w-full max-w-md">
           <motion.h3 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-3xl font-semibold text-center mb-8">
             Contact Us
@@ -118,7 +118,7 @@ export default function Form() {
       </div>
 
       {/* Правая колонка… оставь как есть */}
-      <div className="relative md:w-1/2 w-full flex flex-col justify-center items-end px-10 py-20 bg-[#2a2a2a] overflow-hidden">
+      <div className="relative lg:w-1/2 w-full flex flex-col justify-center items-end px-10 py-20 bg-[#2a2a2a] overflow-hidden">
         <Image src="/images/taylor-GbdJqpft8X0-unsplash.jpg" alt="Contact background" fill className="absolute inset-0 object-cover opacity-40" />
         <div className="relative z-10 max-w-md text-end">
           <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl font-bold mb-4 text-red-600">

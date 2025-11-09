@@ -11,7 +11,7 @@ import Image from "next/image";
 
 export default function Footer() {
    return (
-      <footer className="bg-[#232323] text-gray-300 border-t border-[#2c2c2c]">
+      <footer className="bg-[#363636] text-gray-300 border-t border-[#2c2c2c]">
          <div className="custom-container py-14 flex flex-col md:flex-row justify-between gap-10">
             <motion.div
                initial={{ opacity: 0, y: 20 }}
