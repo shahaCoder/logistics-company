@@ -6,16 +6,16 @@ import Link from "next/link";
 
 const Hero = () => {
    return (
-      <section className="custom-container h-[80vh] max-lg:h-[600px] flex items-center text-white overflow-hidden">
+      <section className="custom-container h-[80vh] max-lg:h-[500px] flex items-center text-white overflow-hidden">
          <Image
             src="/images/truck2.jpg"
             alt="Truck background"
             fill
             priority
-            className="w-full max-lg:min-h-[800px] fixed top-0 object-cover brightness-[0.45] -z-10"
+            className="w-full min-h-[800px] bg-[red] fixed top-0 object-cover brightness-[0.45] -z-10"
          />
 
-         <div className="max-lg:min-h-[800px] absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 -z-10" />
+         <div className="min-h-[800px] absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 -z-10" />
 
          <div className="text-center md:text-left max-md:mx-auto">
             <motion.p
