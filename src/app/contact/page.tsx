@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { ToastContainer, toast } from 'react-toastify';
+import Seo from "@/components/Seo";
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
@@ -46,7 +47,7 @@ const Page = () => {
           name,
           time,
           message,
-          email, // важно: чтобы сработал Reply-To = {{email}}
+          email,
         },
         { publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY! }
       );
@@ -62,6 +63,11 @@ const Page = () => {
 
   return (
     <section className="bg-gray-100 pb-20">
+      <Seo
+  title="Join Our Team | Truck Driver and Logistics Jobs | Global Cooperation LLC"
+  description="Apply for trucking and logistics jobs at Global Cooperation LLC. We offer competitive pay, reliable routes, and growth opportunities for professional drivers and logistics specialists across the USA."
+/>
+
       {/* Верхняя фото-зона */}
       <div className="h-[250px] md:h-[500px]" />
       <div className="absolute top-0 w-full h-[400px] md:h-[500px]">

@@ -1,11 +1,17 @@
 "use client";
 
 import GlintLogo from "@/components/GlintLogo";
+import Seo from "@/components/Seo";
 import { motion } from "framer-motion";
 
 const Page = () => {
   return (
     <section id="about" className="bg-[#1b1b1b] text-white">
+      <Seo
+  title="About Global Cooperation LLC | Trusted USA Trucking Company"
+  description="Learn more about Global Cooperation LLC — a professional logistics and freight company operating across the United States. Discover our mission, experience, and dedication to safe, on-time deliveries."
+/>
+
       {/* HERO */}
       <div className="relative h-[540px] md:h-[620px] overflow-hidden" data-hero>
         {/* Если нужна фон-картинка — раскомментируй блок ниже */}

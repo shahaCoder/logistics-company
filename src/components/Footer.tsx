@@ -107,7 +107,7 @@ export default function Footer() {
                   Contact Info
                </h3>
                <p className="text-sm text-gray-400">
-                  10901 Reed Hartman Hwy, Blue Ash, OH 45242
+                  test
                </p>
                <p className="text-sm text-gray-400">+1 (786) 585-2420</p>
                <p className="text-sm text-gray-400">GlobalCooperationllc@gmail.com</p>

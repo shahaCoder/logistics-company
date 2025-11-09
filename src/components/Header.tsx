@@ -46,7 +46,6 @@ const Header = () => {
          )}
       >
          {/* Desktop */}
-         {/* Desktop */}
          <div className="hidden md:flex custom-container items-center justify-between py-6">
             <Link href={"/"} className="flex items-center gap-2">
                <Image
