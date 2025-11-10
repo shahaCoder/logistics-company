@@ -10,27 +10,6 @@ import { FaUserCircle } from "react-icons/fa";
 export default function Reviews() {
   const reviews = [
     {
-      name: "John Doe",
-      role: "CEO, Example Corp",
-      text: "The service was outstanding! Communication was fast and professional. Definitely recommend this company for anyone looking for reliable solutions.",
-      date: "October 2025",
-      avatar: "/images/user.jpg",
-    },
-    {
-      name: "Sarah Smith",
-      role: "Manager, Logistic Pro",
-      text: "Very reliable team. Everything was smooth and on time. Loved working with them!",
-      date: "September 2025",
-      avatar: "/images/user.jpg",
-    },
-    {
-      name: "Michael Lee",
-      role: "Driver, USA Freight",
-      text: "Best company I’ve worked with — clear communication and fair pay!",
-      date: "August 2025",
-      avatar: "/images/user.jpg",
-    },
-    {
       name: "ryanm12",
       role: "Ch Robinson Company",
       text: "I've worked with Global Cooperation for a while now and its been an enjoyable experience. Easy to communicate with and understanding and cooperative whenever issues arise. I wish more carries were like Global Cooperation!",

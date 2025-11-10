@@ -37,25 +37,19 @@ export default function Footer() {
                </p>
                <div className="flex gap-4 mt-4">
                   <a
-                     href="#"
+                     href="https://www.instagram.com/global.cooperation?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                      className="p-2 rounded-full bg-[#1f1f1f] hover:bg-red-600 transition-colors"
                   >
                      <FaInstagram />
                   </a>
                   <a
-                     href="#"
+                     href="https://www.facebook.com/share/15qAmEpgQj/?mibextid=wwXIfr"
                      className="p-2 rounded-full bg-[#1f1f1f] hover:bg-red-600 transition-colors"
                   >
                      <FaFacebookF />
                   </a>
                   <a
-                     href="#"
-                     className="p-2 rounded-full bg-[#1f1f1f] hover:bg-red-600 transition-colors"
-                  >
-                     <FaTwitter />
-                  </a>
-                  <a
-                     href="mailto:info@truckmotion.com"
+                     href="mailto:operations@glco.us"
                      className="p-2 rounded-full bg-[#1f1f1f] hover:bg-red-600 transition-colors"
                   >
                      <FaEnvelope />
@@ -92,7 +86,13 @@ export default function Footer() {
                   href="/contact"
                   className="hover:text-red-600 transition-colors text-sm"
                >
-                  Contact
+                  Join us
+               </Link>
+               <Link
+                  href="/contact"
+                  className="hover:text-red-600 transition-colors text-sm"
+               >
+                  Move your Freight
                </Link>
             </motion.div>
 
@@ -106,11 +106,11 @@ export default function Footer() {
                <h3 className="text-lg font-semibold text-white mb-1">
                   Contact Info
                </h3>
-               <p className="text-sm text-gray-400">
-                  test
-               </p>
                <p className="text-sm text-gray-400">+1 (786) 585-2420</p>
-               <p className="text-sm text-gray-400">GlobalCooperationllc@gmail.com</p>
+               <p className="text-sm text-gray-400">operations@glco.us</p>
+               <p className="text-sm text-gray-400">
+                  FAX  +1 762 226 9415
+               </p>
             </motion.div>
          </div>
 
