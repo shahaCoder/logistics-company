@@ -4,28 +4,63 @@ import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { FaEnvelope, FaUser, FaCommentDots } from "react-icons/fa";
+import { validateName, validateEmail, validateMessage, getValidationError } from "@/utils/validation";
 
 export default function Form() {
   const formRef = useRef<HTMLFormElement>(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((s) => ({ ...s, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    const error = getValidationError(name, value);
+    if (error) {
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
     setStatus(null);
+    
+    // Validate all fields
+    const newErrors: { [key: string]: string } = {};
+    
+    if (!validateName(form.name)) {
+      newErrors.name = getValidationError("name", form.name) || "Invalid name";
+    }
+    if (!validateEmail(form.email)) {
+      newErrors.email = getValidationError("email", form.email) || "Invalid email";
+    }
+    if (!validateMessage(form.message)) {
+      newErrors.message = getValidationError("message", form.message) || "Invalid message";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setStatus("Please fix the errors in the form.");
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
 
     try {
       const res = await fetch("/api/contact-telegram", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form), // <— шлём поля как есть
+        body: JSON.stringify(form),
       });
 
       if (!res.ok) {
@@ -37,7 +72,10 @@ export default function Form() {
       setForm({ name: "", email: "", message: "" });
       formRef.current?.reset();
     } catch (err) {
-      console.error(err);
+      // Log error in development only
+      if (process.env.NODE_ENV === "development") {
+        console.error("Form submission error:", err);
+      }
       setStatus("Failed to send. Please try again.");
     } finally {
       setLoading(false);
@@ -61,13 +99,18 @@ export default function Form() {
                 <input
                   type="text"
                   name="name"
-                  value={form.name}             // <— controlled
+                  value={form.name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                   placeholder="Your name"
-                  className="w-full bg-transparent border-b border-gray-600 py-2 pl-10 pr-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 transition-all"
+                  pattern="[a-zA-Zа-яА-ЯёЁ\s'-]{2,50}"
+                  className={`w-full bg-transparent border-b py-2 pl-10 pr-3 text-white placeholder-gray-500 focus:outline-none transition-all ${
+                    errors.name ? "border-red-500" : "border-gray-600 focus:border-red-600"
+                  }`}
                 />
               </div>
+              {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
             </div>
 
             {/* Email */}
@@ -78,13 +121,18 @@ export default function Form() {
                 <input
                   type="email"
                   name="email"
-                  value={form.email}            // <— controlled
+                  value={form.email}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                   placeholder="your@email.com"
-                  className="w-full bg-transparent border-b border-gray-600 py-2 pl-10 pr-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 transition-all"
+                  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                  className={`w-full bg-transparent border-b py-2 pl-10 pr-3 text-white placeholder-gray-500 focus:outline-none transition-all ${
+                    errors.email ? "border-red-500" : "border-gray-600 focus:border-red-600"
+                  }`}
                 />
               </div>
+              {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
             </div>
 
             {/* Message */}
@@ -94,14 +142,20 @@ export default function Form() {
                 <FaCommentDots className="absolute left-3 top-3 text-gray-500 group-focus-within:text-red-500 transition-all" />
                 <textarea
                   name="message"
-                  value={form.message}          // <— controlled
+                  value={form.message}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                   placeholder="Write your message..."
                   rows={5}
-                  className="w-full bg-transparent border-b border-gray-600 py-2 pl-10 pr-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 transition-all resize-none"
+                  minLength={10}
+                  maxLength={2000}
+                  className={`w-full bg-transparent border-b py-2 pl-10 pr-3 text-white placeholder-gray-500 focus:outline-none transition-all resize-none ${
+                    errors.message ? "border-red-500" : "border-gray-600 focus:border-red-600"
+                  }`}
                 />
               </div>
+              {errors.message && <p className="text-red-400 text-xs mt-1">{errors.message}</p>}
             </div>
 
             {status && (
@@ -119,7 +173,14 @@ export default function Form() {
 
       {/* Правая колонка… оставь как есть */}
       <div className="relative lg:w-1/2 w-full flex flex-col justify-center items-end px-10 py-20 bg-[#2a2a2a] overflow-hidden">
-        <Image src="/images/taylor-GbdJqpft8X0-unsplash.jpg" alt="Contact background" fill className="absolute inset-0 object-cover opacity-40" />
+        <Image 
+          src="/images/taylor-GbdJqpft8X0-unsplash.jpg" 
+          alt="Contact background" 
+          fill 
+          sizes="(max-width: 768px) 100vw, 50vw"
+          quality={80}
+          className="absolute inset-0 object-cover opacity-40" 
+        />
         <div className="relative z-10 max-w-md text-end">
           <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl font-bold mb-4 text-red-600">
             Get in Touch

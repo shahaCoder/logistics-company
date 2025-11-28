@@ -8,11 +8,15 @@ const cinzel = Cinzel({
   weight: "400",
   variable: "--font-cinzel",
   subsets: ["latin"],
+  display: "swap", // Optimize font loading
+  preload: true,
 });
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
+  display: "swap", // Optimize font loading
+  preload: true,
 });
 
 export const viewport: Viewport = {

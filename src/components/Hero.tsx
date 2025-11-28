@@ -12,6 +12,8 @@ const Hero = () => {
             alt="Truck background"
             fill
             priority
+            sizes="100vw"
+            quality={85}
             className="w-full min-h-[800px] bg-[red] fixed top-0 object-cover brightness-[0.45] -z-10"
          />
 

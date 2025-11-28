@@ -5,9 +5,11 @@ import React, { useState } from "react";
 import emailjs from "@emailjs/browser";
 import { ToastContainer, toast } from 'react-toastify';
 import Seo from "@/components/Seo";
+import { validateName, validateEmail, validatePhone, getValidationError } from "@/utils/validation";
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,6 +24,30 @@ const Page = () => {
     const phone = String(fd.get("phone") || "");
     const experience = String(fd.get("experience") || "");
     const driverType = String(fd.get("driverType") || "");
+
+    // Validate fields
+    const newErrors: { [key: string]: string } = {};
+    
+    if (!validateName(firstName)) {
+      newErrors.firstName = getValidationError("firstName", firstName) || "Invalid first name";
+    }
+    if (!validateName(lastName)) {
+      newErrors.lastName = getValidationError("lastName", lastName) || "Invalid last name";
+    }
+    if (!validateEmail(email)) {
+      newErrors.email = getValidationError("email", email) || "Invalid email";
+    }
+    if (!validatePhone(phone)) {
+      newErrors.phone = getValidationError("phone", phone) || "Invalid phone number";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Please fix the errors in the form.");
+      return;
+    }
+
+    setErrors({});
 
     // Формируем переменные под твой шаблон EmailJS
     const title = "Job Application";
@@ -54,7 +80,10 @@ const Page = () => {
       notify()
       form.reset();
     } catch (err) {
-      console.error(err);
+      // Log error in development only
+      if (process.env.NODE_ENV === "development") {
+        console.error("Job application error:", err);
+      }
       alert("Failed to send. Please try again later.");
     } finally {
       setLoading(false);
@@ -75,6 +104,8 @@ const Page = () => {
           src="/images/hiring.jpeg"
           alt="Apply for a job"
           fill
+          sizes="100vw"
+          quality={85}
           className="object-cover brightness-[30%]"
           priority
         />
@@ -114,9 +145,17 @@ const Page = () => {
               type="text"
               name="firstName"
               placeholder="Enter your first name"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all"
+              pattern="[a-zA-Zа-яА-ЯёЁ\s'-]{2,50}"
+              onBlur={(e) => {
+                const error = getValidationError("firstName", e.target.value);
+                setErrors((prev) => ({ ...prev, firstName: error || "" }));
+              }}
+              className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all ${
+                errors.firstName ? "border-red-500" : "border-gray-300"
+              }`}
               required
             />
+            {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
           </div>
 
           {/* Last Name */}
@@ -126,9 +165,17 @@ const Page = () => {
               type="text"
               name="lastName"
               placeholder="Enter your last name"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all"
+              pattern="[a-zA-Zа-яА-ЯёЁ\s'-]{2,50}"
+              onBlur={(e) => {
+                const error = getValidationError("lastName", e.target.value);
+                setErrors((prev) => ({ ...prev, lastName: error || "" }));
+              }}
+              className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all ${
+                errors.lastName ? "border-red-500" : "border-gray-300"
+              }`}
               required
             />
+            {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
           </div>
 
           {/* Email */}
@@ -138,9 +185,17 @@ const Page = () => {
               type="email"
               name="email"
               placeholder="Enter your email"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all"
+              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+              onBlur={(e) => {
+                const error = getValidationError("email", e.target.value);
+                setErrors((prev) => ({ ...prev, email: error || "" }));
+              }}
+              className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }`}
               required
             />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
           {/* Phone Number */}
@@ -150,9 +205,16 @@ const Page = () => {
               type="tel"
               name="phone"
               placeholder="+1 (555) 123-4567"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all"
+              onBlur={(e) => {
+                const error = getValidationError("phone", e.target.value);
+                setErrors((prev) => ({ ...prev, phone: error || "" }));
+              }}
+              className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 transition-all ${
+                errors.phone ? "border-red-500" : "border-gray-300"
+              }`}
               required
             />
+            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>
 
           {/* Experience */}

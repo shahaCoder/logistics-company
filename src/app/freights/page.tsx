@@ -4,6 +4,19 @@ import Image from "next/image";
 import React, { useMemo, useState } from "react";
 import emailjs from "@emailjs/browser";
 import Seo from "@/components/Seo";
+import {
+   validateCompanyName,
+   validateName,
+   validateEmail,
+   validatePhone,
+   validateCargo,
+   validateWeight,
+   validatePallets,
+   validateAddress,
+   validateReferenceId,
+   validateMessage,
+   getValidationError,
+} from "@/utils/validation";
 
 /* ---------------- Field вынесен из компонента страницы ---------------- */
 function Field({
@@ -53,6 +66,7 @@ export default function FreightSolutionsPage() {
 
    const [loading, setLoading] = useState(false);
    const [status, setStatus] = useState<string | null>(null);
+   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
    // читаем env один раз (и красиво валидируем)
    const emailConfig = useMemo(() => {
@@ -77,6 +91,21 @@ export default function FreightSolutionsPage() {
 
       // аккуратно обновляем только одно поле
       setForm((s) => ({ ...s, [name]: value }));
+      
+      // Clear error when user starts typing
+      if (errors[name]) {
+         setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
+   };
+
+   const handleBlur = (
+      e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+   ) => {
+      const { name, value } = e.target;
+      const error = getValidationError(name, String(value));
+      if (error) {
+         setErrors((prev) => ({ ...prev, [name]: error }));
+      }
    };
 
    const onSubmit = async (e: React.FormEvent) => {
@@ -88,18 +117,49 @@ export default function FreightSolutionsPage() {
          return;
       }
 
-      // простая валидация
-      const requiredFilled =
-         form.companyName &&
-         form.contactName &&
-         form.email &&
-         form.phone &&
-         form.equipment &&
-         form.cargo &&
-         form.pickupAddress;
+      // Validate all fields
+      const newErrors: { [key: string]: string } = {};
 
-      if (!requiredFilled) {
-         setStatus("Please fill in all required fields.");
+      if (!validateCompanyName(form.companyName)) {
+         newErrors.companyName = getValidationError("companyName", form.companyName) || "Invalid company name";
+      }
+      if (!validateName(form.contactName)) {
+         newErrors.contactName = getValidationError("contactName", form.contactName) || "Invalid contact name";
+      }
+      if (!validateEmail(form.email)) {
+         newErrors.email = getValidationError("email", form.email) || "Invalid email";
+      }
+      if (!validatePhone(form.phone)) {
+         newErrors.phone = getValidationError("phone", form.phone) || "Invalid phone number";
+      }
+      if (!form.equipment) {
+         newErrors.equipment = "Please select equipment type";
+      }
+      if (!validateCargo(form.cargo)) {
+         newErrors.cargo = getValidationError("cargo", form.cargo) || "Invalid cargo description";
+      }
+      if (form.weight && !validateWeight(form.weight)) {
+         newErrors.weight = getValidationError("weight", form.weight) || "Invalid weight";
+      }
+      if (form.pallets && !validatePallets(form.pallets)) {
+         newErrors.pallets = getValidationError("pallets", form.pallets) || "Invalid pallets";
+      }
+      if (!validateAddress(form.pickupAddress)) {
+         newErrors.pickupAddress = getValidationError("pickupAddress", form.pickupAddress) || "Invalid pickup address";
+      }
+      if (form.deliveryAddress && !validateAddress(form.deliveryAddress)) {
+         newErrors.deliveryAddress = getValidationError("deliveryAddress", form.deliveryAddress) || "Invalid delivery address";
+      }
+      if (form.referenceId && !validateReferenceId(form.referenceId)) {
+         newErrors.referenceId = getValidationError("referenceId", form.referenceId) || "Invalid reference ID";
+      }
+      if (form.notes && !validateMessage(form.notes, 0, 2000)) {
+         newErrors.notes = "Notes must be less than 2000 characters";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+         setErrors(newErrors);
+         setStatus("Please fix the errors in the form.");
          return;
       }
 
@@ -112,6 +172,7 @@ export default function FreightSolutionsPage() {
 
       setLoading(true);
       setStatus(null);
+      setErrors({});
 
       try {
          const templateParams = {
@@ -188,12 +249,14 @@ Notes:  ${form.notes || "-"}
             website: "",
          });
       } catch (err: any) {
-         // более информативный лог
-         const msg =
-            err?.text ||
-            err?.message ||
-            (typeof err === "string" ? err : JSON.stringify(err));
-         console.error("EmailJS send error:", msg);
+         // Log error in development only
+         if (process.env.NODE_ENV === "development") {
+            const msg =
+               err?.text ||
+               err?.message ||
+               (typeof err === "string" ? err : JSON.stringify(err));
+            console.error("EmailJS send error:", msg);
+         }
          setStatus("Failed to send. Please try again or contact us by phone.");
       } finally {
          setLoading(false);
@@ -215,6 +278,8 @@ Notes:  ${form.notes || "-"}
                   alt="Truck background"
                   fill
                   priority
+                  sizes="100vw"
+                  quality={85}
                   className=" min-h-[800px] fixed top-0 object-cover brightness-[0.45] -z-10"
                />
             </div>
@@ -365,10 +430,15 @@ Notes:  ${form.notes || "-"}
                            name="companyName"
                            value={form.companyName}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="Global Cooperation LLC"
                            autoComplete="organization"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           pattern="[a-zA-Z0-9\s&.,'-]{2,100}"
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.companyName ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
                      </Field>
 
                      <Field label="Contact Name" required>
@@ -376,10 +446,15 @@ Notes:  ${form.notes || "-"}
                            name="contactName"
                            value={form.contactName}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="John Doe"
                            autoComplete="name"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           pattern="[a-zA-Zа-яА-ЯёЁ\s'-]{2,50}"
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.contactName ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.contactName && <p className="text-red-500 text-xs mt-1">{errors.contactName}</p>}
                      </Field>
 
                      <Field label="Email" required>
@@ -388,21 +463,31 @@ Notes:  ${form.notes || "-"}
                            name="email"
                            value={form.email}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="dispatch@company.com"
                            autoComplete="email"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.email ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                      </Field>
 
                      <Field label="Phone" required>
                         <input
+                           type="tel"
                            name="phone"
                            value={form.phone}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="+1 (555) 555-5555"
                            autoComplete="tel"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.phone ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                      </Field>
 
                      <Field label="I’m a freight broker">
@@ -423,7 +508,10 @@ Notes:  ${form.notes || "-"}
                            name="equipment"
                            value={form.equipment}
                            onChange={handleChange}
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           onBlur={handleBlur}
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.equipment ? "border-red-500" : "border-gray-300"
+                           }`}
                         >
                            <option value="" disabled>
                               Select equipment
@@ -434,6 +522,7 @@ Notes:  ${form.notes || "-"}
                            <option value="Step Deck">Step Deck</option>
                            <option value="Power Only">Power Only</option>
                         </select>
+                        {errors.equipment && <p className="text-red-500 text-xs mt-1">{errors.equipment}</p>}
                      </Field>
                   </div>
 
@@ -448,36 +537,57 @@ Notes:  ${form.notes || "-"}
                            name="cargo"
                            value={form.cargo}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="Auto parts on pallets"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           pattern="[a-zA-Z0-9\s,.-]{3,200}"
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.cargo ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.cargo && <p className="text-red-500 text-xs mt-1">{errors.cargo}</p>}
                      </Field>
                      <Field label="Weight (lbs)">
                         <input
+                           type="number"
                            name="weight"
                            value={form.weight}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="42000"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           min="0"
+                           max="999999"
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.weight ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.weight && <p className="text-red-500 text-xs mt-1">{errors.weight}</p>}
                      </Field>
                      <Field label="Pallets / Pieces">
                         <input
                            name="pallets"
                            value={form.pallets}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="24 pallets"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.pallets ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.pallets && <p className="text-red-500 text-xs mt-1">{errors.pallets}</p>}
                      </Field>
                      <Field label="Reference / PO #">
                         <input
                            name="referenceId"
                            value={form.referenceId}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="PO-12458"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                           pattern="[a-zA-Z0-9_-]{1,50}"
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                              errors.referenceId ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.referenceId && <p className="text-red-500 text-xs mt-1">{errors.referenceId}</p>}
                      </Field>
                   </div>
 
@@ -497,10 +607,15 @@ Notes:  ${form.notes || "-"}
                                  name="pickupAddress"
                                  value={form.pickupAddress}
                                  onChange={handleChange}
+                                 onBlur={handleBlur}
                                  placeholder="Dallas, TX 75201"
                                  autoComplete="address-line1"
-                                 className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                                 pattern="[a-zA-Z0-9\s,.#-]{5,200}"
+                                 className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                                    errors.pickupAddress ? "border-red-500" : "border-gray-300"
+                                 }`}
                               />
+                              {errors.pickupAddress && <p className="text-red-500 text-xs mt-1">{errors.pickupAddress}</p>}
                            </Field>
                            <Field label="Date" required>
                               <input
@@ -536,10 +651,15 @@ Notes:  ${form.notes || "-"}
                                  name="deliveryAddress"
                                  value={form.deliveryAddress}
                                  onChange={handleChange}
+                                 onBlur={handleBlur}
                                  placeholder="Atlanta, GA 30301"
                                  autoComplete="address-line1"
-                                 className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
+                                 pattern="[a-zA-Z0-9\s,.#-]{5,200}"
+                                 className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
+                                    errors.deliveryAddress ? "border-red-500" : "border-gray-300"
+                                 }`}
                               />
+                              {errors.deliveryAddress && <p className="text-red-500 text-xs mt-1">{errors.deliveryAddress}</p>}
                            </Field>
                            <Field label="Date (optional)">
                               <input
@@ -570,9 +690,19 @@ Notes:  ${form.notes || "-"}
                            name="notes"
                            value={form.notes}
                            onChange={handleChange}
+                           onBlur={handleBlur}
                            placeholder="Appointment? Lumper? Accessorials?"
-                           className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm min-h-[120px] resize-none"
+                           maxLength={2000}
+                           className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm min-h-[120px] resize-none ${
+                              errors.notes ? "border-red-500" : "border-gray-300"
+                           }`}
                         />
+                        {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes}</p>}
+                        {form.notes.length > 0 && (
+                           <p className="text-xs text-gray-500 mt-1">
+                              {form.notes.length}/2000 characters
+                           </p>
+                        )}
                      </Field>
                   </div>
 
