@@ -1,15 +1,10 @@
 "use client";
 
 import React from "react";
-import Seo from "@/components/Seo";
 
 const TermsPage = () => {
   return (
     <section className="bg-gray-100 py-20">
-      <Seo
-        title="Terms & Conditions | Global Cooperation LLC"
-        description="Read the terms and conditions for using the Global Cooperation LLC website and submitting contact or job application forms."
-      />
 
       <div className="max-w-4xl mx-auto px-6">
         <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10">

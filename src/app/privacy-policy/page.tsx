@@ -1,15 +1,10 @@
 "use client";
 
 import React from "react";
-import Seo from "@/components/Seo";
 
 const PrivacyPolicyPage = () => {
   return (
     <section className="bg-gray-100 py-20">
-      <Seo
-        title="Privacy Policy | Global Cooperation LLC"
-        description="Learn how Global Cooperation LLC collects, uses and protects your personal information when you contact us or apply for a job."
-      />
 
       <div className="max-w-4xl mx-auto px-6">
         <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10">

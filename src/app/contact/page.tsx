@@ -2,16 +2,50 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import React from "react";
-import Seo from "@/components/Seo";
+import Script from "next/script";
+import { createFAQSchema } from "@/utils/structured-data";
 
 const Page = () => {
   const applicationUrl = "https://www.cognitoforms.com/GlobalCooperationLLC/ApplicationForEmployment"; // <-- replace
 
+  const jobFAQs = [
+    {
+      question: "What types of CDL driving positions are available?",
+      answer:
+        "We welcome both owner-operators and company drivers. Whether you drive your own truck or join our fleet, we offer competitive rates, steady freight, and professional support. Positions are available for drivers with Class A CDL licenses and at least 1 year of experience.",
+    },
+    {
+      question: "How much can I earn as a driver?",
+      answer:
+        "Our drivers can earn $10,000+ weekly depending on miles and routes. Owner-operators receive 88% of gross revenue. We guarantee weekly pay with no delays, and offer additional bonuses and fuel card programs to help maximize your earnings.",
+    },
+    {
+      question: "Do you provide steady freight and consistent miles?",
+      answer:
+        "Yes, we specialize in providing steady freight throughout the year. Our network of freight brokers and direct shippers ensures consistent loads, reducing empty miles and maximizing your revenue potential. We offer contract-based loads and dedicated lanes for drivers seeking predictable schedules.",
+    },
+    {
+      question: "What support do you provide to drivers?",
+      answer:
+        "Our 24/7 dispatch support team is always available to assist you. We provide real-time load tracking, transparent communication, and professional guidance throughout every trip. Our team is committed to keeping you moving and informed, ensuring a smooth driving experience.",
+    },
+    {
+      question: "How quickly can I start driving?",
+      answer:
+        "Our fast onboarding process allows qualified drivers to start within 24 hours of application approval. We streamline the paperwork and ensure minimal delays, so you can get on the road quickly and start earning right away.",
+    },
+  ];
+
+  const jobFAQSchema = createFAQSchema(jobFAQs);
+
   return (
     <section className="bg-gray-100 pb-20">
-      <Seo
-        title="Join Our Team | Truck Driver Jobs | Global Cooperation LLC"
-        description="Apply for CDL trucking jobs at GLCO. Competitive pay, steady freight, fast onboarding, and 24/7 support. Become part of a company that values drivers."
+      <Script
+        id="job-faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jobFAQSchema),
+        }}
       />
 
       {/* Top image hero */}
@@ -123,6 +157,32 @@ const Page = () => {
           >
             Go to Application Form
           </motion.a>
+        </div>
+      </motion.div>
+
+      {/* FAQ Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+        className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-10 max-md:p-6 mt-10"
+      >
+        <h2 className="text-3xl md:text-4xl font-semibold text-center text-gray-800 mb-8">
+          Driver Job Application FAQs
+        </h2>
+        <div className="grid md:grid-cols-1 gap-6">
+          {jobFAQs.map((faq, index) => (
+            <div
+              key={index}
+              className="bg-gray-50 rounded-lg p-6 border border-gray-200"
+            >
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                {faq.question}
+              </h3>
+              <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+            </div>
+          ))}
         </div>
       </motion.div>
     </section>

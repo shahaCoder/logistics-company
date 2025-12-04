@@ -9,7 +9,7 @@ const Hero = () => {
       <section className="custom-container h-[80vh] max-lg:h-[500px] flex items-center text-white overflow-hidden">
          <Image
             src="/images/truck2.jpg"
-            alt="Truck background"
+            alt="Professional trucking and freight transportation services across the USA by Global Cooperation LLC"
             fill
             priority
             sizes="100vw"

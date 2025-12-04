@@ -63,7 +63,7 @@ export default function Footer() {
                transition={{ duration: 0.6 }}
                className="flex flex-col space-y-3"
             >
-               <h3 className="text-lg font-semibold text-white mb-1">Links</h3>
+               <h3 className="text-lg font-semibold text-white mb-1">Quick Links</h3>
                <Link
                   href="/"
                   className="hover:text-red-600 transition-colors text-sm"
@@ -77,22 +77,28 @@ export default function Footer() {
                   About Us
                </Link>
                <Link
-                  href="#services"
+                  href="/freights"
                   className="hover:text-red-600 transition-colors text-sm"
                >
-                  Services
+                  Request a Freight Quote
                </Link>
                <Link
                   href="/contact"
                   className="hover:text-red-600 transition-colors text-sm"
                >
-                  Join us
+                  Apply as a CDL Driver
                </Link>
                <Link
-                  href="/contact"
+                  href="/privacy-policy"
                   className="hover:text-red-600 transition-colors text-sm"
                >
-                  Move your Freight
+                  Privacy Policy
+               </Link>
+               <Link
+                  href="/terms"
+                  className="hover:text-red-600 transition-colors text-sm"
+               >
+                  Terms & Conditions
                </Link>
             </motion.div>
 

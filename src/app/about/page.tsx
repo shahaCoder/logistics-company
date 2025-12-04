@@ -1,16 +1,20 @@
 "use client";
 
+import Script from "next/script";
 import GlintLogo from "@/components/GlintLogo";
-import Seo from "@/components/Seo";
 import { motion } from "framer-motion";
+import { localBusinessSchema } from "@/utils/structured-data";
 
 const Page = () => {
   return (
     <section id="about" className="bg-[#1b1b1b] text-white">
-      <Seo
-  title="About Global Cooperation LLC | Trusted USA Trucking Company"
-  description="Learn more about Global Cooperation LLC — a professional logistics and freight company operating across the United States. Discover our mission, experience, and dedication to safe, on-time deliveries."
-/>
+      <Script
+        id="about-localbusiness-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(localBusinessSchema),
+        }}
+      />
 
       {/* HERO */}
       <div className="relative h-[540px] md:h-[620px] overflow-hidden" data-hero>
@@ -72,11 +76,12 @@ const Page = () => {
           >
             We are a professional trucking and logistics company providing
             nationwide transportation solutions across all 48 continental states.
-            With years of hands-on experience in freight delivery and dispatch
-            management, our mission is to offer secure, efficient, and on-time
-            services for every client we serve. We take pride in being a trusted
-            logistics partner to brokers, shippers, and carriers — ensuring
-            consistent communication and reliability on every lane we operate.
+            Based in Ohio, our experienced team handles freight delivery and dispatch
+            management with a mission to offer secure, efficient, and on-time
+            services for every client. As a trusted logistics partner to freight brokers,
+            shippers, and carriers, we ensure consistent communication and reliability
+            on every lane we operate. Our services include dry van, power only, reefer,
+            and flatbed transportation throughout the United States.
           </motion.p>
 
           <motion.p

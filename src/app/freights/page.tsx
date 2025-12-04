@@ -3,7 +3,8 @@
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
 import emailjs from "@emailjs/browser";
-import Seo from "@/components/Seo";
+import Script from "next/script";
+import { createFAQSchema } from "@/utils/structured-data";
 import {
   validateCompanyName,
   validateName,
@@ -290,11 +291,46 @@ Notes:  ${form.notes || "-"}
     }
   };
 
+  const freightFAQs = [
+    {
+      question:
+        "Do you work with both freight brokers and direct shippers?",
+      answer:
+        "Yes, we work with both freight brokers and direct shippers. Our freight quote form and services are designed for both. Simply select 'I'm a freight broker' if it applies to your situation. We provide transparent pricing and reliable service regardless of your role in the supply chain.",
+    },
+    {
+      question: "Which equipment types do you provide?",
+      answer:
+        "We provide a full range of equipment types including dry van for general freight, reefer (refrigerated) for temperature-controlled shipments, flatbed for oversized or heavy loads, step deck trailers, and power only services. Our fleet is well-maintained and ready to handle various cargo requirements.",
+    },
+    {
+      question: "Do you operate nationwide across the United States?",
+      answer:
+        "Yes, we operate nationwide across all 48 continental United States. Our logistics network and 24/7 dispatch support ensure we can handle freight transportation from coast to coast, covering all major shipping lanes and routes throughout the country.",
+    },
+    {
+      question: "How fast do you respond to freight quote requests?",
+      answer:
+        "We prioritize quick responses to all freight quote requests. Typically, our dispatch team responds within minutes during business hours. For expedited loads or time-critical freight, we provide priority handling and can often provide same-day quotes and confirmation.",
+    },
+    {
+      question:
+        "What happens after I submit a freight quote request?",
+      answer:
+        "After you submit your freight quote request with pickup and delivery details, our dispatch team will review your requirements and respond quickly with competitive rates and truck availability. We'll confirm equipment type, dates, and pricing, then work with you to secure a carrier and coordinate the shipment. You'll receive updates throughout the process.",
+    },
+  ];
+
+  const freightFAQSchema = createFAQSchema(freightFAQs);
+
   return (
     <div className="">
-      <Seo
-        title="Move Your Freight Across the USA | Logistics Solutions by Global Cooperation LLC"
-        description="Partner with Global Cooperation LLC to transport your freight safely and efficiently across the United States. Get customized logistics, 24/7 dispatch support, and real-time delivery tracking."
+      <Script
+        id="freight-faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(freightFAQSchema),
+        }}
       />
 
       {/* HERO */}
@@ -428,9 +464,15 @@ Notes:  ${form.notes || "-"}
           <h3 className="text-3xl md:text-4xl font-extrabold text-red-600 text-center mb-8">
             Request a Freight Quote
           </h3>
-          <p className="text-center text-gray-700 max-w-3xl mx-auto mb-10">
-            Fill out the form below. Our dispatch team will respond quickly with
-            pricing and availability.
+          <p className="text-center text-gray-700 max-w-3xl mx-auto mb-4">
+            Fill out the form below with your shipment details including pickup and delivery locations, 
+            cargo description, and preferred equipment type. Our dispatch team will review your request 
+            and respond quickly with competitive pricing and truck availability.
+          </p>
+          <p className="text-center text-gray-600 max-w-3xl mx-auto mb-10 text-sm">
+            After submitting, our team will contact you within minutes during business hours to confirm 
+            rates, equipment availability, and scheduling. We'll work with you to secure the right carrier 
+            and ensure your freight is transported safely and on time across the United States.
           </p>
 
           <form
@@ -873,26 +915,13 @@ Notes:  ${form.notes || "-"}
       {/* FAQ */}
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4 md:px-6">
-          <h3 className="text-2xl md:text-3xl font-extrabold text-red-600 text-center mb-10">
-            FAQ
-          </h3>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-red-600 text-center mb-10">
+            Frequently Asked Questions
+          </h2>
           <div className="grid gap-6 md:grid-cols-2">
-            <FAQ
-              q="Do you work with both freight brokers and direct shippers?"
-              a='Yes. Our page and form are designed for both — select "I’m a freight broker" if it applies.'
-            />
-            <FAQ
-              q="Which equipment types do you provide?"
-              a="Dry Van, Reefer, Flatbed, Step Deck, and Power Only."
-            />
-            <FAQ
-              q="Do you operate nationwide?"
-              a="Yes, we cover all continental U.S. with 24/7 dispatch support."
-            />
-            <FAQ
-              q="How fast do you respond to requests?"
-              a="Usually within minutes during business hours — expedited loads get priority."
-            />
+            {freightFAQs.map((faq, index) => (
+              <FAQ key={index} q={faq.question} a={faq.answer} />
+            ))}
           </div>
         </div>
       </section>
