@@ -126,7 +126,7 @@ const TermsPage = () => {
             <strong>Global Cooperation LLC</strong>
           </p>
           <p className="text-gray-700 mb-1">Email: operations@glco.us</p>
-          <p className="text-gray-700 mb-4">Website: https://glco.us</p>
+          <p className="text-gray-700 mb-4">Website: www.glco.us</p>
 
           <p className="text-xs text-gray-500 mt-6">
             These Terms &amp; Conditions are provided as a general template and do not constitute
