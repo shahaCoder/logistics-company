@@ -60,7 +60,7 @@ const Page = () => {
 
         {/* Motivation line */}
         <p className="text-gray-800 text-center font-medium text-lg mb-8">
-          Fill out the form today — and be on the road tomorrow with guaranteed loads, fast onboarding,
+          Fill out the form today and be on the road tomorrow with guaranteed loads, fast onboarding,
           and a team that keeps you moving.
         </p>
 
@@ -68,8 +68,7 @@ const Page = () => {
         <div className="bg-gray-50 rounded-xl p-6 shadow-sm mb-10">
           <h3 className="text-2xl font-semibold text-gray-800 mb-3">💰 Pay & Earnings</h3>
           <ul className="text-gray-700 space-y-2">
-            <li>• Company Drivers: <strong>$8000 – $10,000+ weekly</strong></li>
-            <li>• Owner Operators: <strong>$15,000 – $20,000+ weekly</strong> (depending on miles & routes)</li>
+            <li>• Our drivers make: <strong>$10,000+ weekly</strong> (depending on miles & routes)</li>
             <li>• 88% of gross for Owner Operators</li>
             <li>• On–time weekly payments</li>
             <li>• Fuel cards & bonuses available</li>
