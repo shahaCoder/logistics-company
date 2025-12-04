@@ -78,7 +78,7 @@ export default function Reviews() {
         >
           {reviews.map((r, i) => (
             <SwiperSlide key={i}>
-              <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200 h-full flex flex-col justify-between">
+              <div className="no-select bg-white rounded-2xl p-6 shadow-md border border-gray-200 h-full flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-4 mb-4">
                     {/* <img

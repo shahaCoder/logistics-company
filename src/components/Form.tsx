@@ -99,7 +99,7 @@ export default function Form() {
   };
 
   return (
-    <section className="flex flex-col lg:flex-row min-h-screen bg-[#363636] text-white">
+    <section className="flex flex-col lg:flex-row min-h-screen bg-[#363636] text-white" id="contact-us">
       <div className="lg:w-1/2 w-full flex items-center justify-center px-6 md:px-16 py-20 bg-[#363636]">
         <div className="w-full max-w-md">
           <motion.h3
