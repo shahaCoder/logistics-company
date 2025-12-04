@@ -106,7 +106,7 @@ export default function Footer() {
                <h3 className="text-lg font-semibold text-white mb-1">
                   Contact Info
                </h3>
-               <p className="text-sm text-gray-400">+1 (786) 585-2420</p>
+               <p className="text-sm text-gray-400">+1 (513) 993-0921</p>
                <p className="text-sm text-gray-400">operations@glco.us</p>
                <p className="text-sm text-gray-400">
                   FAX  +1 762 226 9415

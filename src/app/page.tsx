@@ -26,7 +26,7 @@ export default function Home() {
             <Reviews />
          </section>
 
-         <section className="bg-[#C4C4C4]">
+         <section className="bg-[#C4C4C4]" id="contact-form">
             <Form />
          </section>
       </>
