@@ -301,7 +301,7 @@ Notes:  ${form.notes || "-"}
     {
       question: "Which equipment types do you provide?",
       answer:
-        "We provide a full range of equipment types including dry van for general freight, reefer (refrigerated) for temperature-controlled shipments, flatbed for oversized or heavy loads, step deck trailers, and power only services. Our fleet is well-maintained and ready to handle various cargo requirements.",
+        "We provide a full range of equipment types including dry van for general freight, reefer (refrigerated) for temperature controlled shipments, flatbed for oversized or heavy loads, step deck trailers, and power only services. Our fleet is well maintained and ready to handle various cargo requirements.",
     },
     {
       question: "Do you operate nationwide across the United States?",
@@ -311,7 +311,7 @@ Notes:  ${form.notes || "-"}
     {
       question: "How fast do you respond to freight quote requests?",
       answer:
-        "We prioritize quick responses to all freight quote requests. Typically, our dispatch team responds within minutes during business hours. For expedited loads or time-critical freight, we provide priority handling and can often provide same-day quotes and confirmation.",
+        "We prioritize quick responses to all freight quote requests. Typically, our dispatch team responds within minutes during business hours. For expedited loads or time critical freight, we provide priority handling and can often provide same-day quotes and confirmation.",
     },
     {
       question:

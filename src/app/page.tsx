@@ -55,7 +55,7 @@ const homeFAQs = [
     question:
       "What types of freight transportation services does Global Cooperation LLC offer?",
     answer:
-      "We specialize in dry van, power only, reefer (refrigerated), and flatbed transportation across the United States. Our nationwide trucking services include full truckload (FTL), less-than-truckload (LTL), expedited delivery, and dedicated lane options for consistent freight needs.",
+      "We specialize in Dry Van transportation, providing reliable full truckload (FTL), less-than-truckload (LTL), expedited delivery, and dedicated lane solutions across the United States. Our nationwide service ensures safe, efficient, and on-time freight movement for brokers and shippers of all sizes.",
   },
   {
     question: "How quickly can I get a freight quote?",
@@ -153,7 +153,7 @@ export default function Home() {
                      Still have questions? Get in touch with our team.
                   </p>
                   <Link
-                     href="/contact"
+                     href="#contact-us"
                      className="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-lg transition-all"
                   >
                      Contact Us

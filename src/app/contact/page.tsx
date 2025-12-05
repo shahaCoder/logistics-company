@@ -12,17 +12,17 @@ const Page = () => {
     {
       question: "What types of CDL driving positions are available?",
       answer:
-        "We welcome both owner-operators and company drivers. Whether you drive your own truck or join our fleet, we offer competitive rates, steady freight, and professional support. Positions are available for drivers with Class A CDL licenses and at least 1 year of experience.",
+        "We welcome both owner operators and company drivers. Whether you drive your own truck or join our fleet, we offer competitive rates, steady freight, and professional support. Positions are available for drivers with Class A CDL licenses and at least 1 year of experience.",
     },
     {
       question: "How much can I earn as a driver?",
       answer:
-        "Our drivers can earn $10,000+ weekly depending on miles and routes. Owner-operators receive 88% of gross revenue. We guarantee weekly pay with no delays, and offer additional bonuses and fuel card programs to help maximize your earnings.",
+        "Our drivers can earn $10,000+ weekly depending on miles and routes. Owner operators receive 88% of gross revenue. We guarantee weekly pay with no delays, and offer additional bonuses and fuel card programs to help maximize your earnings.",
     },
     {
       question: "Do you provide steady freight and consistent miles?",
       answer:
-        "Yes, we specialize in providing steady freight throughout the year. Our network of freight brokers and direct shippers ensures consistent loads, reducing empty miles and maximizing your revenue potential. We offer contract-based loads and dedicated lanes for drivers seeking predictable schedules.",
+        "Yes, we specialize in providing steady freight throughout the year. Our network of freight brokers and direct shippers ensures consistent loads, reducing empty miles and maximizing your revenue potential. We offer contract based loads and dedicated lanes for drivers seeking predictable schedules.",
     },
     {
       question: "What support do you provide to drivers?",
