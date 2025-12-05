@@ -92,7 +92,7 @@ const Page = () => {
       {/* CONTENT */}
       <div className="relative z-20 -mt-12 md:-mt-16 rounded-t-3xl bg-[#363636] shadow-2xl">
         {/* STATS SECTION */}
-        <section className="bg-gradient-to-r from-red-600/20 via-red-700/20 to-red-600/20 border-y border-red-600/30 py-14 relative overflow-hidden">
+        <section className="bg-gradient-to-r from-red-600/20 via-red-700/20 rounded-t-3xl to-red-600/20 border-y border-red-600/30 py-14 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('/images/road.jpg')] opacity-5 bg-cover bg-center" />
           <div className="custom-container max-w-6xl mx-auto px-6 relative z-10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
