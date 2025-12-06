@@ -144,9 +144,9 @@ export default function Step7Clearinghouse({
                   }`}
                 />
               )}
-              {errors.clearinghouseSignature && (
+              {errors.clearinghouseSignature?.message && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.clearinghouseSignature.message}
+                  {String(errors.clearinghouseSignature.message)}
                 </p>
               )}
             </div>
@@ -162,9 +162,9 @@ export default function Step7Clearinghouse({
                   errors.clearinghouseDateSigned ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors.clearinghouseDateSigned && (
+              {errors.clearinghouseDateSigned?.message && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.clearinghouseDateSigned.message}
+                  {String(errors.clearinghouseDateSigned.message)}
                 </p>
               )}
             </div>

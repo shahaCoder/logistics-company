@@ -76,8 +76,8 @@ export default function Step6PSP({
                 readOnly
                 className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-600 cursor-not-allowed"
               />
-              {errors.pspFullName && (
-                <p className="text-red-500 text-xs mt-1">{errors.pspFullName.message}</p>
+              {errors.pspFullName?.message && (
+                <p className="text-red-500 text-xs mt-1">{String(errors.pspFullName.message)}</p>
               )}
             </div>
 
@@ -154,8 +154,8 @@ export default function Step6PSP({
                   }`}
                 />
               )}
-              {errors.pspSignature && (
-                <p className="text-red-500 text-xs mt-1">{errors.pspSignature.message}</p>
+              {errors.pspSignature?.message && (
+                <p className="text-red-500 text-xs mt-1">{String(errors.pspSignature.message)}</p>
               )}
             </div>
 
@@ -170,8 +170,8 @@ export default function Step6PSP({
                   errors.pspDateSigned ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors.pspDateSigned && (
-                <p className="text-red-500 text-xs mt-1">{errors.pspDateSigned.message}</p>
+              {errors.pspDateSigned?.message && (
+                <p className="text-red-500 text-xs mt-1">{String(errors.pspDateSigned.message)}</p>
               )}
             </div>
           </div>

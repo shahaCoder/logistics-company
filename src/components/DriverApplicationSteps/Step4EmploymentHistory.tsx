@@ -346,9 +346,9 @@ export default function Step4EmploymentHistory({
           + Add Previous Employer
         </button>
 
-        {errors.employmentRecords && (
+        {errors.employmentRecords?.message && (
           <p className="text-red-500 text-xs mt-1">
-            {errors.employmentRecords.message}
+            {String(errors.employmentRecords.message)}
           </p>
         )}
       </div>

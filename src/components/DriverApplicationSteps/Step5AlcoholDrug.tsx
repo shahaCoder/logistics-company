@@ -186,9 +186,9 @@ export default function Step5AlcoholDrug({
                 readOnly
                 className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-600 cursor-not-allowed"
               />
-              {errors.alcoholDrugName && (
+              {errors.alcoholDrugName?.message && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.alcoholDrugName.message}
+                  {String(errors.alcoholDrugName.message)}
                 </p>
               )}
             </div>
@@ -205,7 +205,6 @@ export default function Step5AlcoholDrug({
                       checked={signatureMode === "draw"}
                       onChange={() => {
                         setSignatureMode("draw");
-                        setSignatureSaved(false);
                         setValue("alcoholDrugSignatureFile", undefined);
                         setValue("alcoholDrugSignature", "");
                       }}
@@ -219,7 +218,6 @@ export default function Step5AlcoholDrug({
                       checked={signatureMode === "text"}
                       onChange={() => {
                         setSignatureMode("text");
-                        setSignatureSaved(false);
                         setValue("alcoholDrugSignatureFile", undefined);
                         setValue("alcoholDrugSignature", "");
                       }}
@@ -269,9 +267,9 @@ export default function Step5AlcoholDrug({
                   }`}
                 />
               )}
-              {errors.alcoholDrugSignature && (
+              {errors.alcoholDrugSignature?.message && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.alcoholDrugSignature.message}
+                  {String(errors.alcoholDrugSignature.message)}
                 </p>
               )}
             </div>
@@ -287,9 +285,9 @@ export default function Step5AlcoholDrug({
                   errors.alcoholDrugDateSigned ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors.alcoholDrugDateSigned && (
+              {errors.alcoholDrugDateSigned?.message && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.alcoholDrugDateSigned.message}
+                  {String(errors.alcoholDrugDateSigned.message)}
                 </p>
               )}
             </div>

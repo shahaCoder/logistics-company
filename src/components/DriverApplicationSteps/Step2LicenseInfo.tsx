@@ -107,9 +107,9 @@ export default function Step2LicenseInfo({
                 errors.licenseNumber ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.licenseNumber && (
+            {errors.licenseNumber?.message && (
               <p className="text-red-500 text-xs mt-1">
-                {errors.licenseNumber.message}
+                {String(errors.licenseNumber.message)}
               </p>
             )}
           </div>
@@ -137,9 +137,9 @@ export default function Step2LicenseInfo({
                 </option>
               ))}
             </select>
-            {errors.licenseState && (
+            {errors.licenseState?.message && (
               <p className="text-red-500 text-xs mt-1">
-                {errors.licenseState.message}
+                {String(errors.licenseState.message)}
               </p>
             )}
           </div>
@@ -159,9 +159,9 @@ export default function Step2LicenseInfo({
               <option value="B">Class B</option>
               <option value="C">Class C</option>
             </select>
-            {errors.licenseClass && (
+            {errors.licenseClass?.message && (
               <p className="text-red-500 text-xs mt-1">
-                {errors.licenseClass.message}
+                {String(errors.licenseClass.message)}
               </p>
             )}
           </div>
@@ -177,9 +177,9 @@ export default function Step2LicenseInfo({
                 errors.licenseExpiresAt ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.licenseExpiresAt && (
+            {errors.licenseExpiresAt?.message && (
               <p className="text-red-500 text-xs mt-1">
-                {errors.licenseExpiresAt.message}
+                {String(errors.licenseExpiresAt.message)}
               </p>
             )}
             {isLicenseExpired && !errors.licenseExpiresAt && (
@@ -338,9 +338,9 @@ export default function Step2LicenseInfo({
                 onChange={(e) => handleFileChange("licenseFrontFile", e)}
                 className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
               />
-              {errors.licenseFrontFile && (
+              {errors.licenseFrontFile?.message && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.licenseFrontFile.message}
+                  {String(errors.licenseFrontFile.message)}
                 </p>
               )}
             </div>
@@ -356,9 +356,9 @@ export default function Step2LicenseInfo({
                 onChange={(e) => handleFileChange("licenseBackFile", e)}
                 className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
               />
-              {errors.licenseBackFile && (
+              {errors.licenseBackFile?.message && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.licenseBackFile.message}
+                  {String(errors.licenseBackFile.message)}
                 </p>
               )}
             </div>

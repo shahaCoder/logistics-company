@@ -102,8 +102,8 @@ export default function Step1ApplicantInfo({
                 errors.firstName ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.firstName && (
-              <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>
+            {errors.firstName?.message && (
+              <p className="text-red-500 text-xs mt-1">{String(errors.firstName.message)}</p>
             )}
           </div>
 
@@ -120,8 +120,8 @@ export default function Step1ApplicantInfo({
                 errors.lastName ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.lastName && (
-              <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>
+            {errors.lastName?.message && (
+              <p className="text-red-500 text-xs mt-1">{String(errors.lastName.message)}</p>
             )}
           </div>
         </div>
@@ -138,8 +138,8 @@ export default function Step1ApplicantInfo({
               errors.dateOfBirth ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.dateOfBirth && (
-            <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth.message}</p>
+          {errors.dateOfBirth?.message && (
+            <p className="text-red-500 text-xs mt-1">{String(errors.dateOfBirth.message)}</p>
           )}
         </div>
 
@@ -158,8 +158,8 @@ export default function Step1ApplicantInfo({
               errors.ssn ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.ssn && (
-            <p className="text-red-500 text-xs mt-1">{errors.ssn.message}</p>
+          {errors.ssn?.message && (
+            <p className="text-red-500 text-xs mt-1">{String(errors.ssn.message)}</p>
           )}
           <p className="text-xs text-gray-600 mt-1">
             SSN is optional but recommended for faster background check processing. If provided, we will securely store your SSN and it will only be used for required DOT background checks.
@@ -188,8 +188,8 @@ export default function Step1ApplicantInfo({
                 errors.phone ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.phone && (
-              <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
+            {errors.phone?.message && (
+              <p className="text-red-500 text-xs mt-1">{String(errors.phone.message)}</p>
             )}
           </div>
 
@@ -204,8 +204,8 @@ export default function Step1ApplicantInfo({
                 errors.email ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+            {errors.email?.message && (
+              <p className="text-red-500 text-xs mt-1">{String(errors.email.message)}</p>
             )}
           </div>
         </div>
@@ -227,9 +227,9 @@ export default function Step1ApplicantInfo({
                   errors.currentAddressLine1 ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors.currentAddressLine1 && (
+              {errors.currentAddressLine1?.message && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.currentAddressLine1.message}
+                  {String(errors.currentAddressLine1.message)}
                 </p>
               )}
             </div>
@@ -248,8 +248,8 @@ export default function Step1ApplicantInfo({
                     errors.currentCity ? "border-red-500" : "border-gray-300"
                   }`}
                 />
-                {errors.currentCity && (
-                  <p className="text-red-500 text-xs mt-1">{errors.currentCity.message}</p>
+                {errors.currentCity?.message && (
+                  <p className="text-red-500 text-xs mt-1">{String(errors.currentCity.message)}</p>
                 )}
               </div>
 
@@ -276,8 +276,8 @@ export default function Step1ApplicantInfo({
                     </option>
                   ))}
                 </select>
-                {errors.currentState && (
-                  <p className="text-red-500 text-xs mt-1">{errors.currentState.message}</p>
+                {errors.currentState?.message && (
+                  <p className="text-red-500 text-xs mt-1">{String(errors.currentState.message)}</p>
                 )}
               </div>
 
@@ -294,8 +294,8 @@ export default function Step1ApplicantInfo({
                     errors.currentZip ? "border-red-500" : "border-gray-300"
                   }`}
                 />
-                {errors.currentZip && (
-                  <p className="text-red-500 text-xs mt-1">{errors.currentZip.message}</p>
+                {errors.currentZip?.message && (
+                  <p className="text-red-500 text-xs mt-1">{String(errors.currentZip.message)}</p>
                 )}
               </div>
             </div>

@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://glco.us
+
+# Sitemaps
+Sitemap: https://glco.us/sitemap.xml

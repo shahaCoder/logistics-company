@@ -139,8 +139,8 @@ export default function Step8MVR({
                   }`}
                 />
               )}
-              {errors.mvrSignature && (
-                <p className="text-red-500 text-xs mt-1">{errors.mvrSignature.message}</p>
+              {errors.mvrSignature?.message && (
+                <p className="text-red-500 text-xs mt-1">{String(errors.mvrSignature.message)}</p>
               )}
             </div>
 
@@ -155,8 +155,8 @@ export default function Step8MVR({
                   errors.mvrDateSigned ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors.mvrDateSigned && (
-                <p className="text-red-500 text-xs mt-1">{errors.mvrDateSigned.message}</p>
+              {errors.mvrDateSigned?.message && (
+                <p className="text-red-500 text-xs mt-1">{String(errors.mvrDateSigned.message)}</p>
               )}
             </div>
           </div>

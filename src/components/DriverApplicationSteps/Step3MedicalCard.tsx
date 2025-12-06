@@ -42,9 +42,9 @@ export default function Step3MedicalCard({
               errors.medicalCardFile ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.medicalCardFile && (
+          {errors.medicalCardFile?.message && (
             <p className="text-red-500 text-xs mt-1">
-              {errors.medicalCardFile.message}
+              {String(errors.medicalCardFile.message)}
             </p>
           )}
           <p className="text-xs text-gray-600 mt-1">
