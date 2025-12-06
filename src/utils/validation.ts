@@ -12,22 +12,13 @@ export const validateEmail = (email: string): boolean => {
   return emailRegex.test(email.trim());
 };
 
-// US Phone validation: accepts various formats
-// +1 (555) 123-4567, (555) 123-4567, 555-123-4567, 5551234567, etc.
+// US Phone validation: accepts format (XXX)XXX-XX-XX
+// Format: (305)522-82-70
 export const validatePhone = (phone: string): boolean => {
   if (!phone || !phone.trim()) return false;
   
-  // Remove all non-digit characters except +
-  const cleaned = phone.replace(/[^\d+]/g, '');
-  const digitsOnly = cleaned.replace(/\+/g, '');
-  
-  // Must have 10 or 11 digits (with country code)
-  if (digitsOnly.length !== 10 && digitsOnly.length !== 11) {
-    return false;
-  }
-  
-  // Check format with regex (allows various formats)
-  const phoneRegex = /^(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/;
+  // Check format: (XXX)XXX-XX-XX
+  const phoneRegex = /^\(\d{3}\)\d{3}-\d{2}-\d{2}$/;
   return phoneRegex.test(phone.trim());
 };
 
@@ -109,7 +100,7 @@ export const getValidationError = (field: string, value: string): string | null 
       break;
     case 'phone':
       if (!validatePhone(value)) {
-        return 'Please enter a valid US phone number (e.g., +1 (555) 123-4567)';
+        return 'Please enter a valid phone number in format (XXX)XXX-XX-XX';
       }
       break;
     case 'companyName':

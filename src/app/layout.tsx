@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat, Cinzel } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import ConditionalLayout from "@/components/ConditionalLayout";
 
 const cinzel = Cinzel({
   weight: "400",
@@ -70,9 +69,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} ${cinzel.variable} antialiased`}>
-        <Header />
-        {children}
-        <Footer />
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );

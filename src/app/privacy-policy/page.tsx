@@ -29,7 +29,29 @@ const PrivacyPolicyPage = () => {
             We may collect the following types of information:
           </p>
           <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
-            <li>Contact details (name, email address, phone number)</li>
+            <li>Contact details (name, email address, phone number, mailing address)</li>
+            <li>Date of birth</li>
+            <li>
+              <strong>Social Security Number (SSN):</strong> We collect your full SSN for required
+              DOT background checks, employment verification, tax purposes, and compliance with
+              federal regulations. Your SSN is encrypted using AES-256-GCM encryption and stored
+              securely. Access to your full SSN is restricted to authorized personnel only and
+              requires additional authentication.
+            </li>
+            <li>
+              Driver's license information (license number, state, class, expiration date,
+              endorsements, and copies of your license)
+            </li>
+            <li>Medical card documentation and expiration dates</li>
+            <li>
+              Employment history (previous employers, dates of employment, positions held, reasons
+              for leaving)
+            </li>
+            <li>
+              Background check information and authorizations (PSP, FMCSA Clearinghouse, MVR
+              consents)
+            </li>
+            <li>Legal consents and signatures</li>
             <li>Information you provide in our contact forms or job applications</li>
             <li>Driver-related details such as experience, type of equipment, and preferences</li>
             <li>Technical data such as IP address, browser type, and basic analytics data</li>
@@ -43,8 +65,16 @@ const PrivacyPolicyPage = () => {
           </p>
           <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
             <li>Responding to your inquiries and messages</li>
-            <li>Reviewing and processing job applications</li>
-            <li>Contacting you about potential opportunities with our company</li>
+            <li>Reviewing and processing driver applications</li>
+            <li>
+              Conducting required DOT background checks, including PSP (Pre-Employment Screening
+              Program), FMCSA Drug & Alcohol Clearinghouse checks, and MVR (Motor Vehicle Record)
+              checks
+            </li>
+            <li>Verifying your identity, driving qualifications, and employment history</li>
+            <li>Complying with federal and state regulations for commercial drivers</li>
+            <li>Contacting you about potential employment opportunities with our company</li>
+            <li>For tax and payroll purposes if you are hired</li>
             <li>Operating, maintaining and improving our website and services</li>
             <li>Complying with legal obligations and protecting our legal rights</li>
           </ul>
@@ -114,8 +144,11 @@ const PrivacyPolicyPage = () => {
           </h2>
           <p className="text-gray-700 mb-4">
             We take reasonable technical and organizational measures to protect your personal
-            information from unauthorized access, loss or misuse. However, no method of transmission
-            over the internet is completely secure, and we cannot guarantee absolute security.
+            information from unauthorized access, loss or misuse. Sensitive information, including
+            your Social Security Number, is encrypted using AES-256-GCM encryption before storage.
+            Access to your full SSN is restricted to authorized personnel only and requires
+            additional authentication. However, no method of transmission over the internet is
+            completely secure, and we cannot guarantee absolute security.
           </p>
 
           <h2 className="text-xl font-semibold text-gray-900 mt-6 mb-3">

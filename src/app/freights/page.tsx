@@ -80,6 +80,16 @@ export default function FreightSolutionsPage() {
     return { serviceId, templateId, publicKey, ok };
   }, []);
 
+  // Format phone: (999)999-99-99
+  const formatPhone = (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    if (cleaned.length === 0) return "";
+    if (cleaned.length <= 3) return `(${cleaned}`;
+    if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)})${cleaned.slice(3)}`;
+    if (cleaned.length <= 8) return `(${cleaned.slice(0, 3)})${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    return `(${cleaned.slice(0, 3)})${cleaned.slice(3, 6)}-${cleaned.slice(6, 8)}-${cleaned.slice(8, 10)}`;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -87,10 +97,15 @@ export default function FreightSolutionsPage() {
   ) => {
     const target = e.target as HTMLInputElement;
     const { name, type } = target;
-    const value =
+    let value =
       type === "checkbox"
         ? (target as HTMLInputElement).checked
         : target.value;
+
+    // Format phone number
+    if (name === "phone" && type === "tel") {
+      value = formatPhone(value as string);
+    }
 
     // аккуратно обновляем только одно поле
     setForm((s) => ({ ...s, [name]: value }));
@@ -247,12 +262,46 @@ Notes:  ${form.notes || "-"}
         `.trim(),
       };
 
+      // Send to EmailJS (existing)
       await emailjs.send(
         emailConfig.serviceId,
         emailConfig.templateId,
         templateParams,
         { publicKey: emailConfig.publicKey }
       );
+
+      // Also save to database
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      try {
+        await fetch(`${apiUrl}/api/requests/freight`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            companyName: form.companyName,
+            contactName: form.contactName,
+            email: form.email,
+            phone: form.phone,
+            isBroker: form.isBroker,
+            equipment: form.equipment,
+            cargo: form.cargo,
+            weight: form.weight,
+            pallets: form.pallets,
+            pickupAddress: form.pickupAddress,
+            pickupDate: form.pickupDate,
+            pickupTime: form.pickupTime,
+            deliveryAddress: form.deliveryAddress,
+            deliveryDate: form.deliveryDate,
+            deliveryTime: form.deliveryTime,
+            referenceId: form.referenceId,
+            notes: form.notes,
+          }),
+        });
+      } catch (dbError) {
+        // Log but don't fail if DB save fails
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to save to database:", dbError);
+        }
+      }
 
       setStatus("Sent! Our dispatch will contact you shortly.");
       setForm({
@@ -558,7 +607,8 @@ Notes:  ${form.notes || "-"}
                   value={form.phone}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  placeholder="+1 (555) 555-5555"
+                  placeholder="(555)123-45-67"
+                  maxLength={15}
                   autoComplete="tel"
                   className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
                     errors.phone ? "border-red-500" : "border-gray-300"

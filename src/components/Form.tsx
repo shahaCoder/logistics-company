@@ -73,15 +73,26 @@ export default function Form() {
     setErrors({});
 
     try {
-      const res = await fetch("/api/contact-telegram", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      
+      // Send to Telegram (existing)
+      const telegramRes = await fetch("/api/contact-telegram", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || `Request failed: ${res.status}`);
+      // Also save to database
+      const dbRes = await fetch(`${apiUrl}/api/requests/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      // If telegram fails but DB succeeds, still show success
+      if (!dbRes.ok && !telegramRes.ok) {
+        const data = await dbRes.json().catch(() => ({}));
+        throw new Error(data?.error || `Request failed: ${dbRes.status}`);
       }
 
       setStatus("Message sent ✅");

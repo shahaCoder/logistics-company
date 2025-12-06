@@ -1,12 +1,25 @@
 "use client";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import Script from "next/script";
+import { useRouter } from "next/navigation";
 import { createFAQSchema } from "@/utils/structured-data";
+import TermsPrivacyModal from "@/components/TermsPrivacyModal";
 
 const Page = () => {
-  const applicationUrl = "https://www.cognitoforms.com/GlobalCooperationLLC/ApplicationForEmployment"; // <-- replace
+  const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleApplyClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsModalOpen(true);
+  };
+
+  const handleAccept = () => {
+    setIsModalOpen(false);
+    router.push("/driver-application");
+  };
 
   const jobFAQs = [
     {
@@ -57,7 +70,8 @@ const Page = () => {
           fill
           sizes="100vw"
           quality={85}
-          className="object-cover brightness-[30%]"
+          className="object-cover object-right-center brightness-[30%]"
+          style={{ objectPosition: 'right center' }}
           priority
         />
         <div className="absolute inset-0 flex items-center justify-center max-md:mt-40">
@@ -73,101 +87,176 @@ const Page = () => {
       </div>
 
       {/* Main Content */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-10 max-md:p-6"
-      >
-        {/* Header */}
-        <h2 className="text-3xl md:text-4xl font-semibold text-center text-gray-800 mb-6">
-          Start Your Application Online
-        </h2>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 -mt-20 md:-mt-32 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="bg-white rounded-2xl shadow-2xl p-8 md:p-12"
+        >
+          {/* Header */}
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Start Your Application Online
+            </h2>
+            <div className="w-24 h-1 bg-red-600 mx-auto mb-6"></div>
+            <p className="text-gray-700 text-lg leading-relaxed max-w-3xl mx-auto mb-4">
+              Global Cooperation LLC is always looking for professional and responsible CDL drivers.
+              If you're looking for steady loads, on–time pay, and respectful dispatch, we'd be happy
+              to review your application and welcome you to our growing fleet.
+            </p>
+            <p className="text-gray-800 font-semibold text-xl">
+              Fill out the form today and be on the road tomorrow with guaranteed loads, fast onboarding,
+              and a team that keeps you moving.
+            </p>
+          </div>
 
-        {/* Intro paragraph */}
-        <p className="text-gray-700 text-center mb-4 leading-relaxed">
-          Global Cooperation LLC is always looking for professional and responsible CDL drivers.
-          If you're looking for steady loads, on–time pay, and respectful dispatch, we'd be happy
-          to review your application and welcome you to our growing fleet.
-        </p>
+          {/* Grid Layout for Sections */}
+          <div className="grid md:grid-cols-2 gap-6 mb-10">
+            {/* Pay & Earnings */}
+            <div className="bg-gradient-to-br from-red-50 to-white rounded-xl p-6 border-l-4 border-red-600 shadow-md">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 bg-red-600 rounded"></span>
+                Pay & Earnings
+              </h3>
+              <ul className="text-gray-700 space-y-2.5">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>Our drivers make: <strong className="text-gray-900">$10,000+ weekly</strong> (depending on miles & routes)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>88% of gross for Owner Operators</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>On–time weekly payments</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>Fuel cards & bonuses available</span>
+                </li>
+              </ul>
+            </div>
 
-        {/* Motivation line */}
-        <p className="text-gray-800 text-center font-medium text-lg mb-8">
-          Fill out the form today and be on the road tomorrow with guaranteed loads, fast onboarding,
-          and a team that keeps you moving.
-        </p>
+            {/* Why Drive With Us */}
+            <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border-l-4 border-gray-400 shadow-md">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 bg-gray-400 rounded"></span>
+                Why Drive With GLCO?
+              </h3>
+              <ul className="text-gray-700 space-y-2.5">
+                <li className="flex items-start gap-2">
+                  <span className="text-gray-600 font-bold mt-1">•</span>
+                  <span>Steady freight all year round</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-gray-600 font-bold mt-1">•</span>
+                  <span>No forced dispatch choose your loads</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-gray-600 font-bold mt-1">•</span>
+                  <span>Respectful & professional communication</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-gray-600 font-bold mt-1">•</span>
+                  <span>24/7 dispatch support</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-gray-600 font-bold mt-1">•</span>
+                  <span>Modern, well maintained equipment</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-gray-600 font-bold mt-1">•</span>
+                  <span>Fast onboarding process start driving within 24 hours</span>
+                </li>
+              </ul>
+            </div>
 
-        {/* Salary Section */}
-        <div className="bg-gray-50 rounded-xl p-6 shadow-sm mb-10">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-3">💰 Pay & Earnings</h3>
-          <ul className="text-gray-700 space-y-2">
-            <li>• Our drivers make: <strong>$10,000+ weekly</strong> (depending on miles & routes)</li>
-            <li>• 88% of gross for Owner Operators</li>
-            <li>• On–time weekly payments</li>
-            <li>• Fuel cards & bonuses available</li>
-          </ul>
-        </div>
+            {/* Requirements */}
+            <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 border-l-4 border-blue-600 shadow-md">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 bg-blue-600 rounded"></span>
+                Requirements
+              </h3>
+              <ul className="text-gray-700 space-y-2.5">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 font-bold mt-1">•</span>
+                  <span>Valid CDL Class A license</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 font-bold mt-1">•</span>
+                  <span>Minimum 1 year of experience</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 font-bold mt-1">•</span>
+                  <span>Clean driving record or minor violations only</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 font-bold mt-1">•</span>
+                  <span>Professional attitude & reliability</span>
+                </li>
+              </ul>
+            </div>
 
-        {/* Why Drive With Us */}
-        <div className="mb-10">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-3">🚚 Why Drive With GLCO?</h3>
-          <ul className="text-gray-700 space-y-2">
-            <li>• Steady freight all year round</li>
-            <li>• No forced dispatch choose your loads</li>
-            <li>• Respectful & professional communication</li>
-            <li>• 24/7 dispatch support</li>
-            <li>• Modern, well maintained equipment</li>
-            <li>• Fast onboarding process start driving within 24 hours</li>
-          </ul>
-        </div>
-
-        {/* Requirements */}
-        <div className="mb-10">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-3">📄 Requirements</h3>
-          <ul className="text-gray-700 space-y-2">
-            <li>• Valid CDL Class A license</li>
-            <li>• Minimum 1 year of experience</li>
-            <li>• Clean driving record or minor violations only</li>
-            <li>• Professional attitude & reliability</li>
-          </ul>
-        </div>
-
-        {/* What We Offer */}
-        <div className="mb-10">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-3">⭐ What We Offer</h3>
-          <ul className="text-gray-700 space-y-2">
-            <li>• Competitive weekly pay</li>
-            <li>• Reliable freight and consistent miles</li>
-            <li>• Fuel discounts & company support</li>
-            <li>• Flexible home time (depending on route)</li>
-            <li>• Fast hiring, minimal paperwork</li>
-          </ul>
-        </div>
+            {/* What We Offer */}
+            <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 border-l-4 border-green-600 shadow-md">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 bg-green-600 rounded"></span>
+                What We Offer
+              </h3>
+              <ul className="text-gray-700 space-y-2.5">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold mt-1">•</span>
+                  <span>Competitive weekly pay</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold mt-1">•</span>
+                  <span>Reliable freight and consistent miles</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold mt-1">•</span>
+                  <span>Fuel discounts & company support</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold mt-1">•</span>
+                  <span>Flexible home time (depending on route)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold mt-1">•</span>
+                  <span>Fast hiring, minimal paperwork</span>
+                </li>
+              </ul>
+            </div>
+          </div>
 
         {/* Button */}
         <div className="flex justify-center mt-6">
-          <motion.a
-            href={applicationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <motion.button
+            onClick={handleApplyClick}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-12 rounded-lg shadow-md transition-all text-lg"
           >
-            Go to Application Form
-          </motion.a>
+            Apply to Drive
+          </motion.button>
         </div>
-      </motion.div>
+        <p className="text-center text-gray-600 text-sm mt-4">
+          Fill out our secure online Driver Application form
+        </p>
+        </motion.div>
+      </div>
 
       {/* FAQ Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-10 max-md:p-6 mt-10"
-      >
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 mt-10">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="bg-white rounded-2xl shadow-2xl p-8 md:p-12"
+        >
         <h2 className="text-3xl md:text-4xl font-semibold text-center text-gray-800 mb-8">
           Driver Job Application FAQs
         </h2>
@@ -184,7 +273,15 @@ const Page = () => {
             </div>
           ))}
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Terms & Privacy Modal */}
+      <TermsPrivacyModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAccept={handleAccept}
+      />
     </section>
   );
 };

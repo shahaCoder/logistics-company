@@ -39,12 +39,13 @@ const Header = () => {
   const isAbout = pathname === "/about";
   const isLegal =
     pathname === "/privacy-policy" || pathname === "/terms";
+  const isDriverApplication = pathname === "/driver-application";
 
   return (
     <header
       className={clsx(
         "w-full relative z-50 transition-colors duration-300",
-        isLegal
+        isLegal || isDriverApplication
           ? "bg-white shadow-md text-gray-900"
           : isAbout
           ? "bg-[#363636] text-white"
@@ -64,7 +65,7 @@ const Header = () => {
           <p
             className={clsx(
               "font-medium",
-              isLegal ? "text-gray-800" : "text-gray-300"
+              isLegal || isDriverApplication ? "text-gray-800" : "text-gray-300"
             )}
           >
             Global Cooperation llc
@@ -75,7 +76,7 @@ const Header = () => {
           <ul
             className={clsx(
               "flex flex-nowrap items-center justify-end gap-6 lg:gap-8 xl:gap-10 font-medium tracking-wide",
-              isLegal ? "text-gray-800" : "text-gray-200"
+              isLegal || isDriverApplication ? "text-gray-800" : "text-gray-200"
             )}
           >
             {navItems.map((item, i) => (
@@ -112,7 +113,7 @@ const Header = () => {
           <p
             className={clsx(
               "font-medium",
-              isLegal ? "text-gray-800" : "text-gray-300"
+              isLegal || isDriverApplication ? "text-gray-800" : "text-gray-300"
             )}
           >
             Global Cooperation llc
@@ -123,7 +124,7 @@ const Header = () => {
           <ul
             className={clsx(
               "flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm uppercase font-medium tracking-wide max-md:mt-10",
-              isLegal ? "text-gray-800" : "text-gray-200"
+              isLegal || isDriverApplication ? "text-gray-800" : "text-gray-200"
             )}
           >
             {navItems.map((item, i) => (

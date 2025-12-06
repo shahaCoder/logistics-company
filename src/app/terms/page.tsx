@@ -37,10 +37,22 @@ const TermsPage = () => {
             2. Contact and Application Forms
           </h2>
           <p className="text-gray-700 mb-4">
-            When you submit a contact form or job application through the Website, you agree to
-            provide accurate and complete information. Submitting a form does not create an
-            employment contract or guarantee that you will be hired or contacted. We reserve the
-            right to accept or reject any application at our sole discretion.
+            When you submit a contact form or driver application through the Website, you agree to
+            provide accurate and complete information, including sensitive personal information such
+            as your Social Security Number (SSN), driver's license details, medical card
+            information, employment history, and other data required for employment and background
+            checks. Submitting a form does not create an employment contract or guarantee that you
+            will be hired or contacted. We reserve the right to accept or reject any application at
+            our sole discretion.
+          </p>
+          <p className="text-gray-700 mb-4">
+            <strong>Collection of Sensitive Information:</strong> As part of the driver application
+            process, we collect and process sensitive personal information including but not limited
+            to: Social Security Number (SSN), date of birth, driver's license information, medical
+            card documentation, employment history, and background check authorizations. This
+            information is required for DOT compliance, employment verification, and background
+            checks. All sensitive information is encrypted and stored securely in accordance with
+            industry standards.
           </p>
 
           <h2 className="text-xl font-semibold text-gray-900 mt-6 mb-3">
