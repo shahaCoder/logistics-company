@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken, getAdminById } from './auth.service.js';
+import { verifyToken, verifyRefreshToken, generateToken, getAdminById } from './auth.service.js';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -17,16 +17,34 @@ export function authRequired(requiredRole: 'SUPER_ADMIN' | 'MANAGER' | 'VIEWER' 
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       // Get token from cookie
-      const token = req.cookies?.token || req.cookies?.adminToken;
+      let token = req.cookies?.token || req.cookies?.adminToken;
+      let payload = token ? verifyToken(token) : null;
 
-      if (!token) {
-        return res.status(401).json({ error: 'Unauthorized' });
+      // If access token is invalid/expired, try to refresh using refresh token
+      if (!payload) {
+        const refreshToken = req.cookies?.refreshToken;
+        if (refreshToken) {
+          const refreshPayload = await verifyRefreshToken(refreshToken);
+          if (refreshPayload) {
+            // Generate new access token
+            const newAccessToken = generateToken(refreshPayload);
+            payload = refreshPayload;
+            
+            // Set new access token cookie
+            const isProduction = process.env.NODE_ENV === 'production';
+            res.cookie('token', newAccessToken, {
+              httpOnly: true,
+              secure: isProduction,
+              sameSite: 'strict',
+              path: '/',
+              maxAge: 15 * 60 * 1000, // 15 minutes
+            });
+          }
+        }
       }
 
-      // Verify token
-      const payload = verifyToken(token);
       if (!payload) {
-        return res.status(401).json({ error: 'Invalid token' });
+        return res.status(401).json({ error: 'Unauthorized' });
       }
 
       // Verify user still exists

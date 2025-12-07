@@ -8,7 +8,8 @@ import {
   decryptSSN,
   deleteApplication,
 } from './admin-applications.service.js';
-import { ApplicationStatus } from '@prisma/client';
+import { ApplicationStatus, AuditAction } from '@prisma/client';
+import { createAuditLog } from '../../services/audit.service.js';
 
 const router = Router();
 
@@ -98,6 +99,21 @@ router.patch('/applications/:id/status', async (req: AuthRequest, res: Response)
       req.user.id
     );
 
+    // Audit log
+    await createAuditLog({
+      adminId: req.user.id,
+      adminEmail: req.user.email,
+      action: AuditAction.UPDATE_STATUS,
+      resourceId: id,
+      resourceType: 'DriverApplication',
+      ipAddress: req.ip || req.socket.remoteAddress,
+      userAgent: req.get('user-agent'),
+      details: {
+        status,
+        hasNotes: !!internalNotes,
+      },
+    });
+
     res.json(updated);
   } catch (error) {
     console.error('Update status error:', error);
@@ -135,6 +151,20 @@ router.post(
       // Format SSN for display (XXX-XX-XXXX)
       const formatted = decryptedSSN.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3');
 
+      // Audit log (critical action)
+      await createAuditLog({
+        adminId: req.user.id,
+        adminEmail: req.user.email,
+        action: AuditAction.DECRYPT_SSN,
+        resourceId: id,
+        resourceType: 'DriverApplication',
+        ipAddress: req.ip || req.socket.remoteAddress,
+        userAgent: req.get('user-agent'),
+        details: {
+          timestamp: new Date().toISOString(),
+        },
+      });
+
       res.json({
         success: true,
         ssn: formatted,
@@ -154,8 +184,24 @@ router.post(
  */
 router.delete('/applications/:id', async (req: AuthRequest, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const { id } = req.params;
     await deleteApplication(id);
+
+    // Audit log
+    await createAuditLog({
+      adminId: req.user.id,
+      adminEmail: req.user.email,
+      action: AuditAction.DELETE_APPLICATION,
+      resourceId: id,
+      resourceType: 'DriverApplication',
+      ipAddress: req.ip || req.socket.remoteAddress,
+      userAgent: req.get('user-agent'),
+    });
+
     res.json({ success: true });
   } catch (error) {
     console.error('Delete application error:', error);

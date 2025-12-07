@@ -88,7 +88,7 @@ export interface DriverApplicationFiles {
   licenseFront?: Express.Multer.File;
   licenseBack?: Express.Multer.File;
   medicalCard?: Express.Multer.File;
-  consentSignatures?: { [key: string]: Express.Multer.File };
+  consentSignatures?: { [key: string]: Express.Multer.File | undefined };
 }
 
 // Metadata from request

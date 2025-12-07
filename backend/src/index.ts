@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import { csrfProtection } from './middleware/csrf.middleware.js';
 import driverApplicationRouter from './modules/driverApplication/driverApplication.controller.js';
 import authRouter from './modules/auth/auth.controller.js';
 import adminApplicationsRouter from './modules/admin-applications/admin-applications.controller.js';
@@ -13,18 +15,40 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
+// Security middleware - Helmet
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for now (can be configured later)
+  crossOriginEmbedderPolicy: false,
+}));
+
+// CORS configuration
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
+  : ['http://localhost:3000', process.env.FRONTEND_URL].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
+
+// Middleware
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Trust proxy for accurate IP addresses (only first proxy)
 // This is safer than 'true' and works correctly with rate limiting
 app.set('trust proxy', 1);
+
+// CSRF Protection (after CORS, before routes)
+app.use(csrfProtection);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -171,6 +171,7 @@ model AdminUser {
   updatedAt   DateTime @updatedAt
 
   reviewedApplications DriverApplication[]
+  refreshTokens        RefreshToken[]
 }
 
 model FreightRequest {
@@ -222,5 +223,49 @@ model ContactRequest {
 
   @@index([createdAt])
   @@index([email])
+}
+
+enum AuditAction {
+  DECRYPT_SSN
+  DELETE_APPLICATION
+  UPDATE_STATUS
+  LOGIN
+  LOGOUT
+  CREATE_APPLICATION
+  VIEW_APPLICATION
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+  
+  adminId     String?
+  adminEmail  String?
+  action      AuditAction
+  resourceId  String?     // Application ID, etc.
+  resourceType String?    // "DriverApplication", "FreightRequest", etc.
+  details     Json?       // Additional context (IP, user agent, etc.)
+  ipAddress   String?
+  userAgent   String?
+
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([resourceId])
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  adminId     String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  revokedAt   DateTime?
+  
+  admin       AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([token])
+  @@index([expiresAt])
 }
 

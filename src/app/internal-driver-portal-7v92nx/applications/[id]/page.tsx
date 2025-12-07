@@ -153,32 +153,14 @@ export default function ApplicationDetailPage() {
 
     setGeneratingPDF(true);
     try {
-      // Get full SSN - try to decrypt if not already decrypted
+      // Get full SSN - use decrypted SSN if available, otherwise use last 4 digits
+      // Note: For PDF generation, if SSN is not already decrypted, we'll use last 4 digits
+      // User should decrypt SSN using the modal before generating PDF if full SSN is needed
       let fullSSN = decryptedSSN;
       if (!fullSSN) {
-        // Prompt user to decrypt SSN first
-        const shouldDecrypt = confirm("SSN needs to be decrypted to include full SSN in PDF. Click OK to decrypt now, or Cancel to use last 4 digits only.");
-        if (shouldDecrypt) {
-          try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-            // Try to get SSN - this will prompt for password if needed
-            const response = await fetch(
-              `${apiUrl}/api/admin/applications/${id}/decrypt-ssn`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ password: prompt("Enter your admin password to decrypt SSN:") || "" }),
-              }
-            );
-            if (response.ok) {
-              const data = await response.json();
-              fullSSN = data.ssn.replace(/-/g, ''); // Remove dashes, we'll format it ourselves
-            }
-          } catch (error) {
-            console.warn("Could not decrypt SSN");
-          }
-        }
+        // If SSN is not decrypted, use last 4 digits for PDF
+        // User should use the decrypt button/modal before generating PDF if full SSN is required
+        console.warn("SSN not decrypted. Using last 4 digits for PDF. Decrypt SSN first if full SSN is needed.");
       }
 
       // Load ALL signatures first using Promise.all
