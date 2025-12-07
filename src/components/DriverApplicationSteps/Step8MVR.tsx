@@ -24,7 +24,7 @@ export default function Step8MVR({
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     if (!watch("mvrDateSigned")) {
-      setValue("mvrDateSigned", today);
+      setValue("mvrDateSigned", today, { shouldValidate: false });
     }
   }, [setValue, watch]);
 
@@ -105,16 +105,23 @@ export default function Step8MVR({
                 <div className="w-full">
                   <SignatureCanvas
                     onSave={(dataUrl) => {
+                      // Prevent any potential form submission
                       fetch(dataUrl)
                         .then((res) => res.blob())
                         .then((blob) => {
                           const file = new File([blob], "signature.png", {
                             type: "image/png",
                           });
+                          // Use shouldValidate: false to prevent auto-submit
                           setValue("mvrSignatureFile", file, {
-                            shouldValidate: true,
+                            shouldValidate: false,
                           });
-                          setValue("mvrSignature", "Drawn signature");
+                          setValue("mvrSignature", "Drawn signature", {
+                            shouldValidate: false,
+                          });
+                        })
+                        .catch((error) => {
+                          console.error("Error saving signature:", error);
                         });
                     }}
                     onClear={() => {
@@ -133,6 +140,12 @@ export default function Step8MVR({
                       setValue("mvrSignature", e.target.value.toUpperCase(), { shouldValidate: true });
                     }
                   })}
+                  onKeyDown={(e) => {
+                    // Prevent form submission on Enter key
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="Type your full name as signature"
                   className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
                     errors.mvrSignature ? "border-red-500" : "border-gray-300"

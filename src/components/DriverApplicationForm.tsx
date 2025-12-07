@@ -513,7 +513,24 @@ export default function DriverApplicationForm() {
       </div>
 
       {/* Form Steps */}
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form 
+        onSubmit={(e) => {
+          // ALWAYS prevent default form submission
+          // Form will ONLY submit via explicit button click handler below
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }}
+        onKeyDown={(e) => {
+          // Prevent form submission on Enter key
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+        }}
+        noValidate
+      >
         {currentStep === 1 && (
           <Step1ApplicantInfo
             register={register}
@@ -602,8 +619,17 @@ export default function DriverApplicationForm() {
             </button>
           ) : (
             <button
-              type="submit"
+              type="button"
               disabled={isSubmitting}
+              onClick={(e) => {
+                // Explicitly prevent any accidental submissions
+                e.preventDefault();
+                e.stopPropagation();
+                // Manually trigger form submission only when button is clicked
+                if (!isSubmitting && currentStep === TOTAL_STEPS) {
+                  handleSubmit(onSubmit)(e as any);
+                }
+              }}
               className={`px-6 py-3 rounded-lg font-semibold text-white transition ${
                 isSubmitting
                   ? "bg-red-400 cursor-not-allowed opacity-60"
