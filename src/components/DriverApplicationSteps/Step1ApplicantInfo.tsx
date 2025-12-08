@@ -2,6 +2,7 @@
 
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import { DriverApplicationFormData } from "../DriverApplicationForm";
+import { englishOnlyInputProps, blockNonEnglishInput } from "../../utils/keyboardLock";
 
 interface Step1Props {
   register: UseFormRegister<DriverApplicationFormData>;
@@ -95,7 +96,9 @@ export default function Step1ApplicantInfo({
             </label>
             <input
               {...register("firstName")}
+              {...englishOnlyInputProps}
               onChange={(e) => {
+                blockNonEnglishInput(e);
                 setValue("firstName", e.target.value.toUpperCase(), { shouldValidate: true });
               }}
               className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
@@ -113,7 +116,9 @@ export default function Step1ApplicantInfo({
             </label>
             <input
               {...register("lastName")}
+              {...englishOnlyInputProps}
               onChange={(e) => {
+                blockNonEnglishInput(e);
                 setValue("lastName", e.target.value.toUpperCase(), { shouldValidate: true });
               }}
               className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
@@ -220,7 +225,9 @@ export default function Step1ApplicantInfo({
               </label>
               <input
                 {...register("currentAddressLine1")}
+                {...englishOnlyInputProps}
                 onChange={(e) => {
+                  blockNonEnglishInput(e);
                   setValue("currentAddressLine1", e.target.value.toUpperCase(), { shouldValidate: true });
                 }}
                 className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
@@ -241,7 +248,9 @@ export default function Step1ApplicantInfo({
                 </label>
                 <input
                   {...register("currentCity")}
+                  {...englishOnlyInputProps}
                   onChange={(e) => {
+                    blockNonEnglishInput(e);
                     setValue("currentCity", e.target.value.toUpperCase(), { shouldValidate: true });
                   }}
                   className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
@@ -287,7 +296,9 @@ export default function Step1ApplicantInfo({
                 </label>
                 <input
                   {...register("currentZip")}
+                  {...englishOnlyInputProps}
                   onChange={(e) => {
+                    blockNonEnglishInput(e);
                     setValue("currentZip", e.target.value.toUpperCase(), { shouldValidate: true });
                   }}
                   className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
@@ -381,9 +392,11 @@ export default function Step1ApplicantInfo({
                       type="text"
                       placeholder="City"
                       value={addr.city}
-                      onChange={(e) =>
-                        updatePreviousAddress(index, "city", e.target.value.toUpperCase())
-                      }
+                      {...englishOnlyInputProps}
+                      onChange={(e) => {
+                        blockNonEnglishInput(e);
+                        updatePreviousAddress(index, "city", e.target.value.toUpperCase());
+                      }}
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2"
                     />
                     <select
@@ -410,9 +423,11 @@ export default function Step1ApplicantInfo({
                       type="text"
                       placeholder="Zip"
                       value={addr.zip}
-                      onChange={(e) =>
-                        updatePreviousAddress(index, "zip", e.target.value.toUpperCase())
-                      }
+                      {...englishOnlyInputProps}
+                      onChange={(e) => {
+                        blockNonEnglishInput(e);
+                        updatePreviousAddress(index, "zip", e.target.value.toUpperCase());
+                      }}
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2"
                     />
                     <input

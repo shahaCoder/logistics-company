@@ -2,6 +2,7 @@
 
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, UseFormGetValues } from "react-hook-form";
 import { DriverApplicationFormData } from "../DriverApplicationForm";
+import { englishOnlyInputProps, blockNonEnglishInput } from "../../utils/keyboardLock";
 
 interface Step4Props {
   register: UseFormRegister<DriverApplicationFormData>;
@@ -139,9 +140,11 @@ export default function Step4EmploymentHistory({
                   <input
                     type="text"
                     value={record.employerFax || ""}
-                    onChange={(e) =>
-                      updateEmploymentRecord(index, "employerFax", e.target.value)
-                    }
+                    {...englishOnlyInputProps}
+                    onChange={(e) => {
+                      blockNonEnglishInput(e);
+                      updateEmploymentRecord(index, "employerFax", e.target.value);
+                    }}
                     className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
                 </div>
@@ -168,9 +171,11 @@ export default function Step4EmploymentHistory({
                 <input
                   type="text"
                   value={record.addressLine1}
-                  onChange={(e) =>
-                    updateEmploymentRecord(index, "addressLine1", e.target.value.toUpperCase())
-                  }
+                  {...englishOnlyInputProps}
+                  onChange={(e) => {
+                    blockNonEnglishInput(e);
+                    updateEmploymentRecord(index, "addressLine1", e.target.value.toUpperCase());
+                  }}
                   className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
                 />
               </div>

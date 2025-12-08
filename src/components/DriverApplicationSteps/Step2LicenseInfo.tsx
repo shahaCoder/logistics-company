@@ -2,6 +2,7 @@
 
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import { DriverApplicationFormData } from "../DriverApplicationForm";
+import { englishOnlyInputProps, blockNonEnglishInput } from "../../utils/keyboardLock";
 
 interface Step2Props {
   register: UseFormRegister<DriverApplicationFormData>;
@@ -100,7 +101,9 @@ export default function Step2LicenseInfo({
             </label>
             <input
               {...register("licenseNumber")}
+              {...englishOnlyInputProps}
               onChange={(e) => {
+                blockNonEnglishInput(e);
                 setValue("licenseNumber", e.target.value.toUpperCase(), { shouldValidate: true });
               }}
               className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
@@ -309,9 +312,11 @@ export default function Step2LicenseInfo({
                       type="text"
                       placeholder="Class"
                       value={license.class}
-                      onChange={(e) =>
-                        updateOtherLicense(index, "class", e.target.value.toUpperCase())
-                      }
+                      {...englishOnlyInputProps}
+                      onChange={(e) => {
+                        blockNonEnglishInput(e);
+                        updateOtherLicense(index, "class", e.target.value.toUpperCase());
+                      }}
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2"
                     />
                   </div>
