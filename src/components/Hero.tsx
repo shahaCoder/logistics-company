@@ -62,7 +62,7 @@ const Hero = () => {
                transition={{ duration: 0.6, delay: 0.8 }}
             >
                <Link
-                  href="/contact"
+                  href="/join-us"
                   className="py-3 px-10 bg-red-600 hover:bg-red-700 transition-all duration-300 font-semibold rounded-sm shadow-md"
                >
                   Join us

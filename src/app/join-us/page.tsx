@@ -200,32 +200,32 @@ const Page = () => {
               </ul>
             </div>
 
-            {/* What We Offer */}
+            {/* Company Culture & Values */}
             <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 border-l-4 border-green-600 shadow-md">
               <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="w-1 h-6 bg-green-600 rounded"></span>
-                What We Offer
+                Company Culture & Values
               </h3>
               <ul className="text-gray-700 space-y-2.5">
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold mt-1">•</span>
-                  <span>Competitive weekly pay</span>
+                  <span>Family-oriented company that values your work-life balance</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold mt-1">•</span>
-                  <span>Reliable freight and consistent miles</span>
+                  <span>Transparent communication and honest business practices</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold mt-1">•</span>
-                  <span>Fuel discounts & company support</span>
+                  <span>Long-term partnerships with drivers who grow with us</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold mt-1">•</span>
-                  <span>Flexible home time (depending on route)</span>
+                  <span>Safety-first approach with comprehensive insurance coverage</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 font-bold mt-1">•</span>
-                  <span>Fast hiring, minimal paperwork</span>
+                  <span>Recognition programs and driver appreciation initiatives</span>
                 </li>
               </ul>
             </div>

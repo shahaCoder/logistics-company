@@ -22,25 +22,25 @@ const services = [
       icon: FaHeadset,
       title: "24/7 Dispatch Support",
       description:
-         "Our dispatch team is available around the clock — no missed calls, no delays. You'll always have someone ready to guide you, track loads, and keep communication open.",
+         "Our dispatch team is available around the clock no missed calls, no delays. You'll always have someone ready to guide you, track loads, and keep communication open.",
    },
    {
       icon: FaFileContract,
-      title: "Contract-Based Loads",
+      title: "Contract Based Loads",
       description:
-         "We work with trusted partners and long-term contracts, offering consistent freight and fair rates. No empty miles — just steady, reliable work for professionals.",
+         "We work with trusted partners and long-term contracts, offering consistent freight and fair rates. No empty miles just steady, reliable work for professionals.",
    },
    {
       icon: FaRoute,
       title: "Dedicated Lines",
       description:
-         "We offer dedicated routes for our regular partners, giving you stability and predictable income. Stay focused on driving — we'll handle the logistics.",
+         "We offer dedicated routes for our regular partners, giving you stability and predictable income. Stay focused on driving we'll handle the logistics.",
    },
    {
       icon: FaDollarSign,
-      title: "Weekly Pay — No Delays",
+      title: "Weekly Pay, No Delays",
       description:
-         "You deliver, we pay — it's that simple. All drivers receive their payments weekly, without excuses or waiting periods.",
+         "You deliver, we pay it's that simple. All drivers receive their payments weekly, without excuses or waiting periods.",
    },
    {
       icon: FaUsers,

@@ -343,7 +343,7 @@ const Page = () => {
                 Request a Freight Quote
               </Link>
               <Link
-                href="/contact"
+                href="/join-us"
                 className="inline-block bg-transparent border-2 border-white text-white hover:bg-white/20 font-semibold py-4 px-10 rounded-lg transition-all shadow-lg hover:shadow-xl hover:scale-105 transform duration-300"
               >
                 Apply as a Driver

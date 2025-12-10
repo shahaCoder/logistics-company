@@ -6,11 +6,11 @@ export const metadata: Metadata = {
   description:
     "Apply for CDL trucking jobs at Global Cooperation LLC. Competitive weekly pay, steady freight, fast onboarding, and 24/7 dispatch support. Owner-operators and company drivers welcome. Become part of a company that values drivers.",
   alternates: {
-    canonical: "https://glco.us/contact",
+    canonical: "https://glco.us/join-us",
   },
   openGraph: {
     type: "website",
-    url: "https://glco.us/contact",
+    url: "https://glco.us/join-us",
     title: "Join Our Team | CDL Truck Driver Jobs | Global Cooperation LLC",
     description:
       "Apply for CDL trucking jobs at Global Cooperation LLC. Competitive weekly pay, steady freight, fast onboarding, and 24/7 dispatch support.",

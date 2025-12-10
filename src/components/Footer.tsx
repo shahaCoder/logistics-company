@@ -83,7 +83,7 @@ export default function Footer() {
                   Request a Freight Quote
                </Link>
                <Link
-                  href="/contact"
+                  href="/join-us"
                   className="hover:text-red-600 transition-colors text-sm"
                >
                   Apply as a CDL Driver
