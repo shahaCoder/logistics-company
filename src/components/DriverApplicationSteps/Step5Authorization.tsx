@@ -5,22 +5,21 @@ import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "rea
 import { DriverApplicationFormData } from "../DriverApplicationForm";
 import SignatureCanvas from "../SignatureCanvas";
 
-interface Step7Props {
+interface Step5Props {
   register: UseFormRegister<DriverApplicationFormData>;
   errors: FieldErrors<DriverApplicationFormData>;
   watch: UseFormWatch<DriverApplicationFormData>;
   setValue: UseFormSetValue<DriverApplicationFormData>;
 }
 
-export default function Step7Clearinghouse({
+export default function Step5Authorization({
   register,
   errors,
   watch,
   setValue,
-}: Step7Props) {
-  const clearinghouseRegistered = watch("clearinghouseRegistered");
-  const signatureFile = watch("clearinghouseSignatureFile");
-  const signatureText = watch("clearinghouseSignature");
+}: Step5Props) {
+  const signatureFile = watch("authorizationSignatureFile");
+  const signatureText = watch("authorizationSignature");
   
   // Determine signature mode based on saved data
   const getInitialSignatureMode = (): "text" | "draw" => {
@@ -49,42 +48,47 @@ export default function Step7Clearinghouse({
   // Set default date signed to today
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
-    if (!watch("clearinghouseDateSigned")) {
-      setValue("clearinghouseDateSigned", today);
+    if (!watch("authorizationDateSigned")) {
+      setValue("authorizationDateSigned", today, { shouldValidate: false });
     }
   }, [setValue, watch]);
 
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        Step 8 – FMCSA Drug & Alcohol Clearinghouse Consent
+        Step 5 – Authorization & Certification
       </h2>
 
       <div className="space-y-6">
-        {/* Clearinghouse Text */}
-        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-[500px] overflow-y-auto shadow-md mb-6">
+        {/* Authorization Text */}
+        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-96 overflow-y-auto shadow-md mb-6">
           <div className="flex items-start gap-4 mb-4">
             <div className="flex-shrink-0 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
               <span className="text-2xl text-white font-bold">!</span>
             </div>
             <div className="flex-1">
-              <h3 className="text-xl md:text-2xl font-bold text-red-700 mb-3">
-                GENERAL CONSENT FOR LIMITED QUERIES OF THE FEDERAL MOTOR CARRIER SAFETY ADMINISTRATION (FMCSA) DRUG AND ALCOHOL CLEARINGHOUSE
+              <h3 className="text-2xl md:text-3xl font-bold text-red-700 mb-3">
+                TO BE READ AND SIGNED BY APPLICANT
               </h3>
               <div className="h-0.5 w-20 bg-red-600 mb-4"></div>
               <div className="bg-white rounded p-4 border border-gray-200">
-                <div className="text-base text-gray-800 space-y-4 leading-relaxed">
+                <div className="text-base text-gray-800 leading-relaxed space-y-4">
                   <p>
-                    I, <strong>{watch("firstName")} {watch("lastName")}</strong>, hereby provide consent to <strong>GLOBAL COOPERATION LLC</strong> to conduct a limited query of the FMCSA Commercial Driver's License Drug and Alcohol Clearinghouse (Clearinghouse) to determine whether drug or alcohol violation information about me exists in the Clearinghouse.
+                    I authorize you to make investigations (including contacting current and prior employers) into my personal, employment, financial, medical history, and other related matters as may be necessary in arriving at an employment decision. I hereby release employers, schools, health care providers, and other persons from all liability in responding to inquiries and releasing information in connection with my application.
                   </p>
                   <p>
-                    I am consenting to multiple limited queries for the duration of employment with <strong>GLOBAL COOPERATION LLC</strong>.
+                    In the event of employment, I understand that false or misleading information given in my application or interview(s) may result in discharge. I also understand that I am required to abide by all rules and regulations of the Company.
                   </p>
                   <p>
-                    I understand that if the limited query conducted by <strong>GLOBAL COOPERATION LLC</strong> indicates that drug or alcohol violation information about me exists in the Clearinghouse, FMCSA will not disclose that information to <strong>GLOBAL COOPERATION LLC</strong> without first obtaining additional specific consent from me.
+                    I understand that the information I provide regarding my current and/or prior employers may be used, and those employer(s) will be contacted for the purpose of investigating my safety performance history as required by 49 CFR 391.23. I understand that I have the right to:
                   </p>
-                  <p>
-                    I further understand that if I refuse to provide consent for <strong>GLOBAL COOPERATION LLC</strong> to conduct a limited query of the Clearinghouse, <strong>GLOBAL COOPERATION LLC</strong> must prohibit me from performing safety-sensitive functions, including driving a commercial motor vehicle, as required by FMCSA's drug and alcohol program regulations.
+                  <ul className="list-disc list-inside ml-4 space-y-2">
+                    <li>Review information provided by current/previous employers;</li>
+                    <li>Have errors in the information corrected by previous employers, and for those previous employers to resend the corrected information to the prospective employer; and</li>
+                    <li>Have a rebuttal statement attached to the alleged erroneous information, if the previous employer(s) and I cannot agree on the accuracy of the information.</li>
+                  </ul>
+                  <p className="font-semibold">
+                    This certifies that this application was completed by me, and all entries on it and information in it are true and complete to the best of my knowledge. *
                   </p>
                 </div>
               </div>
@@ -94,10 +98,11 @@ export default function Step7Clearinghouse({
 
         {/* Signature Section */}
         <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Signature</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-800 mb-2">
-                Prospective Employee Signature <span className="text-red-600">*</span>
+                Signature <span className="text-red-600">*</span>
               </label>
               <div className="mb-3">
                 <div className="flex gap-4 mb-3">
@@ -107,9 +112,8 @@ export default function Step7Clearinghouse({
                       checked={signatureMode === "draw"}
                       onChange={() => {
                         setSignatureMode("draw");
-                        // Only clear text signature if switching from text mode
                         if (signatureText && signatureText !== "Drawn signature") {
-                          setValue("clearinghouseSignature", "");
+                          setValue("authorizationSignature", "");
                         }
                       }}
                       className="h-4 w-4 accent-red-600"
@@ -122,13 +126,11 @@ export default function Step7Clearinghouse({
                       checked={signatureMode === "text"}
                       onChange={() => {
                         setSignatureMode("text");
-                        // Only clear file signature if switching from draw mode
                         if (signatureFile) {
-                          setValue("clearinghouseSignatureFile", undefined);
+                          setValue("authorizationSignatureFile", undefined);
                         }
-                        // Clear "Drawn signature" placeholder if present
                         if (signatureText === "Drawn signature") {
-                          setValue("clearinghouseSignature", "");
+                          setValue("authorizationSignature", "");
                         }
                       }}
                       className="h-4 w-4 accent-red-600"
@@ -154,16 +156,21 @@ export default function Step7Clearinghouse({
                           const file = new File([blob], "signature.png", {
                             type: "image/png",
                           });
-                          setValue("clearinghouseSignatureFile", file, {
-                            shouldValidate: true,
+                          setValue("authorizationSignatureFile", file, {
+                            shouldValidate: false,
                           });
-                          setValue("clearinghouseSignature", "Drawn signature");
+                          setValue("authorizationSignature", "Drawn signature", {
+                            shouldValidate: false,
+                          });
                           setSignatureDataUrl(dataUrl);
+                        })
+                        .catch((error) => {
+                          console.error("Error saving signature:", error);
                         });
                     }}
                     onClear={() => {
-                      setValue("clearinghouseSignatureFile", undefined);
-                      setValue("clearinghouseSignature", "");
+                      setValue("authorizationSignatureFile", undefined);
+                      setValue("authorizationSignature", "");
                       setSignatureDataUrl(undefined);
                     }}
                     width={400}
@@ -179,22 +186,25 @@ export default function Step7Clearinghouse({
                     </div>
                   )}
                   <input
-                    {...register("clearinghouseSignature", {
+                    {...register("authorizationSignature", {
                       onChange: (e) => {
-                        setValue("clearinghouseSignature", e.target.value.toUpperCase(), { shouldValidate: true });
+                        setValue("authorizationSignature", e.target.value.toUpperCase(), { shouldValidate: true });
                       }
                     })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                      }
+                    }}
                     placeholder="Type your full name as signature"
                     className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
-                      errors.clearinghouseSignature ? "border-red-500" : "border-gray-300"
+                      errors.authorizationSignature ? "border-red-500" : "border-gray-300"
                     }`}
                   />
                 </div>
               )}
-              {errors.clearinghouseSignature?.message && (
-                <p className="text-red-500 text-xs mt-1">
-                  {String(errors.clearinghouseSignature.message)}
-                </p>
+              {errors.authorizationSignature?.message && (
+                <p className="text-red-500 text-xs mt-1">{String(errors.authorizationSignature.message)}</p>
               )}
             </div>
 
@@ -204,43 +214,14 @@ export default function Step7Clearinghouse({
               </label>
               <input
                 type="date"
-                {...register("clearinghouseDateSigned")}
+                {...register("authorizationDateSigned")}
                 className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
-                  errors.clearinghouseDateSigned ? "border-red-500" : "border-gray-300"
+                  errors.authorizationDateSigned ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors.clearinghouseDateSigned?.message && (
-                <p className="text-red-500 text-xs mt-1">
-                  {String(errors.clearinghouseDateSigned.message)}
-                </p>
+              {errors.authorizationDateSigned?.message && (
+                <p className="text-red-500 text-xs mt-1">{String(errors.authorizationDateSigned.message)}</p>
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-800 mb-2">
-                Are you registered with FMCSA Clearinghouse?{" "}
-                <span className="text-red-600">*</span>
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={clearinghouseRegistered === true}
-                    onChange={() => setValue("clearinghouseRegistered", true)}
-                    className="h-4 w-4 accent-red-600"
-                  />
-                  <span>Yes</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={clearinghouseRegistered === false}
-                    onChange={() => setValue("clearinghouseRegistered", false)}
-                    className="h-4 w-4 accent-red-600"
-                  />
-                  <span>No</span>
-                </label>
-              </div>
             </div>
           </div>
         </div>

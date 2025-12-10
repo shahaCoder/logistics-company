@@ -4,14 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import confetti from "canvas-confetti";
 import Step1ApplicantInfo from "./DriverApplicationSteps/Step1ApplicantInfo";
 import Step2LicenseInfo from "./DriverApplicationSteps/Step2LicenseInfo";
 import Step3MedicalCard from "./DriverApplicationSteps/Step3MedicalCard";
 import Step4EmploymentHistory from "./DriverApplicationSteps/Step4EmploymentHistory";
-import Step5AlcoholDrug from "./DriverApplicationSteps/Step5AlcoholDrug";
-import Step6PSP from "./DriverApplicationSteps/Step6PSP";
-import Step7Clearinghouse from "./DriverApplicationSteps/Step7Clearinghouse";
-import Step8MVR from "./DriverApplicationSteps/Step8MVR";
+import Step5Authorization from "./DriverApplicationSteps/Step5Authorization";
+import Step6AlcoholDrug from "./DriverApplicationSteps/Step5AlcoholDrug";
+import Step7PSP from "./DriverApplicationSteps/Step6PSP";
+import Step8Clearinghouse from "./DriverApplicationSteps/Step7Clearinghouse";
+import Step9MVR from "./DriverApplicationSteps/Step8MVR";
 
 // Zod schemas for each step
 const previousAddressSchema = z.object({
@@ -49,6 +51,9 @@ const employmentRecordSchema = z.object({
 
 const fullFormSchema = z.object({
   // Step 1
+  applicantType: z.enum(["COMPANY_DRIVER", "OWNER_OPERATOR"]),
+  truckYear: z.string().optional(),
+  truckMake: z.string().optional(),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required").refine(
@@ -111,45 +116,116 @@ const fullFormSchema = z.object({
   // Step 4
   employmentRecords: z.array(employmentRecordSchema).min(1, "At least one employment record is required"),
 
-  // Step 5
+  // Step 5 - Authorization
+  authorizationSignature: z.string().optional(),
+  authorizationSignatureFile: z.instanceof(File).optional(),
+  authorizationDateSigned: z.string().min(1, "Date signed is required"),
+
+  // Step 6
   alcoholDrugPositive: z.boolean(),
   alcoholDrugPositiveExplanation: z.string().optional(),
   alcoholConcentration: z.boolean(),
   alcoholConcentrationExplanation: z.string().optional(),
   refusedTest: z.boolean(),
   refusedTestExplanation: z.string().optional(),
+  alcoholDrugReturnToDuty: z.boolean().optional(),
   alcoholDrugName: z.string().min(1, "Name is required"),
   alcoholDrugSignature: z.string().optional(),
   alcoholDrugSignatureFile: z.instanceof(File).optional(),
   alcoholDrugDateSigned: z.string().min(1, "Date signed is required"),
 
-  // Step 6
+  // Step 7
   pspFullName: z.string().min(1, "Full name is required"),
   pspSignature: z.string().optional(),
   pspSignatureFile: z.instanceof(File).optional(),
   pspDateSigned: z.string().min(1, "Date signed is required"),
 
-  // Step 7
+  // Step 8
   clearinghouseSignature: z.string().optional(),
   clearinghouseSignatureFile: z.instanceof(File).optional(),
   clearinghouseDateSigned: z.string().min(1, "Date signed is required"),
   clearinghouseRegistered: z.boolean(),
 
-  // Step 8
+  // Step 9
   mvrSignature: z.string().optional(),
   mvrSignatureFile: z.instanceof(File).optional(),
   mvrDateSigned: z.string().min(1, "Date signed is required"),
+}).superRefine((data, ctx) => {
+  if (!data.applicantType) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please select your driver type",
+      path: ["applicantType"],
+    });
+  }
+  if (data.applicantType === "OWNER_OPERATOR") {
+    if (!data.truckYear || !data.truckYear.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Truck year is required for Owner Operators",
+        path: ["truckYear"],
+      });
+    }
+    if (!data.truckMake || !data.truckMake.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Truck make is required for Owner Operators",
+        path: ["truckMake"],
+      });
+    }
+  }
 });
 
 export type DriverApplicationFormData = z.infer<typeof fullFormSchema>;
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 export default function DriverApplicationForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Confetti animation on success
+  useEffect(() => {
+    if (submitSuccess) {
+      // Create a beautiful confetti burst
+      const duration = 3000; // 3 seconds
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+      function randomInRange(min: number, max: number) {
+        return Math.random() * (max - min) + min;
+      }
+
+      const interval: NodeJS.Timeout = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        
+        // Launch confetti from left
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        
+        // Launch confetti from right
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+      }, 250);
+
+      // Cleanup
+      return () => clearInterval(interval);
+    }
+  }, [submitSuccess]);
 
   const {
     register,
@@ -180,6 +256,7 @@ export default function DriverApplicationForm() {
       alcoholDrugPositive: false,
       alcoholConcentration: false,
       refusedTest: false,
+      alcoholDrugReturnToDuty: false,
       clearinghouseRegistered: false,
     },
   });
@@ -192,6 +269,7 @@ export default function DriverApplicationForm() {
     switch (currentStep) {
       case 1:
         fieldsToValidate = [
+          "applicantType",
           "firstName",
           "lastName",
           "dateOfBirth",
@@ -203,6 +281,10 @@ export default function DriverApplicationForm() {
           "currentZip",
           "livedAtCurrentMoreThan3Years",
         ];
+        // Add truck fields if owner operator
+        if (watchedValues.applicantType === "OWNER_OPERATOR") {
+          fieldsToValidate.push("truckYear", "truckMake");
+        }
         break;
       case 2:
         fieldsToValidate = [
@@ -221,6 +303,16 @@ export default function DriverApplicationForm() {
         fieldsToValidate = ["employmentRecords"];
         break;
       case 5:
+        fieldsToValidate = ["authorizationDateSigned"];
+        // Validate signature (either text or file)
+        const hasAuthorizationSignature = 
+          (watchedValues.authorizationSignature && watchedValues.authorizationSignature.trim() !== "") ||
+          watchedValues.authorizationSignatureFile;
+        if (!hasAuthorizationSignature) {
+          return false;
+        }
+        break;
+      case 6:
         fieldsToValidate = [
           "alcoholDrugName",
           "alcoholDrugDateSigned",
@@ -233,7 +325,7 @@ export default function DriverApplicationForm() {
           return false;
         }
         break;
-      case 6:
+      case 7:
         fieldsToValidate = ["pspFullName", "pspDateSigned"];
         const hasPSPSignature = 
           (watchedValues.pspSignature && watchedValues.pspSignature.trim() !== "") ||
@@ -242,7 +334,7 @@ export default function DriverApplicationForm() {
           return false;
         }
         break;
-      case 7:
+      case 8:
         fieldsToValidate = [
           "clearinghouseDateSigned",
           "clearinghouseRegistered",
@@ -254,7 +346,7 @@ export default function DriverApplicationForm() {
           return false;
         }
         break;
-      case 8:
+      case 9:
         fieldsToValidate = ["mvrDateSigned"];
         const hasMVRSignature = 
           (watchedValues.mvrSignature && watchedValues.mvrSignature.trim() !== "") ||
@@ -330,6 +422,9 @@ export default function DriverApplicationForm() {
 
       // Prepare JSON payload
       const payload = {
+        applicantType: data.applicantType,
+        truckYear: data.truckYear || null,
+        truckMake: data.truckMake || null,
         firstName: data.firstName,
         lastName: data.lastName,
         dateOfBirth: data.dateOfBirth,
@@ -372,6 +467,12 @@ export default function DriverApplicationForm() {
           wasSafetySensitive: record.wasSafetySensitive,
         })),
         legalConsents: [
+          {
+            type: "AUTHORIZATION",
+            accepted: true,
+            signedAt: data.authorizationDateSigned,
+            formVersion: "1.0",
+          },
           {
             type: "ALCOHOL_DRUG",
             accepted: true,
@@ -428,6 +529,9 @@ export default function DriverApplicationForm() {
       }
       
       // Append signature files
+      if (data.authorizationSignatureFile) {
+        formData.append("consentAuthorization", data.authorizationSignatureFile);
+      }
       if (data.alcoholDrugSignatureFile) {
         formData.append("consentAlcoholDrug", data.alcoholDrugSignatureFile);
       }
@@ -590,7 +694,7 @@ export default function DriverApplicationForm() {
           />
         )}
         {currentStep === 5 && (
-          <Step5AlcoholDrug
+          <Step5Authorization
             register={register}
             errors={errors}
             watch={watch}
@@ -598,18 +702,26 @@ export default function DriverApplicationForm() {
           />
         )}
         {currentStep === 6 && (
-          <Step6PSP register={register} errors={errors} watch={watch} setValue={setValue} />
-        )}
-        {currentStep === 7 && (
-          <Step7Clearinghouse
+          <Step6AlcoholDrug
             register={register}
             errors={errors}
             watch={watch}
             setValue={setValue}
           />
         )}
+        {currentStep === 7 && (
+          <Step7PSP register={register} errors={errors} watch={watch} setValue={setValue} />
+        )}
         {currentStep === 8 && (
-          <Step8MVR register={register} errors={errors} watch={watch} setValue={setValue} />
+          <Step8Clearinghouse
+            register={register}
+            errors={errors}
+            watch={watch}
+            setValue={setValue}
+          />
+        )}
+        {currentStep === 9 && (
+          <Step9MVR register={register} errors={errors} watch={watch} setValue={setValue} />
         )}
 
         {/* Error Message */}

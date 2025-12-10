@@ -62,30 +62,27 @@ export default function Step5AlcoholDrug({
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        Step 5 – Alcohol & Drug Test Statement
+        Step 6 – Alcohol & Drug Test Statement
       </h2>
 
       <div className="space-y-6">
         {/* Statement Text */}
-        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-80 overflow-y-auto shadow-md mb-6">
+        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-96 overflow-y-auto shadow-md mb-6">
           <div className="flex items-start gap-4 mb-4">
             <div className="flex-shrink-0 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
               <span className="text-2xl text-white font-bold">!</span>
             </div>
             <div className="flex-1">
               <h3 className="text-2xl md:text-3xl font-bold text-red-700 mb-3">
-                IMPORTANT: Alcohol & Drug Testing Statement
+                PRE-EMPLOYMENT EMPLOYEE ALCOHOL & DRUG TEST STATEMENT
               </h3>
               <div className="h-0.5 w-20 bg-red-600 mb-4"></div>
-              <p className="text-lg text-gray-900 leading-relaxed font-semibold mb-4">
-                By signing below, you acknowledge and agree that:
-              </p>
               <div className="bg-white rounded p-4 border border-gray-200">
-                <p className="text-base text-gray-800 leading-relaxed">
-                  I understand that as a commercial driver, I am subject to alcohol and drug testing
-                  as required by the Federal Motor Carrier Safety Regulations (FMCSR). I certify that
-                  the information provided below is true and accurate to the best of my knowledge.
-                </p>
+                <div className="text-base text-gray-800 leading-relaxed space-y-4">
+                  <p>
+                    49 CFR Part 40.25(j) states, as the employer, you must ask the employee whether he or she has tested positive, or refused to test, on any pre-employment drug or alcohol test administered by an employer to which the employee applied for, but did not obtain, safety-sensitive transportation work covered by DOT agency drug and alcohol testing rules during the past two years. If the employee admits that he or she had a positive test or a refusal to test, you must not use the employee to perform safety-sensitive functions for you, until and unless the employee documents successful completion of the return-to-duty process required in 49 CFR Subpart O.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -93,9 +90,10 @@ export default function Step5AlcoholDrug({
 
         {/* Questions */}
         <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Drug and Alcohol Questions</h3>
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2">
-              Have you ever tested positive for a controlled substance?{" "}
+              A. Have you ever tested positive for a controlled substance?{" "}
               <span className="text-red-600">*</span>
             </label>
             <div className="flex gap-4">
@@ -134,7 +132,7 @@ export default function Step5AlcoholDrug({
 
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2">
-              Have you ever had an alcohol concentration of .04 or greater?{" "}
+              B. Have you ever had an alcohol concentration of .04 or greater?{" "}
               <span className="text-red-600">*</span>
             </label>
             <div className="flex gap-4">
@@ -173,7 +171,7 @@ export default function Step5AlcoholDrug({
 
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2">
-              Have you ever refused a required test for drugs or alcohol?{" "}
+              C. Have you ever refused a required test for drugs or alcohol?{" "}
               <span className="text-red-600">*</span>
             </label>
             <div className="flex gap-4">
@@ -208,6 +206,56 @@ export default function Step5AlcoholDrug({
                 />
               </div>
             )}
+          </div>
+
+          {/* Conditional Documentation Question */}
+          {(alcoholDrugPositive || alcoholConcentration || refusedTest) && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <label className="block text-sm font-medium text-gray-800 mb-2">
+                If you answered yes to the above question, can you provide documentation of successful completion of DOT return-to-duty requirements (including follow-up tests).{" "}
+                <span className="text-red-600">*</span>
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    checked={watch("alcoholDrugReturnToDuty") === true}
+                    onChange={() => setValue("alcoholDrugReturnToDuty", true)}
+                    className="h-4 w-4 accent-red-600"
+                  />
+                  <span>Yes</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    checked={watch("alcoholDrugReturnToDuty") === false}
+                    onChange={() => setValue("alcoholDrugReturnToDuty", false)}
+                    className="h-4 w-4 accent-red-600"
+                  />
+                  <span>No</span>
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* Understanding Statement */}
+          <div className="mt-6 p-4 bg-white border border-gray-200 rounded-lg">
+            <p className="text-base text-gray-800 leading-relaxed mb-4">
+              I understand that, as required by the Federal Motor Carrier Safety Regulations and Company policy, all drivers must submit to alcohol and controlled substance testing as a condition of employment. I also understand that any offer of employment will be contingent upon the results of an alcohol and controlled substance test. Therefore, I agree to submit to the following alcohol and controlled substance tests in accordance and as defined by the Federal Motor Carrier Safety Regulation and this Company's policies:
+            </p>
+            <ul className="list-disc list-inside ml-4 space-y-2 text-base text-gray-800">
+              <li>Pre-Employment, to determine employment eligibility</li>
+              <li>Random</li>
+              <li>Reasonable Suspicion</li>
+              <li>Post-Accident</li>
+            </ul>
+          </div>
+
+          {/* Certification Statement */}
+          <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg">
+            <p className="text-base text-gray-800 leading-relaxed font-semibold">
+              I certify that I have read, understand, and agree to abide by the conditions of this consent and release form.
+            </p>
           </div>
         </div>
 

@@ -42,6 +42,7 @@ const allowedMimeTypes: Record<string, string[]> = {
   licenseFront: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
   licenseBack: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
   medicalCard: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
+  consentAuthorization: ['image/jpeg', 'image/png', 'image/jpg'],
   consentAlcoholDrug: ['image/jpeg', 'image/png', 'image/jpg'],
   consentSafetyPerformance: ['image/jpeg', 'image/png', 'image/jpg'],
   consentPSP: ['image/jpeg', 'image/png', 'image/jpg'],
@@ -70,6 +71,7 @@ const uploadFields = [
   { name: 'licenseFront', maxCount: 1 },
   { name: 'licenseBack', maxCount: 1 },
   { name: 'medicalCard', maxCount: 1 },
+  { name: 'consentAuthorization', maxCount: 1 },
   { name: 'consentAlcoholDrug', maxCount: 1 },
   { name: 'consentSafetyPerformance', maxCount: 1 },
   { name: 'consentPSP', maxCount: 1 },
@@ -157,6 +159,7 @@ router.post(
         'wasSubjectToFMCSR',
         'wasSafetySensitive',
         'accepted',
+        'alcoholDrugReturnToDuty',
       ];
 
       const convertBooleans = (obj: any): any => {
@@ -202,6 +205,7 @@ router.post(
         licenseBack: uploadedFiles?.['licenseBack']?.[0],
         medicalCard: uploadedFiles?.['medicalCard']?.[0],
         consentSignatures: {
+          AUTHORIZATION: uploadedFiles?.['consentAuthorization']?.[0],
           ALCOHOL_DRUG: uploadedFiles?.['consentAlcoholDrug']?.[0],
           SAFETY_PERFORMANCE: uploadedFiles?.['consentSafetyPerformance']?.[0],
           PSP: uploadedFiles?.['consentPSP']?.[0],
@@ -227,6 +231,7 @@ router.post(
       // Validate consent signature files
       if (files.consentSignatures) {
         const consentFieldMap: Record<string, string> = {
+          AUTHORIZATION: 'consentAuthorization',
           ALCOHOL_DRUG: 'consentAlcoholDrug',
           SAFETY_PERFORMANCE: 'consentSafetyPerformance',
           PSP: 'consentPSP',

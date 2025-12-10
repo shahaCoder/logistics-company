@@ -18,6 +18,7 @@ enum ApplicationStatus {
 }
 
 enum LegalConsentType {
+  AUTHORIZATION
   ALCOHOL_DRUG
   SAFETY_PERFORMANCE
   PSP
@@ -62,6 +63,14 @@ model DriverApplication {
   // SSN
   ssnEncrypted String
   ssnLast4     String
+
+  // Driver Type
+  applicantType String? // COMPANY_DRIVER or OWNER_OPERATOR
+  truckYear     String? // For Owner Operators
+  truckMake     String? // For Owner Operators
+
+  // Alcohol & Drug Test
+  alcoholDrugReturnToDuty Boolean? // Documentation of return-to-duty completion
 
   // Relations
   previousAddresses PreviousAddress[]

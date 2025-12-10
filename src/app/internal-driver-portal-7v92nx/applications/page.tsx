@@ -28,6 +28,7 @@ export default function ApplicationsPage() {
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -41,7 +42,7 @@ export default function ApplicationsPage() {
         limit: "20",
       });
 
-      if (search.trim()) params.append("search", search.trim());
+      if (debouncedSearch.trim()) params.append("search", debouncedSearch.trim());
       if (statusFilter) params.append("status", statusFilter);
 
       const response = await fetch(`${apiUrl}/api/admin/applications?${params}`, {
@@ -63,9 +64,19 @@ export default function ApplicationsPage() {
     }
   };
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
   useEffect(() => {
     fetchApplications();
-  }, [currentPage, statusFilter, search]);
+  }, [currentPage, statusFilter, debouncedSearch]);
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete the application for ${name}? This action cannot be undone.`)) {
@@ -136,10 +147,7 @@ export default function ApplicationsPage() {
             <input
               type="text"
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="First name or last name..."
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
             />
@@ -167,11 +175,11 @@ export default function ApplicationsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-hidden min-h-[400px]">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading...</div>
+          <div className="p-8 text-center text-gray-500 min-h-[400px] flex items-center justify-center">Loading...</div>
         ) : applications.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No applications found</div>
+          <div className="p-8 text-center text-gray-500 min-h-[400px] flex items-center justify-center">No applications found</div>
         ) : (
           <>
             <div className="overflow-x-auto">

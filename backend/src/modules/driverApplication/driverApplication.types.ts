@@ -39,7 +39,7 @@ export const EmploymentRecordSchema = z.object({
 });
 
 export const LegalConsentSchema = z.object({
-  type: z.enum(['ALCOHOL_DRUG', 'SAFETY_PERFORMANCE', 'PSP', 'CLEARINGHOUSE', 'MVR']),
+  type: z.enum(['AUTHORIZATION', 'ALCOHOL_DRUG', 'SAFETY_PERFORMANCE', 'PSP', 'CLEARINGHOUSE', 'MVR']),
   accepted: z.boolean(),
   signedAt: z.string().optional(),
   formVersion: z.string().optional(),
@@ -63,6 +63,14 @@ export const DriverApplicationDTOSchema = z.object({
 
   // SSN (optional)
   ssn: z.string().regex(/^\d{3}-?\d{2}-?\d{4}$/).optional().or(z.literal('')),
+
+  // Driver Type
+  applicantType: z.enum(['COMPANY_DRIVER', 'OWNER_OPERATOR']).optional(),
+  truckYear: z.string().optional(),
+  truckMake: z.string().optional(),
+
+  // Alcohol & Drug Test
+  alcoholDrugReturnToDuty: z.boolean().optional(),
 
   // License
   license: DriverLicenseSchema,

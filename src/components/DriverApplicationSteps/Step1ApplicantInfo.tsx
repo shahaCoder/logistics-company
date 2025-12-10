@@ -105,6 +105,124 @@ export default function Step1ApplicantInfo({
       </h2>
 
       <div className="space-y-6">
+        {/* Driver Type Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-800 mb-2">
+            I want to work as <span className="text-red-600">*</span>
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+              watch("applicantType") === "COMPANY_DRIVER" 
+                ? "border-red-600 bg-red-50" 
+                : "border-gray-300 hover:border-gray-400"
+            }`}>
+              <input
+                type="radio"
+                value="COMPANY_DRIVER"
+                {...register("applicantType")}
+                className="w-5 h-5 text-red-600 focus:ring-red-600"
+              />
+              <div className="flex-1">
+                <div className="font-semibold text-gray-900">Company Driver</div>
+                <div className="text-sm text-gray-600">Drive as part of our fleet</div>
+              </div>
+            </label>
+            <label className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+              watch("applicantType") === "OWNER_OPERATOR" 
+                ? "border-red-600 bg-red-50" 
+                : "border-gray-300 hover:border-gray-400"
+            }`}>
+              <input
+                type="radio"
+                value="OWNER_OPERATOR"
+                {...register("applicantType")}
+                className="w-5 h-5 text-red-600 focus:ring-red-600"
+              />
+              <div className="flex-1">
+                <div className="font-semibold text-gray-900">Owner Operator</div>
+                <div className="text-sm text-gray-600">Drive your own truck</div>
+              </div>
+            </label>
+          </div>
+          {errors.applicantType?.message && (
+            <p className="text-red-500 text-xs mt-1">{String(errors.applicantType.message)}</p>
+          )}
+        </div>
+
+        {/* Truck Information - Only for Owner Operators */}
+        {watch("applicantType") === "OWNER_OPERATOR" && (
+          <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Truck Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-1">
+                  Truck Year <span className="text-red-600">*</span>
+                </label>
+                <select
+                  {...register("truckYear")}
+                  onChange={(e) => {
+                    setValue("truckYear", e.target.value, { shouldValidate: true });
+                  }}
+                  className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
+                    errors.truckYear ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  <option value="">Select Year</option>
+                  {Array.from({ length: 27 }, (_, i) => 2026 - i).map((year) => (
+                    <option key={year} value={year.toString()}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+                {errors.truckYear?.message && (
+                  <p className="text-red-500 text-xs mt-1">{String(errors.truckYear.message)}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-1">
+                  Truck Make <span className="text-red-600">*</span>
+                </label>
+                <select
+                  {...register("truckMake")}
+                  onChange={(e) => {
+                    setValue("truckMake", e.target.value, { shouldValidate: true });
+                  }}
+                  className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
+                    errors.truckMake ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  <option value="">Select Make</option>
+                  <option value="FREIGHTLINER">Freightliner</option>
+                  <option value="PETERBILT">Peterbilt</option>
+                  <option value="KENWORTH">Kenworth</option>
+                  <option value="VOLVO">Volvo</option>
+                  <option value="MACK">Mack</option>
+                  <option value="INTERNATIONAL">International</option>
+                  <option value="WESTERN STAR">Western Star</option>
+                  <option value="FREIGHTLINER CASCADIA">Freightliner Cascadia</option>
+                  <option value="FREIGHTLINER COLUMBIA">Freightliner Columbia</option>
+                  <option value="PETERBILT 379">Peterbilt 379</option>
+                  <option value="PETERBILT 579">Peterbilt 579</option>
+                  <option value="KENWORTH T680">Kenworth T680</option>
+                  <option value="KENWORTH T880">Kenworth T880</option>
+                  <option value="VOLVO VNL">Volvo VNL</option>
+                  <option value="VOLVO VNR">Volvo VNR</option>
+                  <option value="MACK ANTHEM">Mack Anthem</option>
+                  <option value="MACK PINNACLE">Mack Pinnacle</option>
+                  <option value="INTERNATIONAL LT SERIES">International LT Series</option>
+                  <option value="INTERNATIONAL PROSTAR">International ProStar</option>
+                  <option value="WESTERN STAR 4900">Western Star 4900</option>
+                  <option value="WESTERN STAR 5700">Western Star 5700</option>
+                  <option value="OTHER">Other</option>
+                </select>
+                {errors.truckMake?.message && (
+                  <p className="text-red-500 text-xs mt-1">{String(errors.truckMake.message)}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Name Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>

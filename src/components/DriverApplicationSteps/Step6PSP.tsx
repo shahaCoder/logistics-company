@@ -56,44 +56,101 @@ export default function Step6PSP({
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        Step 6 – PSP Driver Disclosure & Authorization
+        Step 7 – PSP Driver Disclosure & Authorization
       </h2>
 
       <div className="space-y-6">
-        {/* PSP Text */}
-        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-96 overflow-y-auto shadow-md mb-6">
+        {/* PSP Disclosure Text */}
+        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-[600px] overflow-y-auto shadow-md mb-6">
           <div className="flex items-start gap-4 mb-4">
             <div className="flex-shrink-0 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
               <span className="text-2xl text-white font-bold">!</span>
             </div>
             <div className="flex-1">
               <h3 className="text-2xl md:text-3xl font-bold text-red-700 mb-3">
-                IMPORTANT: PSP Driver Disclosure & Authorization
+                PSP DRIVER DISCLOSURE & AUTHORIZATION
               </h3>
               <div className="h-0.5 w-20 bg-red-600 mb-4"></div>
-              <p className="text-lg text-gray-900 leading-relaxed font-semibold mb-4">
-                By signing below, you authorize Global Cooperation LLC to:
-              </p>
               <div className="bg-white rounded p-4 border border-gray-200">
-                <div className="text-base text-gray-800 space-y-3 leading-relaxed">
-                  <p>
-                    In connection with your application for employment with Global Cooperation LLC
-                    (the "Company"), the Company may obtain information about you from the Federal Motor
-                    Carrier Safety Administration (FMCSA) Pre-Employment Screening Program (PSP).
+                <div className="text-base text-gray-800 space-y-4 leading-relaxed">
+                  <p className="font-semibold">
+                    MANDATORY USE BY ALL ACCOUNT HOLDERS
+                  </p>
+                  <p className="font-semibold">
+                    IMPORTANT DISCLOSURE REGARDING BACKGROUND REPORTS FROM THE PSP Online Service
                   </p>
                   <p>
-                    This information may include, but is not limited to, your crash history and
-                    inspection history from the FMCSA Motor Carrier Management Information System (MCMIS).
+                    In connection with your application for employment with <strong>GLOBAL COOPERATION LLC</strong>, the Prospective Employer may obtain reports on your driving and safety inspection history from the Federal Motor Carrier Safety Administration (FMCSA).
                   </p>
-                  <p>
-                    By signing below, you authorize the Company to access your PSP record and use the
-                    information contained therein for employment purposes. You understand that this
-                    authorization will remain in effect for the duration of your employment relationship
-                    with the Company.
+                  <div className="space-y-3">
+                    <p className="font-semibold">Adverse Action Process (In-Person Application):</p>
+                    <p>
+                      If you submit your application in person and the Prospective Employer uses FMCSA information for an adverse employment decision (e.g., not hiring), the Prospective Employer must provide you with a copy of the report and a written summary of your rights under the Fair Credit Reporting Act before taking final action. The Prospective Employer will notify you if adverse action is taken based on your driving history or safety report, stating that the action was based on the report.
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    <p className="font-semibold">Adverse Action Process (Non-In-Person Application):</p>
+                    <p>
+                      If you submit your application by mail, telephone, computer, or similar means, and FMCSA information is used for an adverse employment decision, the Prospective Employer must provide you oral, written, or electronic notification within three business days of taking adverse action. This notification must state that adverse action was taken based on FMCSA information, provide the name, address, and toll-free telephone number of FMCSA, clarify that FMCSA did not make the decision and cannot provide specific reasons for the adverse action, and inform you of your right to request a free copy of the report (with proper identification) and dispute its accuracy with FMCSA.
+                    </p>
+                    <p>
+                      If you request a driver record from the Prospective Employer who procured it, the Prospective Employer must send you a copy of the report and a summary of your rights under the Fair Credit Reporting Act within three business days of receiving your request and proper identification.
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    <p className="font-semibold">Challenging Data Accuracy:</p>
+                    <p>
+                      Neither the Prospective Employer nor the FMCSA contractor can correct incorrect safety data. You can challenge data accuracy by submitting a request to the website: <strong>https://dataqs.fmcsa.dot.gov</strong>. If crash or inspection information reported by a State is challenged, FMCSA cannot change or correct it; the request will be forwarded by the DataQs system to the appropriate State for adjudication.
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    <p className="font-semibold">PSP Report Content:</p>
+                    <p>
+                      The PSP report will display any crash or inspection in which you were involved. It explicitly states that the PSP report does not report, assign, or imply fault. It includes all Commercial Motor Vehicle (CMV) crashes where you were a driver or co-driver and reported to FMCSA, regardless of fault. All inspections, with or without violations, appear on the PSP report. State citations associated with Federal Motor Carrier Safety Regulations (FMCSR) violations adjudicated by a court of law will also appear and remain on the PSP report.
+                    </p>
+                  </div>
+                  <p className="font-semibold">
+                    The Prospective Employer cannot obtain background reports from FMCSA without your authorization.
                   </p>
-                  <p>
-                    You also understand that you have the right to review the information obtained from
-                    the PSP and to dispute any inaccurate information directly with the FMCSA.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Authorization Text */}
+        <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6 max-h-[500px] overflow-y-auto shadow-md mb-6">
+          <div className="flex-1">
+            <h3 className="text-xl md:text-2xl font-bold text-blue-700 mb-4">
+              AUTHORIZATION
+            </h3>
+            <div className="bg-white rounded p-4 border border-gray-200">
+              <div className="text-base text-gray-800 space-y-4 leading-relaxed">
+                <p>
+                  If you agree that the Prospective Employer may obtain such background reports, please read the following and sign below:
+                </p>
+                <p>
+                  I authorize <strong>GLOBAL COOPERATION LLC</strong> ("Prospective Employer") to access the FMCSA Pre-Employment Screening Program (PSP) system. I understand that the Prospective Employer will request release of my safety performance information, including crash data from the previous five (5) years and inspection history from the previous three (3) years, and acknowledge that this information will be used to determine my suitability for employment.
+                </p>
+                <p>
+                  I understand that neither the Prospective Employer nor the FMCSA contractor can correct incorrect safety data. I understand that I can challenge data accuracy by submitting a request to <strong>https://dataqs.fmcsa.dot.gov</strong>. I understand that if crash or inspection information reported by a State is challenged, FMCSA cannot change or correct it; the request will be forwarded by the DataQs system to the appropriate State for adjudication.
+                </p>
+                <p>
+                  I understand that any crash or inspection in which I was involved will display on my PSP report. I understand that the PSP report does not report, assign, or imply fault. I understand that all Commercial Motor Vehicle (CMV) crashes where I was a driver or co-driver and reported to FMCSA, regardless of fault, will appear on my PSP report. I understand that all inspections, with or without violations, appear on the PSP report. I understand that State citations associated with Federal Motor Carrier Safety Regulations (FMCSR) violations adjudicated by a court of law will also appear and remain on the PSP report.
+                </p>
+                <p>
+                  I confirm that I have read the Disclosure Regarding Background Reports and, by signing, I authorize the Prospective Employer and its employees, authorized agents, and/or affiliates to obtain the authorized information.
+                </p>
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                  <p className="text-sm font-semibold mb-2">NOTICE:</p>
+                  <p className="text-sm">
+                    This form is available to monthly account holders by NIC on behalf of the U.S. Department of Transportation, Federal Motor Carrier Safety Administration (FMCSA). Account holders must obtain an Applicant's written or electronic consent and use the language contained in this Disclosure and Authorization form exactly as provided, as a stand-alone document, not to be included with other consent forms or language.
+                  </p>
+                </div>
+                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                  <p className="text-sm font-semibold mb-2">NOTICE:</p>
+                  <p className="text-sm">
+                    The prospective employment concept referenced in this form contemplates the definition of "employee" contained at 49 C.F.R. 383.5.
                   </p>
                 </div>
               </div>

@@ -56,43 +56,28 @@ export default function Step8MVR({
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        Step 8 – MVR Release Consent
+        Step 9 – MVR Release Consent
       </h2>
 
       <div className="space-y-6">
         {/* MVR Text */}
-        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-96 overflow-y-auto shadow-md mb-6">
+        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-[400px] overflow-y-auto shadow-md mb-6">
           <div className="flex items-start gap-4 mb-4">
             <div className="flex-shrink-0 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
               <span className="text-2xl text-white font-bold">!</span>
             </div>
             <div className="flex-1">
-              <h3 className="text-2xl md:text-3xl font-bold text-red-700 mb-3">
-                IMPORTANT: Motor Vehicle Record (MVR) Release and Authorization
+              <h3 className="text-xl md:text-2xl font-bold text-red-700 mb-3">
+                MVR Release Consent
               </h3>
               <div className="h-0.5 w-20 bg-red-600 mb-4"></div>
-              <p className="text-lg text-gray-900 leading-relaxed font-semibold mb-4">
-                By signing below, you authorize Global Cooperation LLC to:
-              </p>
               <div className="bg-white rounded p-4 border border-gray-200">
-                <div className="text-base text-gray-800 space-y-3 leading-relaxed">
+                <div className="text-base text-gray-800 space-y-4 leading-relaxed">
                   <p>
-                    I hereby authorize Global Cooperation LLC (the "Company") to obtain my Motor Vehicle
-                    Record (MVR) from any state in which I hold or have held a driver's license.
+                    In conjunction with my potential employment <strong>GLOBAL COOPERATION LLC</strong> ("the company"), I <strong>{watch("firstName")} {watch("lastName")}</strong> (applicant) consent to the release of my Motor Vehicle Records (MVR) to the company. I understand the company will use these records to evaluate my suitability to fulfill driving duties that may be related to the position for which I am applying. I also consent to the review, evaluation, and other use of any MVR I may have provided to the company.
                   </p>
                   <p>
-                    I understand that the Company will use this information to evaluate my qualifications
-                    for employment as a commercial driver and to ensure compliance with Federal Motor
-                    Carrier Safety Regulations (FMCSR).
-                  </p>
-                  <p>
-                    I authorize the release of my MVR information to the Company and understand that
-                    this authorization will remain in effect for the duration of my employment
-                    relationship with the Company.
-                  </p>
-                  <p>
-                    I certify that the information I have provided regarding my driving history is true
-                    and accurate to the best of my knowledge.
+                    This consent is given in satisfaction of Public Law 18 USC 2721 et. Seq., "Federal Drivers Privacy Protection Act", and is intended to constitute "written consent" as required by this Act.
                   </p>
                 </div>
               </div>
@@ -102,11 +87,10 @@ export default function Step8MVR({
 
         {/* Signature Section */}
         <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Signature</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-800 mb-2">
-                Signature <span className="text-red-600">*</span>
+                Prospective Employee Signature <span className="text-red-600">*</span>
               </label>
               <div className="mb-3">
                 <div className="flex gap-4 mb-3">
