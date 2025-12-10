@@ -119,25 +119,25 @@ export default function Home() {
       <SecondSec />
 
          <section className="bg-[#C4C4C4]">
-            <div className="custom-container py-20">
+            <div className="py-20">
                <Services />
             </div>
          </section>
-         <section className="w-full custom-container bg-[#C4C4C4] py-20">
+         <section className="bg-[#C4C4C4] py-20">
             <Reviews />
          </section>
 
          {/* FAQ Section */}
          <section className="bg-[#C4C4C4] py-20">
-            <div className="custom-container">
+            <div className="mx-auto w-full max-w-[1440px] px-4 lg:px-10">
                <h2 className="text-4xl md:text-5xl font-bold text-center text-red-600 mb-12">
                   Frequently Asked Questions
                </h2>
-               <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+               <div className="grid md:grid-cols-2 gap-8 xl:gap-12">
                   {homeFAQs.map((faq, index) => (
                      <div
                         key={index}
-                        className="bg-white rounded-lg p-6 shadow-md border border-gray-200"
+                        className="bg-white rounded-lg p-6 shadow-md border border-gray-200 h-full"
                      >
                         <h3 className="text-xl font-semibold text-gray-900 mb-3">
                            {faq.question}

@@ -16,6 +16,8 @@ export default function Step3MedicalCard({
   watch,
   setValue,
 }: Step3Props) {
+  const medicalCardFile = watch("medicalCardFile");
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -34,6 +36,11 @@ export default function Step3MedicalCard({
           <label className="block text-sm font-medium text-gray-800 mb-1">
             Upload Copy <span className="text-red-600">*</span>
           </label>
+          {medicalCardFile && (
+            <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+              ✓ File uploaded: {medicalCardFile.name} ({(medicalCardFile.size / 1024).toFixed(1)} KB)
+            </div>
+          )}
           <input
             type="file"
             accept="image/*,.pdf"

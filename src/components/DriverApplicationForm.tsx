@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -269,6 +269,8 @@ export default function DriverApplicationForm() {
     return isValid;
   };
 
+  const formRef = useRef<HTMLDivElement>(null);
+
   const handleNext = async () => {
     const isValid = await validateCurrentStep();
     if (isValid && currentStep < TOTAL_STEPS) {
@@ -291,8 +293,10 @@ export default function DriverApplicationForm() {
       
       setCurrentStep(currentStep + 1);
       setSubmitError(null);
-      // Scroll to top of page
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to top of form container
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
   };
 
@@ -300,14 +304,18 @@ export default function DriverApplicationForm() {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
       setSubmitError(null);
-      // Scroll to top of page
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to top of form container
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
   };
 
-  // Scroll to top when step changes
+  // Scroll to top of form when step changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   }, [currentStep]);
 
   const onSubmit = async (data: DriverApplicationFormData) => {
@@ -442,9 +450,28 @@ export default function DriverApplicationForm() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || "Something went wrong. Please try again or contact our office."
-        );
+        const errorMessage = errorData.message || errorData.error || "Unknown error";
+        
+        // Преобразуем технические ошибки в понятные сообщения для пользователей
+        let userFriendlyMessage = "Something went wrong. Please try again or contact our office.";
+        
+        if (errorMessage.includes("Validation failed") || errorMessage.includes("validation")) {
+          userFriendlyMessage = "Please check all required fields and try again.";
+        } else if (errorMessage.includes("File") || errorMessage.includes("file") || errorMessage.includes("upload")) {
+          userFriendlyMessage = "There was an issue with one of your uploaded files. Please check that all files are valid images or PDFs and try again.";
+        } else if (errorMessage.includes("date") || errorMessage.includes("Date") || errorMessage.includes("expiration")) {
+          userFriendlyMessage = "Please check all date fields and ensure they are valid dates.";
+        } else if (errorMessage.includes("SSN") || errorMessage.includes("ssn")) {
+          userFriendlyMessage = "Something went wrong. Please try again or contact our office.";
+        } else if (errorMessage.includes("network") || errorMessage.includes("fetch") || errorMessage.includes("Failed to fetch")) {
+          userFriendlyMessage = "Network error. Please check your internet connection and try again.";
+        } else if (response.status === 429) {
+          userFriendlyMessage = "Too many requests. Please wait a moment and try again.";
+        } else if (response.status >= 500) {
+          userFriendlyMessage = "Server error. Please try again in a few moments or contact our office.";
+        }
+        
+        throw new Error(userFriendlyMessage);
       }
 
       setSubmitSuccess(true);
@@ -454,11 +481,7 @@ export default function DriverApplicationForm() {
       if (process.env.NODE_ENV === "development") {
         console.error("Submission error:", errorMessage);
       }
-      setSubmitError(
-        errorMessage.includes("SSN") || errorMessage.includes("ssn")
-          ? "Something went wrong. Please try again or contact our office."
-          : errorMessage
-      );
+      setSubmitError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -495,23 +518,7 @@ export default function DriverApplicationForm() {
   const progress = (currentStep / TOTAL_STEPS) * 100;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 md:p-8">
-      {/* Language Warning */}
-      <div className="mb-6 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
-        <div className="flex items-start gap-3">
-          <svg className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <div>
-            <p className="text-sm font-semibold text-amber-900 mb-1">
-              ⚠️ English Keyboard Required
-            </p>
-            <p className="text-xs text-amber-800 leading-relaxed">
-              Please use <strong>English (US) keyboard layout only</strong>. All form fields accept English letters only. If your keyboard is set to another language, please switch to English before filling out the form.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div ref={formRef} className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 md:p-8">
 
       {/* Progress Bar */}
       <div className="mb-8">
@@ -639,14 +646,46 @@ export default function DriverApplicationForm() {
             <button
               type="button"
               disabled={isSubmitting}
-              onClick={(e) => {
+              onClick={async (e) => {
                 // Explicitly prevent any accidental submissions
                 e.preventDefault();
                 e.stopPropagation();
-                // Manually trigger form submission only when button is clicked
-                if (!isSubmitting && currentStep === TOTAL_STEPS) {
-                  handleSubmit(onSubmit)(e as any);
+                
+                if (isSubmitting) {
+                  return;
                 }
+                
+                if (currentStep !== TOTAL_STEPS) {
+                  return;
+                }
+                
+                // Validate current step first
+                const stepValid = await validateCurrentStep();
+                if (!stepValid) {
+                  setSubmitError("Please fill in all required fields before submitting.");
+                  // Scroll to top to show errors
+                  setTimeout(() => {
+                    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 100);
+                  return;
+                }
+                
+                // Use handleSubmit which will validate ALL fields and call onSubmit if valid
+                // handleSubmit returns a function that validates and calls onSubmit
+                handleSubmit(
+                  (data) => {
+                    // This callback is only called if validation passes
+                    onSubmit(data);
+                  },
+                  (errors) => {
+                    // This callback is called if validation fails
+                    console.log("Validation errors:", errors);
+                    setSubmitError("Please check all fields and fix any errors before submitting.");
+                    setTimeout(() => {
+                      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }
+                )();
               }}
               className={`px-6 py-3 rounded-lg font-semibold text-white transition ${
                 isSubmitting

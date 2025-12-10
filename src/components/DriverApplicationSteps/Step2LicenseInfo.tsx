@@ -76,6 +76,9 @@ export default function Step2LicenseInfo({
     setValue("otherLicenses", updated);
   };
 
+  const licenseFrontFile = watch("licenseFrontFile");
+  const licenseBackFile = watch("licenseBackFile");
+
   const handleFileChange = (
     field: "licenseFrontFile" | "licenseBackFile",
     e: React.ChangeEvent<HTMLInputElement>
@@ -337,6 +340,11 @@ export default function Step2LicenseInfo({
                 Upload FRONT copy of your driver's license{" "}
                 <span className="text-red-600">*</span>
               </label>
+              {licenseFrontFile && (
+                <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                  ✓ File uploaded: {licenseFrontFile.name} ({(licenseFrontFile.size / 1024).toFixed(1)} KB)
+                </div>
+              )}
               <input
                 type="file"
                 accept="image/*,.pdf"
@@ -355,6 +363,11 @@ export default function Step2LicenseInfo({
                 Upload BACK copy of your driver's license{" "}
                 <span className="text-red-600">*</span>
               </label>
+              {licenseBackFile && (
+                <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                  ✓ File uploaded: {licenseBackFile.name} ({(licenseBackFile.size / 1024).toFixed(1)} KB)
+                </div>
+              )}
               <input
                 type="file"
                 accept="image/*,.pdf"

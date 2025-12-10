@@ -85,7 +85,7 @@ const Page = () => {
             className="mt-4 max-w-2xl text-gray-300 text-lg"
           >
             Reliable logistics and nationwide trucking solutions across the United States.
-          </motion.p>
+          </motion.p> 
         </div>
       </div>
 
@@ -357,3 +357,4 @@ const Page = () => {
 };
 
 export default Page;
+

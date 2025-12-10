@@ -7,6 +7,7 @@ import { DriverApplicationFiles, ApplicationMetadata } from './driverApplication
 import { fileTypeFromBuffer } from 'file-type';
 import { createAuditLog } from '../../services/audit.service.js';
 import { AuditAction } from '@prisma/client';
+import { sendApplicationConfirmation } from '../../services/email.service.js';
 
 const router = Router();
 
@@ -38,8 +39,8 @@ async function validateFileContent(fieldName: string, buffer: Buffer, allowedMim
 
 // Allowed MIME types for each field
 const allowedMimeTypes: Record<string, string[]> = {
-  licenseFront: ['image/jpeg', 'image/png', 'image/jpg'],
-  licenseBack: ['image/jpeg', 'image/png', 'image/jpg'],
+  licenseFront: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
+  licenseBack: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
   medicalCard: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
   consentAlcoholDrug: ['image/jpeg', 'image/png', 'image/jpg'],
   consentSafetyPerformance: ['image/jpeg', 'image/png', 'image/jpg'],
@@ -268,6 +269,44 @@ router.post(
           email: dto.email,
         },
       });
+
+      // Send confirmation email asynchronously (don't block response)
+      // Email failure should not interrupt application creation
+      sendApplicationConfirmation(dto.email, dto.firstName)
+        .then(() => {
+          // Log successful email send
+          createAuditLog({
+            action: AuditAction.APPLICATION_EMAIL_SENT,
+            resourceId: result.id,
+            resourceType: 'DriverApplication',
+            ipAddress: meta.applicantIp,
+            userAgent: meta.userAgent,
+            details: {
+              email: dto.email,
+            },
+          }).catch((auditError) => {
+            console.error('Failed to log email audit:', auditError);
+          });
+        })
+        .catch((emailError) => {
+          // Email sending failed, but application was already created
+          // Log the failure for monitoring
+          console.error('Failed to send application confirmation email:', emailError);
+          // Optionally log email failure to audit log
+          createAuditLog({
+            action: AuditAction.APPLICATION_EMAIL_SENT,
+            resourceId: result.id,
+            resourceType: 'DriverApplication',
+            ipAddress: meta.applicantIp,
+            userAgent: meta.userAgent,
+            details: {
+              email: dto.email,
+              error: emailError instanceof Error ? emailError.message : 'Unknown error',
+            },
+          }).catch((auditError) => {
+            console.error('Failed to log email failure audit:', auditError);
+          });
+        });
 
       res.status(201).json({
         success: true,

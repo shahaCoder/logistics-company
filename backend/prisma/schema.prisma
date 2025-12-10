@@ -233,6 +233,7 @@ enum AuditAction {
   LOGOUT
   CREATE_APPLICATION
   VIEW_APPLICATION
+  APPLICATION_EMAIL_SENT
 }
 
 model AuditLog {

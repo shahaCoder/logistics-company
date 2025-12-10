@@ -54,28 +54,34 @@ export default function Reviews() {
   ];
 
   return (
-    <section className="w-full ">
-      <motion.h2 initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.6, delay: 0.1 }} className="text-center text-3xl md:text-4xl font-extrabold text-red-600 mb-10">
-        REVIEWS FROM BELOVED CUSTOMERS
-      </motion.h2>
-
-      <motion.div initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.6, delay: 0.1 }}>
-        <Swiper
-          modules={[Pagination]}
-          spaceBetween={30}
-          slidesPerView={1}
-          pagination={{ clickable: true }}
-          breakpoints={{
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-          }}
+    <section className="w-full">
+      <div className="mx-auto w-full max-w-[1440px] px-4 lg:px-10">
+        <motion.h2 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.1 }} 
+          className="text-center text-3xl md:text-4xl font-extrabold text-red-600 mb-10"
         >
+          REVIEWS FROM BELOVED CUSTOMERS
+        </motion.h2>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <Swiper
+            modules={[Pagination]}
+            spaceBetween={30}
+            slidesPerView={1}
+            pagination={{ clickable: true }}
+            breakpoints={{
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+          >
           {reviews.map((r, i) => (
             <SwiperSlide key={i}>
               <div className="no-select bg-white rounded-2xl p-6 shadow-md border border-gray-200 h-full flex flex-col justify-between">
@@ -120,8 +126,9 @@ export default function Reviews() {
               </div>
             </SwiperSlide>
           ))}
-        </Swiper>
-      </motion.div>
+          </Swiper>
+        </motion.div>
+      </div>
     </section>
   );
 }

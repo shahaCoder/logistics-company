@@ -30,22 +30,37 @@ export async function createDriverApplication(
     ssnEncrypted = encryptSensitive(ssn);
   }
 
-  // Parse dates
+  // Parse dates with validation
   const dateOfBirth = new Date(dto.dateOfBirth);
+  if (isNaN(dateOfBirth.getTime())) {
+    throw new Error('Invalid date of birth');
+  }
+  
   const licenseExpiresAt = new Date(dto.license.expiresAt);
+  if (isNaN(licenseExpiresAt.getTime())) {
+    throw new Error('Invalid license expiration date');
+  }
+  
+  // Validate date is not too far in the future (reasonable limit: 50 years)
+  const maxFutureDate = new Date();
+  maxFutureDate.setFullYear(maxFutureDate.getFullYear() + 50);
+  if (licenseExpiresAt > maxFutureDate) {
+    throw new Error('License expiration date is too far in the future');
+  }
   
   // Handle optional medical card expiration date
   let medicalCardExpiresAt: Date | null = null;
   if (dto.medicalCardExpiresAt && dto.medicalCardExpiresAt.trim()) {
     const parsedDate = new Date(dto.medicalCardExpiresAt);
     // Only set if date is valid, otherwise ignore (field is optional)
-    if (!isNaN(parsedDate.getTime())) {
+    if (!isNaN(parsedDate.getTime()) && parsedDate <= maxFutureDate) {
       medicalCardExpiresAt = parsedDate;
     }
     // If date is invalid, we just ignore it since the field is optional
   }
 
-  // Create application in transaction
+  // Create application in transaction with increased timeout (30 seconds)
+  // File uploads happen inside transaction but in parallel to minimize time
   const application = await prisma.$transaction(async (tx) => {
     // Create main application record
     const app = await tx.driverApplication.create({
@@ -67,37 +82,53 @@ export async function createDriverApplication(
       },
     });
 
-    // Upload files and create related records
+    // Upload files in parallel (inside transaction but async)
     const uploadPromises: Promise<void>[] = [];
 
-    // Upload license images
+    // Upload license files (can be image or PDF)
     let licenseFrontUrl: string | undefined;
     let licenseFrontPublicId: string | undefined;
     let licenseBackUrl: string | undefined;
     let licenseBackPublicId: string | undefined;
 
     if (files.licenseFront) {
+      // Determine file type from mimetype
+      const isPDF = files.licenseFront.mimetype === 'application/pdf' || 
+                    files.licenseFront.originalname?.toLowerCase().endsWith('.pdf');
+      const resourceType = isPDF ? 'raw' : 'image';
+      
       const upload = uploadToApplicationFolder(
         files.licenseFront.buffer,
         app.id,
         'license-front',
-        'image'
+        resourceType
       ).then((result) => {
         licenseFrontUrl = result.url;
         licenseFrontPublicId = result.publicId;
+      }).catch((error) => {
+        console.error('Error uploading license front:', error);
+        throw error;
       });
       uploadPromises.push(upload);
     }
 
     if (files.licenseBack) {
+      // Determine file type from mimetype
+      const isPDF = files.licenseBack.mimetype === 'application/pdf' || 
+                    files.licenseBack.originalname?.toLowerCase().endsWith('.pdf');
+      const resourceType = isPDF ? 'raw' : 'image';
+      
       const upload = uploadToApplicationFolder(
         files.licenseBack.buffer,
         app.id,
         'license-back',
-        'image'
+        resourceType
       ).then((result) => {
         licenseBackUrl = result.url;
         licenseBackPublicId = result.publicId;
+      }).catch((error) => {
+        console.error('Error uploading license back:', error);
+        throw error;
       });
       uploadPromises.push(upload);
     }
@@ -120,6 +151,9 @@ export async function createDriverApplication(
       ).then((result) => {
         medicalCardUrl = result.url;
         medicalCardPublicId = result.publicId;
+      }).catch((error) => {
+        console.error('Error uploading medical card:', error);
+        throw error;
       });
       uploadPromises.push(upload);
     }
@@ -196,7 +230,7 @@ export async function createDriverApplication(
       });
     }
 
-    // Create legal consents with signature uploads
+    // Create legal consents with signature uploads (in parallel)
     const consentPromises = dto.legalConsents.map(async (consent) => {
       let signatureUrl: string | undefined;
       let signaturePublicId: string | undefined;
@@ -230,6 +264,9 @@ export async function createDriverApplication(
     await Promise.all(consentPromises);
 
     return app;
+  }, {
+    maxWait: 10000, // Maximum time to wait for a transaction slot
+    timeout: 30000, // Maximum time the transaction can run (30 seconds)
   });
 
   return {

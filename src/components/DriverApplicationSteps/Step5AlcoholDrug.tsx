@@ -23,8 +23,33 @@ export default function Step5AlcoholDrug({
   const alcoholConcentration = watch("alcoholConcentration");
   const refusedTest = watch("refusedTest");
   const fullName = watch("alcoholDrugName");
-  const [signatureMode, setSignatureMode] = useState<"text" | "draw">("draw");
+  const signatureFile = watch("alcoholDrugSignatureFile");
+  const signatureText = watch("alcoholDrugSignature");
+  
+  // Determine signature mode based on saved data
+  const getInitialSignatureMode = (): "text" | "draw" => {
+    if (signatureFile) return "draw";
+    if (signatureText && signatureText.trim() !== "" && signatureText !== "Drawn signature") return "text";
+    return "draw";
+  };
+  
+  const [signatureMode, setSignatureMode] = useState<"text" | "draw">(getInitialSignatureMode());
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | undefined>(undefined);
   const signatureRef = useRef<SignatureCanvasComponent | null>(null);
+
+  // Restore signature from saved file when component mounts or file changes
+  useEffect(() => {
+    if (signatureFile && signatureMode === "draw") {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        setSignatureDataUrl(dataUrl);
+      };
+      reader.readAsDataURL(signatureFile);
+    } else {
+      setSignatureDataUrl(undefined);
+    }
+  }, [signatureFile, signatureMode]);
 
   // Set default date signed to today
   useEffect(() => {
@@ -42,15 +67,28 @@ export default function Step5AlcoholDrug({
 
       <div className="space-y-6">
         {/* Statement Text */}
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 max-h-60 overflow-y-auto">
-          <h3 className="font-semibold text-gray-900 mb-2">
-            Alcohol & Drug Testing Statement
-          </h3>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            I understand that as a commercial driver, I am subject to alcohol and drug testing
-            as required by the Federal Motor Carrier Safety Regulations (FMCSR). I certify that
-            the information provided below is true and accurate to the best of my knowledge.
-          </p>
+        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-80 overflow-y-auto shadow-md mb-6">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="flex-shrink-0 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+              <span className="text-2xl text-white font-bold">!</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-2xl md:text-3xl font-bold text-red-700 mb-3">
+                IMPORTANT: Alcohol & Drug Testing Statement
+              </h3>
+              <div className="h-0.5 w-20 bg-red-600 mb-4"></div>
+              <p className="text-lg text-gray-900 leading-relaxed font-semibold mb-4">
+                By signing below, you acknowledge and agree that:
+              </p>
+              <div className="bg-white rounded p-4 border border-gray-200">
+                <p className="text-base text-gray-800 leading-relaxed">
+                  I understand that as a commercial driver, I am subject to alcohol and drug testing
+                  as required by the Federal Motor Carrier Safety Regulations (FMCSR). I certify that
+                  the information provided below is true and accurate to the best of my knowledge.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Questions */}
@@ -205,8 +243,10 @@ export default function Step5AlcoholDrug({
                       checked={signatureMode === "draw"}
                       onChange={() => {
                         setSignatureMode("draw");
-                        setValue("alcoholDrugSignatureFile", undefined);
-                        setValue("alcoholDrugSignature", "");
+                        // Only clear text signature if switching from text mode
+                        if (signatureText && signatureText !== "Drawn signature") {
+                          setValue("alcoholDrugSignature", "");
+                        }
                       }}
                       className="h-4 w-4 accent-red-600"
                     />
@@ -218,8 +258,14 @@ export default function Step5AlcoholDrug({
                       checked={signatureMode === "text"}
                       onChange={() => {
                         setSignatureMode("text");
-                        setValue("alcoholDrugSignatureFile", undefined);
-                        setValue("alcoholDrugSignature", "");
+                        // Only clear file signature if switching from draw mode
+                        if (signatureFile) {
+                          setValue("alcoholDrugSignatureFile", undefined);
+                        }
+                        // Clear "Drawn signature" placeholder if present
+                        if (signatureText === "Drawn signature") {
+                          setValue("alcoholDrugSignature", "");
+                        }
                       }}
                       className="h-4 w-4 accent-red-600"
                     />
@@ -230,7 +276,13 @@ export default function Step5AlcoholDrug({
 
               {signatureMode === "draw" ? (
                 <div className="w-full">
+                  {signatureFile && (
+                    <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                      ✓ Signature saved (drawn signature)
+                    </div>
+                  )}
                   <SignatureCanvas
+                    initialDataUrl={signatureDataUrl}
                     onSave={(dataUrl) => {
                       // Convert data URL to File
                       fetch(dataUrl)
@@ -243,11 +295,13 @@ export default function Step5AlcoholDrug({
                             shouldValidate: true,
                           });
                           setValue("alcoholDrugSignature", "Drawn signature");
+                          setSignatureDataUrl(dataUrl);
                         });
                     }}
                     onClear={() => {
                       setValue("alcoholDrugSignatureFile", undefined);
                       setValue("alcoholDrugSignature", "");
+                      setSignatureDataUrl(undefined);
                     }}
                     width={400}
                     height={200}
@@ -255,17 +309,24 @@ export default function Step5AlcoholDrug({
                   />
                 </div>
               ) : (
-                <input
-                  {...register("alcoholDrugSignature", {
-                    onChange: (e) => {
-                      setValue("alcoholDrugSignature", e.target.value.toUpperCase(), { shouldValidate: true });
-                    }
-                  })}
-                  placeholder="Type your full name as signature"
-                  className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
-                    errors.alcoholDrugSignature ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
+                <div>
+                  {signatureText && signatureText.trim() !== "" && signatureText !== "Drawn signature" && (
+                    <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                      ✓ Signature saved: {signatureText}
+                    </div>
+                  )}
+                  <input
+                    {...register("alcoholDrugSignature", {
+                      onChange: (e) => {
+                        setValue("alcoholDrugSignature", e.target.value.toUpperCase(), { shouldValidate: true });
+                      }
+                    })}
+                    placeholder="Type your full name as signature"
+                    className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
+                      errors.alcoholDrugSignature ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                </div>
               )}
               {errors.alcoholDrugSignature?.message && (
                 <p className="text-red-500 text-xs mt-1">

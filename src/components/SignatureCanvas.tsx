@@ -11,6 +11,7 @@ interface SignatureCanvasProps {
   backgroundColor?: string;
   penColor?: string;
   autoSave?: boolean;
+  initialDataUrl?: string; // For restoring signature from saved file
 }
 
 export default function SignatureCanvasComponent({
@@ -21,11 +22,13 @@ export default function SignatureCanvasComponent({
   backgroundColor = "#ffffff",
   penColor = "#000000",
   autoSave = false,
+  initialDataUrl,
 }: SignatureCanvasProps) {
   const sigPadRef = useRef<SignatureCanvas>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width, height });
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isRestored, setIsRestored] = useState(false);
 
   const saveSignature = useCallback(() => {
     if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
@@ -101,6 +104,31 @@ export default function SignatureCanvasComponent({
       onClear();
     }
   };
+
+  // Restore signature from initialDataUrl if provided
+  useEffect(() => {
+    if (initialDataUrl && sigPadRef.current) {
+      const img = new Image();
+      img.onload = () => {
+        if (sigPadRef.current) {
+          const canvas = sigPadRef.current.getCanvas();
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            setIsRestored(true);
+          }
+        }
+      };
+      img.onerror = () => {
+        console.error('Failed to load signature image');
+      };
+      img.src = initialDataUrl;
+    } else if (!initialDataUrl && isRestored) {
+      // Reset flag when dataUrl is cleared
+      setIsRestored(false);
+    }
+  }, [initialDataUrl, isRestored]);
 
   // Expose save function via ref
   useEffect(() => {
