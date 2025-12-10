@@ -119,7 +119,10 @@ export default function Step1ApplicantInfo({
               <input
                 type="radio"
                 value="COMPANY_DRIVER"
-                {...register("applicantType")}
+                {...register("applicantType", { required: true })}
+                onChange={(e) => {
+                  setValue("applicantType", e.target.value as "COMPANY_DRIVER" | "OWNER_OPERATOR", { shouldValidate: true });
+                }}
                 className="w-5 h-5 text-red-600 focus:ring-red-600"
               />
               <div className="flex-1">
@@ -135,7 +138,10 @@ export default function Step1ApplicantInfo({
               <input
                 type="radio"
                 value="OWNER_OPERATOR"
-                {...register("applicantType")}
+                {...register("applicantType", { required: true })}
+                onChange={(e) => {
+                  setValue("applicantType", e.target.value as "COMPANY_DRIVER" | "OWNER_OPERATOR", { shouldValidate: true });
+                }}
                 className="w-5 h-5 text-red-600 focus:ring-red-600"
               />
               <div className="flex-1">

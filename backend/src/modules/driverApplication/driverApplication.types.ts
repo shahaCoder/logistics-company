@@ -26,9 +26,10 @@ export const EmploymentRecordSchema = z.object({
   employerFax: z.string().optional(),
   employerEmail: z.string().email().optional().or(z.literal('')),
   addressLine1: z.string().min(1),
+  country: z.string().min(1).default('US'),
   city: z.string().min(1),
-  state: z.string().length(2),
-  zip: z.string().min(5),
+  state: z.string().min(1), // Can be 2 letters for US or text for other countries
+  zip: z.string().optional(), // Optional for non-US countries
   positionHeld: z.string().optional(),
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),

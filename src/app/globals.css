@@ -18,6 +18,10 @@ h1 {
    font-family: "cinzel", cursive;
 }
 
+.font-dancing-script {
+   font-family: var(--font-dancing-script), "Dancing Script", cursive;
+}
+
 .custom-container {
    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
 }

@@ -61,7 +61,7 @@ export default function Step6PSP({
 
       <div className="space-y-6">
         {/* PSP Disclosure Text */}
-        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 max-h-[600px] overflow-y-auto shadow-md mb-6">
+        <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 shadow-md mb-6">
           <div className="flex items-start gap-4 mb-4">
             <div className="flex-shrink-0 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
               <span className="text-2xl text-white font-bold">!</span>
@@ -119,7 +119,7 @@ export default function Step6PSP({
         </div>
 
         {/* Authorization Text */}
-        <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6 max-h-[500px] overflow-y-auto shadow-md mb-6">
+        <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6 shadow-md mb-6">
           <div className="flex-1">
             <h3 className="text-xl md:text-2xl font-bold text-blue-700 mb-4">
               AUTHORIZATION
@@ -266,7 +266,7 @@ export default function Step6PSP({
                       }
                     })}
                     placeholder="Type your full name as signature"
-                    className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
+                    className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent font-dancing-script text-2xl ${
                       errors.pspSignature ? "border-red-500" : "border-gray-300"
                     }`}
                   />

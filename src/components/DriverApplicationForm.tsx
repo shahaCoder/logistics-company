@@ -37,9 +37,10 @@ const employmentRecordSchema = z.object({
   employerFax: z.string().optional(),
   employerEmail: z.string().email().optional().or(z.literal("")),
   addressLine1: z.string().min(1, "Address is required"),
+  country: z.string().min(1, "Country is required"),
   city: z.string().min(1, "City is required"),
-  state: z.string().length(2, "State must be 2 letters"),
-  zip: z.string().min(5, "Zip code is required"),
+  state: z.string().min(1, "State/Province/Region is required"),
+  zip: z.string().optional(), // Optional for non-US countries
   positionHeld: z.string().optional(),
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
@@ -47,11 +48,26 @@ const employmentRecordSchema = z.object({
   equipmentClass: z.string().optional(),
   wasSubjectToFMCSR: z.boolean(),
   wasSafetySensitive: z.boolean(),
+}).refine((data) => {
+  // If country is US, zip is required and state must be 2 letters
+  if (data.country === "US") {
+    return data.zip && data.zip.length >= 5 && data.state.length === 2;
+  }
+  // For other countries, state is required but zip is optional
+  return data.state && data.state.length > 0;
+}, {
+  message: "Please provide valid state and zip code for US, or state/province for other countries",
+  path: ["state"], // Error will show on state field
 });
 
 const fullFormSchema = z.object({
   // Step 1
-  applicantType: z.enum(["COMPANY_DRIVER", "OWNER_OPERATOR"]),
+  applicantType: z.enum(["COMPANY_DRIVER", "OWNER_OPERATOR"]).refine(
+    (val) => val === "COMPANY_DRIVER" || val === "OWNER_OPERATOR",
+    {
+      message: "Please select your driver type",
+    }
+  ),
   truckYear: z.string().optional(),
   truckMake: z.string().optional(),
   firstName: z.string().min(1, "First name is required"),
@@ -111,7 +127,43 @@ const fullFormSchema = z.object({
   medicalCardFile: z
     .any()
     .refine((file) => file instanceof File && file.size > 0, "Medical card copy is required"),
-  medicalCardExpiresAt: z.string().optional(),
+  medicalCardExpiresAt: z.string().optional().refine(
+    (val) => {
+      // If empty or undefined, it's valid (optional field)
+      if (!val || val.trim() === "") return true;
+      
+      // Check date format
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(val)) return false;
+      
+      const [year, month, day] = val.split('-').map(Number);
+      
+      // Validate date components directly
+      if (year < 1900 || year > 2100) return false;
+      if (month < 1 || month > 12) return false;
+      if (day < 1 || day > 31) return false;
+      
+      // Create date in local timezone to avoid UTC parsing issues
+      const date = new Date(year, month - 1, day);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) return false;
+      
+      // Verify the date components match (prevents invalid dates like 2029-28-01)
+      if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
+        return false;
+      }
+      
+      // Check if date is not expired (compare dates only, not time)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
+      return date >= today;
+    },
+    {
+      message: "Medical card expiration date must be valid and not expired",
+    }
+  ),
 
   // Step 4
   employmentRecords: z.array(employmentRecordSchema).min(1, "At least one employment record is required"),
@@ -246,6 +298,7 @@ export default function DriverApplicationForm() {
         {
           employerName: "",
           addressLine1: "",
+          country: "US",
           city: "",
           state: "",
           zip: "",
@@ -264,10 +317,60 @@ export default function DriverApplicationForm() {
   const watchedValues = watch();
 
   const validateCurrentStep = async () => {
+    console.log("=== validateCurrentStep START ===");
+    console.log("Current step:", currentStep);
     let fieldsToValidate: (keyof DriverApplicationFormData)[] = [];
+
+    // Helper function to validate date format
+    const isValidDate = (dateString: string | undefined): boolean => {
+      if (!dateString || dateString.trim() === "") return false;
+      // Check if date string matches YYYY-MM-DD format (HTML5 date input format)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(dateString)) {
+        console.log("Date regex failed for:", dateString);
+        return false;
+      }
+      const [year, month, day] = dateString.split('-').map(Number);
+      
+      // Validate date components directly (more reliable than Date parsing)
+      if (year < 1900 || year > 2100) {
+        console.log("Year out of range:", year);
+        return false;
+      }
+      if (month < 1 || month > 12) {
+        console.log("Month out of range:", month);
+        return false;
+      }
+      if (day < 1 || day > 31) {
+        console.log("Day out of range:", day);
+        return false;
+      }
+      
+      // Create date in local timezone to avoid UTC parsing issues
+      const date = new Date(year, month - 1, day);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.log("Date is NaN:", dateString);
+        return false;
+      }
+      
+      // Verify the date components match (prevents invalid dates like 2029-28-01)
+      if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
+        console.log("Date components don't match:", {
+          input: { year, month, day },
+          parsed: { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() }
+        });
+        return false;
+      }
+      
+      console.log("Date is valid:", dateString);
+      return true;
+    };
 
     switch (currentStep) {
       case 1:
+        console.log("Validating Step 1");
         fieldsToValidate = [
           "applicantType",
           "firstName",
@@ -281,10 +384,20 @@ export default function DriverApplicationForm() {
           "currentZip",
           "livedAtCurrentMoreThan3Years",
         ];
+        console.log("Base fields to validate:", fieldsToValidate);
+        console.log("applicantType value:", watchedValues.applicantType);
+        
         // Add truck fields if owner operator
         if (watchedValues.applicantType === "OWNER_OPERATOR") {
           fieldsToValidate.push("truckYear", "truckMake");
+          console.log("Added truck fields for OWNER_OPERATOR");
+          console.log("truckYear:", watchedValues.truckYear);
+          console.log("truckMake:", watchedValues.truckMake);
         }
+        console.log("All fields to validate:", fieldsToValidate);
+        
+        // Don't validate date here - let trigger handle it
+        // We'll check it after trigger
         break;
       case 2:
         fieldsToValidate = [
@@ -295,15 +408,37 @@ export default function DriverApplicationForm() {
           "licenseFrontFile",
           "licenseBackFile",
         ];
+        // Validate date format
+        if (!isValidDate(watchedValues.licenseExpiresAt)) {
+          return false;
+        }
         break;
       case 3:
         fieldsToValidate = ["medicalCardFile"];
+        // Validate medical card expiration date if provided (optional field)
+        const medicalCardDate = watchedValues.medicalCardExpiresAt;
+        if (medicalCardDate && medicalCardDate.trim() !== "") {
+          // If date is provided, it must be valid and not expired
+          if (!isValidDate(medicalCardDate)) {
+            return false;
+          }
+          const expirationDate = new Date(medicalCardDate);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Reset time to compare dates only
+          if (expirationDate < today) {
+            return false; // Date is expired
+          }
+        }
         break;
       case 4:
         fieldsToValidate = ["employmentRecords"];
         break;
       case 5:
         fieldsToValidate = ["authorizationDateSigned"];
+        // Validate date format
+        if (!isValidDate(watchedValues.authorizationDateSigned)) {
+          return false;
+        }
         // Validate signature (either text or file)
         const hasAuthorizationSignature = 
           (watchedValues.authorizationSignature && watchedValues.authorizationSignature.trim() !== "") ||
@@ -317,6 +452,10 @@ export default function DriverApplicationForm() {
           "alcoholDrugName",
           "alcoholDrugDateSigned",
         ];
+        // Validate date format
+        if (!isValidDate(watchedValues.alcoholDrugDateSigned)) {
+          return false;
+        }
         // Validate signature (either text or file)
         const hasAlcoholDrugSignature = 
           (watchedValues.alcoholDrugSignature && watchedValues.alcoholDrugSignature.trim() !== "") ||
@@ -327,6 +466,10 @@ export default function DriverApplicationForm() {
         break;
       case 7:
         fieldsToValidate = ["pspFullName", "pspDateSigned"];
+        // Validate date format
+        if (!isValidDate(watchedValues.pspDateSigned)) {
+          return false;
+        }
         const hasPSPSignature = 
           (watchedValues.pspSignature && watchedValues.pspSignature.trim() !== "") ||
           watchedValues.pspSignatureFile;
@@ -339,6 +482,10 @@ export default function DriverApplicationForm() {
           "clearinghouseDateSigned",
           "clearinghouseRegistered",
         ];
+        // Validate date format
+        if (!isValidDate(watchedValues.clearinghouseDateSigned)) {
+          return false;
+        }
         const hasClearinghouseSignature = 
           (watchedValues.clearinghouseSignature && watchedValues.clearinghouseSignature.trim() !== "") ||
           watchedValues.clearinghouseSignatureFile;
@@ -348,6 +495,10 @@ export default function DriverApplicationForm() {
         break;
       case 9:
         fieldsToValidate = ["mvrDateSigned"];
+        // Validate date format
+        if (!isValidDate(watchedValues.mvrDateSigned)) {
+          return false;
+        }
         const hasMVRSignature = 
           (watchedValues.mvrSignature && watchedValues.mvrSignature.trim() !== "") ||
           watchedValues.mvrSignatureFile;
@@ -357,14 +508,142 @@ export default function DriverApplicationForm() {
         break;
     }
 
+    // Trigger validation for all fields in this step
+    console.log("Triggering validation for fields:", fieldsToValidate);
     const isValid = await trigger(fieldsToValidate);
-    return isValid;
+    console.log("Trigger result:", isValid);
+    
+    // If trigger returned false, there are validation errors
+    if (!isValid) {
+      console.log("Validation failed - trigger returned false");
+      console.log("Fields being validated:", fieldsToValidate);
+      console.log("Current errors object:", errors);
+      
+      // Check each field individually
+      for (const field of fieldsToValidate) {
+        const fieldError = errors[field];
+        if (fieldError) {
+          console.log(`Field "${field}" has error:`, fieldError);
+        } else {
+          console.log(`Field "${field}" is OK`);
+        }
+      }
+      return false;
+    }
+    
+    // Additional manual checks for critical fields that might not be caught by trigger
+    // Check applicantType specifically (radio buttons can be tricky)
+    if (fieldsToValidate.includes("applicantType")) {
+      const applicantTypeValue = watchedValues.applicantType;
+      console.log("Checking applicantType:", applicantTypeValue);
+      if (!applicantTypeValue || 
+          (applicantTypeValue !== "COMPANY_DRIVER" && applicantTypeValue !== "OWNER_OPERATOR")) {
+        console.log("applicantType validation failed:", applicantTypeValue);
+        return false;
+      }
+      console.log("applicantType is valid");
+    }
+    
+    // Check dateOfBirth
+    if (fieldsToValidate.includes("dateOfBirth")) {
+      const dateValue = watchedValues.dateOfBirth;
+      console.log("Checking dateOfBirth:", dateValue, "Type:", typeof dateValue);
+      if (!dateValue || typeof dateValue !== "string" || dateValue.trim() === "") {
+        console.log("dateOfBirth is empty or invalid type");
+        return false;
+      }
+      if (!isValidDate(dateValue)) {
+        console.log("dateOfBirth format is invalid:", dateValue, "Expected format: YYYY-MM-DD");
+        return false;
+      }
+      console.log("dateOfBirth is valid");
+    }
+    
+    // Wait a moment for errors to update, then check one more time
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Final check: verify no errors exist in the form state
+    console.log("Final error check - errors object:", errors);
+    const hasFormErrors = fieldsToValidate.some(field => {
+      const fieldError = errors[field];
+      if (fieldError) {
+        console.log(`Field "${field}" has error after trigger:`, fieldError);
+        return true;
+      }
+      return false;
+    });
+    
+    if (hasFormErrors) {
+      console.log("Final check failed - errors found");
+      return false;
+    }
+    
+    console.log("All validations passed!");
+    return true;
   };
 
   const formRef = useRef<HTMLDivElement>(null);
 
+  // Function to find the first step with errors and navigate to it
+  const findFirstStepWithErrors = (validationErrors: typeof errors): number => {
+    // Define which fields belong to which step
+    const stepFields: Record<number, (keyof DriverApplicationFormData)[]> = {
+      1: ["applicantType", "firstName", "lastName", "dateOfBirth", "phone", "email", "currentAddressLine1", "currentCity", "currentState", "currentZip", "livedAtCurrentMoreThan3Years", "truckYear", "truckMake"],
+      2: ["licenseNumber", "licenseState", "licenseClass", "licenseExpiresAt", "licenseFrontFile", "licenseBackFile"],
+      3: ["medicalCardFile", "medicalCardExpiresAt"],
+      4: ["employmentRecords"],
+      5: ["authorizationDateSigned", "authorizationSignature", "authorizationSignatureFile"],
+      6: ["alcoholDrugName", "alcoholDrugDateSigned", "alcoholDrugSignature", "alcoholDrugSignatureFile"],
+      7: ["pspFullName", "pspDateSigned", "pspSignature", "pspSignatureFile"],
+      8: ["clearinghouseDateSigned", "clearinghouseRegistered", "clearinghouseSignature", "clearinghouseSignatureFile"],
+      9: ["mvrDateSigned", "mvrSignature", "mvrSignatureFile"],
+    };
+
+    // Check each step in order
+    for (let step = 1; step <= TOTAL_STEPS; step++) {
+      const fields = stepFields[step] || [];
+      const hasError = fields.some(field => {
+        const error = validationErrors[field];
+        return error !== undefined && error !== null;
+      });
+      
+      if (hasError) {
+        return step;
+      }
+    }
+    
+    return currentStep; // If no errors found, stay on current step
+  };
+
+  // Function to scroll to first field with error
+  const scrollToFirstError = () => {
+    setTimeout(() => {
+      // Find first input/select/textarea with error class
+      const firstErrorField = formRef.current?.querySelector('.border-red-500, input:invalid, select:invalid, textarea:invalid');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Focus on the field
+        if (firstErrorField instanceof HTMLElement && 'focus' in firstErrorField) {
+          (firstErrorField as HTMLElement).focus();
+        }
+      } else {
+        // If no specific field found, scroll to top of form
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 300);
+  };
+
   const handleNext = async () => {
+    console.log("=== handleNext called ===");
+    console.log("Current step:", currentStep);
+    console.log("Watched values:", watchedValues);
+    console.log("Current errors:", errors);
+    
     const isValid = await validateCurrentStep();
+    
+    console.log("Validation result:", isValid);
+    console.log("Can proceed:", isValid && currentStep < TOTAL_STEPS);
+    
     if (isValid && currentStep < TOTAL_STEPS) {
       // Auto-fill names when transitioning from Step 1 to Step 2
       if (currentStep === 1) {
@@ -455,9 +734,10 @@ export default function DriverApplicationForm() {
           employerFax: record.employerFax || "",
           employerEmail: record.employerEmail || "",
           addressLine1: record.addressLine1,
+          country: record.country || "US",
           city: record.city,
           state: record.state,
-          zip: record.zip,
+          zip: record.zip || "",
           positionHeld: record.positionHeld || "",
           dateFrom: record.dateFrom || "",
           dateTo: record.dateTo || "",
@@ -726,8 +1006,16 @@ export default function DriverApplicationForm() {
 
         {/* Error Message */}
         {submitError && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 text-sm">{submitError}</p>
+          <div className="mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <h3 className="text-red-800 font-semibold mb-1">Please fix the following errors:</h3>
+                <p className="text-red-700 text-sm whitespace-pre-line">{submitError}</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -792,10 +1080,101 @@ export default function DriverApplicationForm() {
                   (errors) => {
                     // This callback is called if validation fails
                     console.log("Validation errors:", errors);
-                    setSubmitError("Please check all fields and fix any errors before submitting.");
-                    setTimeout(() => {
-                      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
+                    
+                    // Find the first step with errors
+                    const firstErrorStep = findFirstStepWithErrors(errors);
+                    
+                    // Navigate to that step
+                    if (firstErrorStep !== currentStep) {
+                      setCurrentStep(firstErrorStep);
+                    }
+                    
+                    // Collect error messages for display with user-friendly field names
+                    const errorMessages: string[] = [];
+                    const fieldNameMap: Record<string, string> = {
+                      applicantType: "Driver Type",
+                      firstName: "First Name",
+                      lastName: "Last Name",
+                      dateOfBirth: "Date of Birth",
+                      phone: "Phone",
+                      email: "Email",
+                      currentAddressLine1: "Address",
+                      currentCity: "City",
+                      currentState: "State",
+                      currentZip: "Zip Code",
+                      truckYear: "Truck Year",
+                      truckMake: "Truck Make",
+                      licenseNumber: "License Number",
+                      licenseState: "License State",
+                      licenseClass: "License Class",
+                      licenseExpiresAt: "License Expiration Date",
+                      licenseFrontFile: "License Front Photo",
+                      licenseBackFile: "License Back Photo",
+                      medicalCardFile: "Medical Card",
+                      medicalCardExpiresAt: "Medical Card Expiration Date",
+                      employmentRecords: "Employment History",
+                      authorizationDateSigned: "Authorization Date",
+                      authorizationSignature: "Authorization Signature",
+                      authorizationSignatureFile: "Authorization Signature",
+                      alcoholDrugName: "Name",
+                      alcoholDrugDateSigned: "Date Signed",
+                      alcoholDrugSignature: "Signature",
+                      alcoholDrugSignatureFile: "Signature",
+                      pspFullName: "Full Name",
+                      pspDateSigned: "Date Signed",
+                      pspSignature: "Signature",
+                      pspSignatureFile: "Signature",
+                      clearinghouseDateSigned: "Date Signed",
+                      clearinghouseRegistered: "Clearinghouse Registration",
+                      clearinghouseSignature: "Signature",
+                      clearinghouseSignatureFile: "Signature",
+                      mvrDateSigned: "Date Signed",
+                      mvrSignature: "Signature",
+                      mvrSignatureFile: "Signature",
+                    };
+                    
+                    const stepFields: Record<number, (keyof DriverApplicationFormData)[]> = {
+                      1: ["applicantType", "firstName", "lastName", "dateOfBirth", "phone", "email", "currentAddressLine1", "currentCity", "currentState", "currentZip", "truckYear", "truckMake"],
+                      2: ["licenseNumber", "licenseState", "licenseClass", "licenseExpiresAt", "licenseFrontFile", "licenseBackFile"],
+                      3: ["medicalCardFile", "medicalCardExpiresAt"],
+                      4: ["employmentRecords"],
+                      5: ["authorizationDateSigned", "authorizationSignature", "authorizationSignatureFile"],
+                      6: ["alcoholDrugName", "alcoholDrugDateSigned", "alcoholDrugSignature", "alcoholDrugSignatureFile"],
+                      7: ["pspFullName", "pspDateSigned", "pspSignature", "pspSignatureFile"],
+                      8: ["clearinghouseDateSigned", "clearinghouseRegistered", "clearinghouseSignature", "clearinghouseSignatureFile"],
+                      9: ["mvrDateSigned", "mvrSignature", "mvrSignatureFile"],
+                    };
+                    
+                    const fields = stepFields[firstErrorStep] || [];
+                    fields.forEach(field => {
+                      const error = errors[field];
+                      if (error?.message) {
+                        const friendlyName = fieldNameMap[field as string] || field.toString();
+                        errorMessages.push(`• ${friendlyName}: ${error.message}`);
+                      }
+                    });
+                    
+                    // Show detailed error message
+                    if (errorMessages.length > 0) {
+                      const stepNames: Record<number, string> = {
+                        1: "Applicant Information",
+                        2: "License Information",
+                        3: "Medical Card",
+                        4: "Employment History",
+                        5: "Authorization & Certification",
+                        6: "Alcohol & Drug Test Statement",
+                        7: "PSP Driver Disclosure",
+                        8: "FMCSA Clearinghouse Consent",
+                        9: "MVR Release Consent",
+                      };
+                      const stepName = stepNames[firstErrorStep] || `Step ${firstErrorStep}`;
+                      setSubmitError(`Step ${firstErrorStep} - ${stepName}:\n\n${errorMessages.slice(0, 5).join('\n')}${errorMessages.length > 5 ? `\n\n...and ${errorMessages.length - 5} more error(s)` : ''}`);
+                    } else {
+                      setSubmitError(`Please check all fields on Step ${firstErrorStep} and fix any errors before submitting.`);
+                    }
+                    
+                    // Scroll to first error field
+                    scrollToFirstError();
                   }
                 )();
               }}

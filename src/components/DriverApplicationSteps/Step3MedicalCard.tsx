@@ -66,8 +66,15 @@ export default function Step3MedicalCard({
           <input
             type="date"
             {...register("medicalCardExpiresAt")}
-            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+            className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
+              errors.medicalCardExpiresAt ? "border-red-500" : "border-gray-300"
+            }`}
           />
+          {errors.medicalCardExpiresAt?.message && (
+            <p className="text-red-500 text-xs mt-1">
+              {String(errors.medicalCardExpiresAt.message)}
+            </p>
+          )}
         </div>
       </div>
     </div>

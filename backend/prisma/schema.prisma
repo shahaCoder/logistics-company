@@ -139,9 +139,10 @@ model EmploymentRecord {
   employerEmail String?
 
   addressLine1 String
+  country      String  @default("US")
   city         String
   state        String
-  zip          String
+  zip          String?
 
   positionHeld String?
   dateFrom     DateTime?

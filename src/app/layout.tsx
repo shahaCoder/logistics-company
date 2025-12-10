@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Montserrat, Cinzel } from "next/font/google";
+import { Montserrat, Cinzel, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
 
@@ -15,6 +15,14 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
   display: "swap", // Optimize font loading
+  preload: true,
+});
+
+const dancingScript = Dancing_Script({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-dancing-script",
+  subsets: ["latin"],
+  display: "swap",
   preload: true,
 });
 
@@ -68,7 +76,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${montserrat.variable} ${cinzel.variable} antialiased`}>
+      <body className={`${montserrat.variable} ${cinzel.variable} ${dancingScript.variable} antialiased`}>
         <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>

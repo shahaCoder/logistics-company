@@ -31,6 +31,7 @@ export default function Step4EmploymentHistory({
         employerFax: "",
         employerEmail: "",
         addressLine1: "",
+        country: "US",
         city: "",
         state: "",
         zip: "",
@@ -108,9 +109,11 @@ export default function Step4EmploymentHistory({
                 <input
                   type="text"
                   value={record.employerName}
-                  onChange={(e) =>
-                    updateEmploymentRecord(index, "employerName", e.target.value.toUpperCase())
-                  }
+                  {...englishOnlyInputProps}
+                  onChange={(e) => {
+                    blockNonEnglishInput(e);
+                    updateEmploymentRecord(index, "employerName", e.target.value.toUpperCase());
+                  }}
                   className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
                 />
               </div>
@@ -180,7 +183,70 @@ export default function Step4EmploymentHistory({
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
+                    Country <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    value={record.country || "US"}
+                    onChange={(e) =>
+                      updateEmploymentRecord(index, "country", e.target.value)
+                    }
+                    className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  >
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="MX">Mexico</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="AU">Australia</option>
+                    <option value="DE">Germany</option>
+                    <option value="FR">France</option>
+                    <option value="IT">Italy</option>
+                    <option value="ES">Spain</option>
+                    <option value="NL">Netherlands</option>
+                    <option value="BE">Belgium</option>
+                    <option value="CH">Switzerland</option>
+                    <option value="AT">Austria</option>
+                    <option value="SE">Sweden</option>
+                    <option value="NO">Norway</option>
+                    <option value="DK">Denmark</option>
+                    <option value="FI">Finland</option>
+                    <option value="PL">Poland</option>
+                    <option value="CZ">Czech Republic</option>
+                    <option value="HU">Hungary</option>
+                    <option value="RO">Romania</option>
+                    <option value="BG">Bulgaria</option>
+                    <option value="GR">Greece</option>
+                    <option value="PT">Portugal</option>
+                    <option value="IE">Ireland</option>
+                    <option value="NZ">New Zealand</option>
+                    <option value="ZA">South Africa</option>
+                    <option value="BR">Brazil</option>
+                    <option value="AR">Argentina</option>
+                    <option value="CL">Chile</option>
+                    <option value="CO">Colombia</option>
+                    <option value="PE">Peru</option>
+                    <option value="VE">Venezuela</option>
+                    <option value="EC">Ecuador</option>
+                    <option value="UY">Uruguay</option>
+                    <option value="PY">Paraguay</option>
+                    <option value="BO">Bolivia</option>
+                    <option value="RU">Russia</option>
+                    <option value="BY">Belarus</option>
+                    <option value="KZ">Kazakhstan</option>
+                    <option value="AM">Armenia</option>
+                    <option value="AZ">Azerbaijan</option>
+                    <option value="KG">Kyrgyzstan</option>
+                    <option value="MD">Moldova</option>
+                    <option value="TJ">Tajikistan</option>
+                    <option value="TM">Turkmenistan</option>
+                    <option value="UZ">Uzbekistan</option>
+                    <option value="UA">Ukraine</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-1">
                     City <span className="text-red-600">*</span>
@@ -188,52 +254,77 @@ export default function Step4EmploymentHistory({
                   <input
                     type="text"
                     value={record.city}
-                    onChange={(e) =>
-                      updateEmploymentRecord(index, "city", e.target.value.toUpperCase())
-                    }
+                    {...englishOnlyInputProps}
+                    onChange={(e) => {
+                      blockNonEnglishInput(e);
+                      updateEmploymentRecord(index, "city", e.target.value.toUpperCase());
+                    }}
                     className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-1">
-                    State <span className="text-red-600">*</span>
-                  </label>
-                  <select
-                    value={record.state}
-                    onChange={(e) =>
-                      updateEmploymentRecord(index, "state", e.target.value)
-                    }
-                    className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
-                  >
-                    <option value="">Select</option>
-                    {[
-                      "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
-                      "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-                      "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-                      "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-                      "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
-                    ].map((state) => (
-                      <option key={state} value={state}>
-                        {state}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-1">
-                    Zip <span className="text-red-600">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={record.zip}
-                    onChange={(e) =>
-                      updateEmploymentRecord(index, "zip", e.target.value.toUpperCase())
-                    }
-                    className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {record.country === "US" || !record.country ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-800 mb-1">
+                        State <span className="text-red-600">*</span>
+                      </label>
+                      <select
+                        value={record.state}
+                        onChange={(e) =>
+                          updateEmploymentRecord(index, "state", e.target.value)
+                        }
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                      >
+                        <option value="">Select State</option>
+                        {[
+                          "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+                          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+                          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+                          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+                          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+                        ].map((state) => (
+                          <option key={state} value={state}>
+                            {state}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-800 mb-1">
+                        Zip Code <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={record.zip}
+                        {...englishOnlyInputProps}
+                        onChange={(e) => {
+                          blockNonEnglishInput(e);
+                          updateEmploymentRecord(index, "zip", e.target.value.toUpperCase());
+                        }}
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-800 mb-1">
+                      State/Province/Region <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={record.state || ""}
+                      {...englishOnlyInputProps}
+                      onChange={(e) => {
+                        blockNonEnglishInput(e);
+                        updateEmploymentRecord(index, "state", e.target.value.toUpperCase());
+                      }}
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -244,9 +335,11 @@ export default function Step4EmploymentHistory({
                   <input
                     type="text"
                     value={record.positionHeld || ""}
-                    onChange={(e) =>
-                      updateEmploymentRecord(index, "positionHeld", e.target.value.toUpperCase())
-                    }
+                    {...englishOnlyInputProps}
+                    onChange={(e) => {
+                      blockNonEnglishInput(e);
+                      updateEmploymentRecord(index, "positionHeld", e.target.value.toUpperCase());
+                    }}
                     className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
                 </div>
@@ -258,9 +351,11 @@ export default function Step4EmploymentHistory({
                   <input
                     type="text"
                     value={record.equipmentClass || ""}
-                    onChange={(e) =>
-                      updateEmploymentRecord(index, "equipmentClass", e.target.value.toUpperCase())
-                    }
+                    {...englishOnlyInputProps}
+                    onChange={(e) => {
+                      blockNonEnglishInput(e);
+                      updateEmploymentRecord(index, "equipmentClass", e.target.value.toUpperCase());
+                    }}
                     className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
                 </div>
@@ -300,11 +395,13 @@ export default function Step4EmploymentHistory({
                 <label className="block text-sm font-medium text-gray-800 mb-1">
                   Reason for Leaving
                 </label>
-                <textarea
-                  value={record.reasonForLeaving || ""}
-                  onChange={(e) =>
-                    updateEmploymentRecord(index, "reasonForLeaving", e.target.value)
-                  }
+                  <textarea
+                    value={record.reasonForLeaving || ""}
+                    {...englishOnlyInputProps}
+                    onChange={(e) => {
+                      blockNonEnglishInput(e);
+                      updateEmploymentRecord(index, "reasonForLeaving", e.target.value.toUpperCase());
+                    }}
                   rows={3}
                   className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
                 />
