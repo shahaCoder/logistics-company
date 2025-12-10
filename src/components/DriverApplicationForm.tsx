@@ -695,6 +695,12 @@ export default function DriverApplicationForm() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      
+      // Проверяем, что API URL установлен в production
+      if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_API_URL) {
+        console.error("NEXT_PUBLIC_API_URL is not set in production!");
+        throw new Error("Server configuration error. Please contact support.");
+      }
 
       // Prepare FormData
       const formData = new FormData();
@@ -833,26 +839,64 @@ export default function DriverApplicationForm() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || errorData.error || "Unknown error";
+        let errorData: any = {};
+        const contentType = response.headers.get("content-type");
+        
+        try {
+          if (contentType && contentType.includes("application/json")) {
+            errorData = await response.json();
+          } else {
+            const text = await response.text();
+            errorData = { message: text || `HTTP ${response.status}` };
+          }
+        } catch (parseError) {
+          errorData = { message: `HTTP ${response.status}: ${response.statusText}` };
+        }
+        
+        const errorMessage = errorData.message || errorData.error || errorData.details || "Unknown error";
+        
+        // Логируем детали ошибки для отладки (только в development)
+        if (process.env.NODE_ENV === "development") {
+          console.error("Backend error details:", {
+            status: response.status,
+            statusText: response.statusText,
+            errorMessage,
+            errorData,
+            apiUrl,
+          });
+        }
         
         // Преобразуем технические ошибки в понятные сообщения для пользователей
         let userFriendlyMessage = "Something went wrong. Please try again or contact our office.";
         
-        if (errorMessage.includes("Validation failed") || errorMessage.includes("validation")) {
-          userFriendlyMessage = "Please check all required fields and try again.";
-        } else if (errorMessage.includes("File") || errorMessage.includes("file") || errorMessage.includes("upload")) {
-          userFriendlyMessage = "There was an issue with one of your uploaded files. Please check that all files are valid images or PDFs and try again.";
-        } else if (errorMessage.includes("date") || errorMessage.includes("Date") || errorMessage.includes("expiration")) {
-          userFriendlyMessage = "Please check all date fields and ensure they are valid dates.";
-        } else if (errorMessage.includes("SSN") || errorMessage.includes("ssn")) {
-          userFriendlyMessage = "Something went wrong. Please try again or contact our office.";
-        } else if (errorMessage.includes("network") || errorMessage.includes("fetch") || errorMessage.includes("Failed to fetch")) {
-          userFriendlyMessage = "Network error. Please check your internet connection and try again.";
+        // Проверяем конкретные типы ошибок
+        if (response.status === 400) {
+          // Bad Request - обычно валидация
+          if (errorMessage.includes("Validation failed") || 
+              errorMessage.includes("validation") || 
+              errorMessage.includes("required") ||
+              errorMessage.includes("invalid") ||
+              errorMessage.toLowerCase().includes("field")) {
+            userFriendlyMessage = "Please check all required fields and ensure all information is correct.";
+          } else if (errorMessage.includes("date") || errorMessage.includes("Date") || errorMessage.includes("expiration")) {
+            userFriendlyMessage = "Please check all date fields and ensure they are valid dates in the correct format.";
+          } else if (errorMessage.includes("File") || errorMessage.includes("file") || errorMessage.includes("upload")) {
+            userFriendlyMessage = "There was an issue with one of your uploaded files. Please check that all files are valid images or PDFs and try again.";
+          } else {
+            userFriendlyMessage = "Please check all required fields and try again.";
+          }
+        } else if (response.status === 422) {
+          // Unprocessable Entity - валидация данных
+          userFriendlyMessage = "Please check all required fields and ensure all information is correct.";
+        } else if (response.status === 413) {
+          // Payload Too Large
+          userFriendlyMessage = "File size is too large. Please reduce the size of your uploaded files and try again.";
         } else if (response.status === 429) {
           userFriendlyMessage = "Too many requests. Please wait a moment and try again.";
         } else if (response.status >= 500) {
           userFriendlyMessage = "Server error. Please try again in a few moments or contact our office.";
+        } else if (errorMessage.includes("network") || errorMessage.includes("fetch") || errorMessage.includes("Failed to fetch")) {
+          userFriendlyMessage = "Network error. Please check your internet connection and try again.";
         }
         
         throw new Error(userFriendlyMessage);
@@ -862,10 +906,22 @@ export default function DriverApplicationForm() {
     } catch (error) {
       // Don't log sensitive data - only log safe error message
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      
+      // Логируем детали для отладки
       if (process.env.NODE_ENV === "development") {
-        console.error("Submission error:", errorMessage);
+        console.error("Submission error:", {
+          message: errorMessage,
+          error: error,
+          apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000",
+        });
       }
-      setSubmitError(errorMessage);
+      
+      // Если это ошибка сети, показываем более понятное сообщение
+      if (errorMessage.includes("Failed to fetch") || errorMessage.includes("NetworkError")) {
+        setSubmitError("Unable to connect to server. Please check your internet connection and try again.");
+      } else {
+        setSubmitError(errorMessage);
+      }
     } finally {
       setIsSubmitting(false);
     }
