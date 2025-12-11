@@ -31,13 +31,34 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction) 
     ? (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
     : ['http://localhost:3000', process.env.FRONTEND_URL].filter(Boolean);
 
+  // Логируем для отладки в production
+  if (process.env.NODE_ENV === 'production') {
+    console.log('CSRF check:', {
+      origin,
+      referer,
+      allowedOrigins,
+      path: req.path,
+    });
+  }
+
   // Check Origin header
   if (origin) {
-    const originUrl = new URL(origin);
-    const originHost = `${originUrl.protocol}//${originUrl.host}`;
-    
-    if (!allowedOrigins.includes(originHost)) {
-      return res.status(403).json({ error: 'CSRF protection: Invalid origin' });
+    try {
+      const originUrl = new URL(origin);
+      const originHost = `${originUrl.protocol}//${originUrl.host}`;
+      
+      if (!allowedOrigins.includes(originHost)) {
+        console.warn('CSRF: Invalid origin', { originHost, allowedOrigins });
+        return res.status(403).json({ 
+          error: 'CSRF protection: Invalid origin',
+          message: 'Request origin is not allowed',
+        });
+      }
+    } catch (urlError) {
+      console.error('CSRF: Invalid origin URL format', { origin, error: urlError });
+      return res.status(403).json({ 
+        error: 'CSRF protection: Invalid origin format',
+      });
     }
   }
 

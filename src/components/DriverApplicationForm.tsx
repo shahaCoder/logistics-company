@@ -633,11 +633,85 @@ export default function DriverApplicationForm() {
     }, 300);
   };
 
+  // Function to save all signatures before step change
+  const saveAllSignatures = async () => {
+    // Find all signature canvas elements
+    const signatureCanvases = formRef.current?.querySelectorAll('.signature-canvas');
+    if (!signatureCanvases || signatureCanvases.length === 0) return;
+    
+    const savePromises: Promise<void>[] = [];
+    
+    signatureCanvases.forEach((canvas) => {
+      // Try to find the react-signature-canvas instance through various methods
+      const reactCanvas = (canvas as any);
+      
+      // Method 1: Try to find through parent component
+      let sigPad: any = null;
+      
+      // Check if canvas has direct reference
+      if (reactCanvas.__reactInternalFiber) {
+        let fiber = reactCanvas.__reactInternalFiber;
+        while (fiber) {
+          if (fiber.memoizedProps?.ref?.current) {
+            sigPad = fiber.memoizedProps.ref.current;
+            break;
+          }
+          fiber = fiber.return;
+        }
+      }
+      
+      // Method 2: Try to find through parent element
+      if (!sigPad) {
+        const parent = canvas.parentElement;
+        if (parent) {
+          const parentComponent = (parent as any).__reactInternalFiber;
+          if (parentComponent) {
+            let fiber = parentComponent;
+            while (fiber) {
+              if (fiber.memoizedProps?.ref?.current) {
+                sigPad = fiber.memoizedProps.ref.current;
+                break;
+              }
+              fiber = fiber.return;
+            }
+          }
+        }
+      }
+      
+      if (sigPad && typeof sigPad.saveSignature === 'function') {
+        const isEmpty = typeof sigPad.isEmpty === 'function' ? sigPad.isEmpty() : false;
+        if (!isEmpty) {
+          savePromises.push(
+            new Promise((resolve) => {
+              try {
+                sigPad.saveSignature();
+                setTimeout(resolve, 50); // Small delay to ensure save completes
+              } catch (error) {
+                console.warn('Failed to save signature:', error);
+                resolve();
+              }
+            })
+          );
+        }
+      }
+    });
+    
+    // Wait for all signatures to be saved
+    if (savePromises.length > 0) {
+      await Promise.all(savePromises);
+      // Additional delay to ensure state updates
+      await new Promise(resolve => setTimeout(resolve, 150));
+    }
+  };
+
   const handleNext = async () => {
     console.log("=== handleNext called ===");
     console.log("Current step:", currentStep);
     console.log("Watched values:", watchedValues);
     console.log("Current errors:", errors);
+    
+    // Save any pending signatures before validation
+    await saveAllSignatures();
     
     const isValid = await validateCurrentStep();
     

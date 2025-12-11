@@ -229,18 +229,27 @@ export default function Step6PSP({
                   <SignatureCanvas
                     initialDataUrl={signatureDataUrl}
                     onSave={(dataUrl) => {
-                      fetch(dataUrl)
-                        .then((res) => res.blob())
-                        .then((blob) => {
-                          const file = new File([blob], "signature.png", {
-                            type: "image/png",
+                      try {
+                        fetch(dataUrl)
+                          .then((res) => res.blob())
+                          .then((blob) => {
+                            const file = new File([blob], "signature.png", {
+                              type: "image/png",
+                            });
+                            setValue("pspSignatureFile", file, {
+                              shouldValidate: true,
+                            });
+                            setValue("pspSignature", "Drawn signature", {
+                              shouldValidate: false,
+                            });
+                            setSignatureDataUrl(dataUrl);
+                          })
+                          .catch((error) => {
+                            console.error("Error saving signature:", error);
                           });
-                          setValue("pspSignatureFile", file, {
-                            shouldValidate: true,
-                          });
-                          setValue("pspSignature", "Drawn signature");
-                          setSignatureDataUrl(dataUrl);
-                        });
+                      } catch (error) {
+                        console.error("Error processing signature:", error);
+                      }
                     }}
                     onClear={() => {
                       setValue("pspSignatureFile", undefined);

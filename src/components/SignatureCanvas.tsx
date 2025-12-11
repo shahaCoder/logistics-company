@@ -40,11 +40,21 @@ export default function SignatureCanvasComponent({
   // Calculate responsive canvas size
   useEffect(() => {
     const updateSize = () => {
-      if (canvasRef.current) {
+      if (canvasRef.current && sigPadRef.current) {
         const containerWidth = canvasRef.current.parentElement?.offsetWidth || window.innerWidth - 64;
         const isMobile = window.innerWidth < 768;
         const calculatedWidth = isMobile ? Math.min(containerWidth, width) : width;
         const calculatedHeight = isMobile ? Math.min(calculatedWidth * 0.5, height) : height;
+        
+        // Save current signature before resize
+        let currentDataUrl: string | null = null;
+        try {
+          if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
+            currentDataUrl = sigPadRef.current.toDataURL("image/png");
+          }
+        } catch (error) {
+          console.warn('Failed to save signature before resize:', error);
+        }
         
         setCanvasSize({
           width: calculatedWidth,
@@ -52,12 +62,31 @@ export default function SignatureCanvasComponent({
         });
 
         // Resize canvas if it exists
-        if (sigPadRef.current) {
-          const canvas = sigPadRef.current.getCanvas();
+        const canvas = sigPadRef.current.getCanvas();
+        const ctx = canvas.getContext('2d');
+        if (ctx && currentDataUrl) {
           canvas.width = calculatedWidth;
           canvas.height = calculatedHeight;
-          // Clear and redraw if needed
-          sigPadRef.current.clear();
+          
+          // Restore signature after resize
+          const img = new Image();
+          img.onload = () => {
+            ctx.drawImage(img, 0, 0, calculatedWidth, calculatedHeight);
+            // Trigger save after restore to ensure it's saved
+            setTimeout(() => {
+              if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
+                saveSignature();
+              }
+            }, 50);
+          };
+          img.onerror = () => {
+            console.error('Failed to restore signature after resize');
+          };
+          img.src = currentDataUrl;
+        } else if (ctx) {
+          // Just resize if no signature to restore
+          canvas.width = calculatedWidth;
+          canvas.height = calculatedHeight;
         }
       }
     };
@@ -81,19 +110,29 @@ export default function SignatureCanvasComponent({
         clearTimeout(saveTimeoutRef.current);
       }
       saveTimeoutRef.current = setTimeout(() => {
-        saveSignature();
-      }, 500); // Debounce 500ms
+        if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
+          saveSignature();
+        }
+      }, 200); // Debounce 200ms (reduced for faster save)
     };
 
     // Listen to canvas drawing events
     canvas.addEventListener("mouseup", handleCanvasChange);
     canvas.addEventListener("touchend", handleCanvasChange);
+    canvas.addEventListener("mouseleave", handleCanvasChange); // Save when mouse leaves canvas
+    canvas.addEventListener("pointerup", handleCanvasChange); // Also listen to pointer events
 
     return () => {
       canvas.removeEventListener("mouseup", handleCanvasChange);
       canvas.removeEventListener("touchend", handleCanvasChange);
+      canvas.removeEventListener("mouseleave", handleCanvasChange);
+      canvas.removeEventListener("pointerup", handleCanvasChange);
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
+        // Save immediately on unmount if there's pending save
+        if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
+          saveSignature();
+        }
       }
     };
   }, [autoSave, saveSignature]);
@@ -101,9 +140,46 @@ export default function SignatureCanvasComponent({
   const handleClear = () => {
     if (sigPadRef.current) {
       sigPadRef.current.clear();
+      setIsRestored(false);
       onClear();
     }
   };
+
+  // Save signature when component loses focus or unmounts
+  useEffect(() => {
+    const handleBlur = () => {
+      if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
+        // Small delay to ensure drawing is complete
+        setTimeout(() => {
+          saveSignature();
+        }, 100);
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
+        saveSignature();
+      }
+    };
+
+    // Add blur listener to canvas container
+    const container = canvasRef.current;
+    if (container) {
+      container.addEventListener('blur', handleBlur, true);
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      if (container) {
+        container.removeEventListener('blur', handleBlur, true);
+      }
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Save on unmount if there's a signature
+      if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
+        saveSignature();
+      }
+    };
+  }, [saveSignature]);
 
   // Restore signature from initialDataUrl if provided
   useEffect(() => {

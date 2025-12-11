@@ -26,12 +26,20 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   ? (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
   : ['http://localhost:3000', process.env.FRONTEND_URL].filter(Boolean);
 
+// Логируем конфигурацию CORS при старте
+console.log('CORS configuration:', {
+  nodeEnv: process.env.NODE_ENV,
+  frontendUrl: process.env.FRONTEND_URL,
+  allowedOrigins,
+});
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.warn('CORS: Blocked origin', { origin, allowedOrigins });
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -76,10 +84,26 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Unhandled error:', err);
+  console.error('Unhandled error:', {
+    message: err.message,
+    stack: err.stack,
+    name: err.name,
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString(),
+  });
+  
+  // CORS errors
+  if (err.message.includes('CORS')) {
+    return res.status(403).json({
+      error: 'CORS error',
+      message: 'Request origin is not allowed',
+    });
+  }
+  
   res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined,
+    message: process.env.NODE_ENV === 'development' ? err.message : 'An unexpected error occurred',
   });
 });
 

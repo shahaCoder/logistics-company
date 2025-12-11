@@ -93,6 +93,19 @@ const handleMulterError = (err: any, req: Request, res: Response, next: any) => 
         message: 'File size exceeds 10MB limit',
       });
     }
+    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      // Log unexpected field for debugging
+      console.error('Multer unexpected field error:', {
+        field: err.field,
+        message: err.message,
+        allowedFields: uploadFields.map(f => f.name),
+      });
+      return res.status(400).json({
+        success: false,
+        error: 'File upload error',
+        message: `Unexpected file field: ${err.field}. Please check your form submission.`,
+      });
+    }
     return res.status(400).json({
       success: false,
       error: 'File upload error',
@@ -318,7 +331,16 @@ router.post(
         data: result,
       });
     } catch (error) {
-      console.error('Error creating driver application:', error);
+      // Логируем детали ошибки для отладки
+      console.error('Error creating driver application:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        timestamp: new Date().toISOString(),
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+      });
 
       // Don't expose sensitive information
       const errorMessage = error instanceof Error ? error.message : 'Internal server error';
@@ -326,10 +348,14 @@ router.post(
       // Mask any SSN references in error messages
       const safeMessage = errorMessage.replace(/\d{3}-?\d{2}-?\d{4}/g, '***-**-****');
 
+      // В production показываем общее сообщение, в development - детали
+      const isDevelopment = process.env.NODE_ENV === 'development';
+
       res.status(500).json({
         success: false,
         error: 'Failed to create driver application',
-        message: safeMessage,
+        message: isDevelopment ? safeMessage : 'Internal server error. Please try again later or contact support.',
+        ...(isDevelopment && { details: error instanceof Error ? error.stack : undefined }),
       });
     }
   }
