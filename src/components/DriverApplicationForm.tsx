@@ -1052,7 +1052,7 @@ export default function DriverApplicationForm() {
 
       {/* Form Steps */}
       <form 
-        lang="en"
+        lang="en-US"
         onSubmit={(e) => {
           // ALWAYS prevent default form submission
           // Form will ONLY submit via explicit button click handler below

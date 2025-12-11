@@ -10,6 +10,37 @@ import {
 const prisma = new PrismaClient();
 
 /**
+ * Parse a date string in YYYY-MM-DD format as a local date (not UTC)
+ * This prevents timezone-related date shifts (e.g., 10/31/2025 becoming 11/01/2025)
+ */
+function parseLocalDate(dateString: string): Date {
+  // Validate format: YYYY-MM-DD
+  const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const match = dateString.match(dateRegex);
+  if (!match) {
+    throw new Error(`Invalid date format: ${dateString}. Expected YYYY-MM-DD`);
+  }
+  
+  const year = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const day = parseInt(match[3], 10);
+  
+  // Create date in local timezone (not UTC)
+  const date = new Date(year, month - 1, day);
+  
+  // Verify the date is valid (handles cases like 2025-02-30)
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() + 1 !== month ||
+    date.getDate() !== day
+  ) {
+    throw new Error(`Invalid date: ${dateString}`);
+  }
+  
+  return date;
+}
+
+/**
  * Creates a new driver application with all related data
  */
 export async function createDriverApplication(
@@ -30,20 +61,25 @@ export async function createDriverApplication(
     ssnEncrypted = encryptSensitive(ssn);
   }
 
-  // Parse dates with validation
-  const dateOfBirth = new Date(dto.dateOfBirth);
-  if (isNaN(dateOfBirth.getTime())) {
-    throw new Error('Invalid date of birth');
+  // Parse dates with validation (using local timezone to avoid day shifts)
+  let dateOfBirth: Date;
+  try {
+    dateOfBirth = parseLocalDate(dto.dateOfBirth);
+  } catch (error) {
+    throw new Error(`Invalid date of birth: ${error instanceof Error ? error.message : 'Invalid format'}`);
   }
   
-  const licenseExpiresAt = new Date(dto.license.expiresAt);
-  if (isNaN(licenseExpiresAt.getTime())) {
-    throw new Error('Invalid license expiration date');
+  let licenseExpiresAt: Date;
+  try {
+    licenseExpiresAt = parseLocalDate(dto.license.expiresAt);
+  } catch (error) {
+    throw new Error(`Invalid license expiration date: ${error instanceof Error ? error.message : 'Invalid format'}`);
   }
   
   // Validate date is not too far in the future (reasonable limit: 50 years)
   const maxFutureDate = new Date();
   maxFutureDate.setFullYear(maxFutureDate.getFullYear() + 50);
+  maxFutureDate.setHours(23, 59, 59, 999); // End of day
   if (licenseExpiresAt > maxFutureDate) {
     throw new Error('License expiration date is too far in the future');
   }
@@ -51,12 +87,16 @@ export async function createDriverApplication(
   // Handle optional medical card expiration date
   let medicalCardExpiresAt: Date | null = null;
   if (dto.medicalCardExpiresAt && dto.medicalCardExpiresAt.trim()) {
-    const parsedDate = new Date(dto.medicalCardExpiresAt);
-    // Only set if date is valid, otherwise ignore (field is optional)
-    if (!isNaN(parsedDate.getTime()) && parsedDate <= maxFutureDate) {
-      medicalCardExpiresAt = parsedDate;
+    try {
+      const parsedDate = parseLocalDate(dto.medicalCardExpiresAt);
+      // Only set if date is valid and not too far in the future
+      if (parsedDate <= maxFutureDate) {
+        medicalCardExpiresAt = parsedDate;
+      }
+    } catch (error) {
+      // If date is invalid, we just ignore it since the field is optional
+      console.warn('Invalid medical card expiration date, ignoring:', dto.medicalCardExpiresAt);
     }
-    // If date is invalid, we just ignore it since the field is optional
   }
 
   // Create application in transaction with increased timeout (30 seconds)
@@ -204,8 +244,8 @@ export async function createDriverApplication(
           city: addr.city,
           state: addr.state,
           zip: addr.zip,
-          fromDate: addr.fromDate ? new Date(addr.fromDate) : null,
-          toDate: addr.toDate ? new Date(addr.toDate) : null,
+          fromDate: addr.fromDate ? parseLocalDate(addr.fromDate) : null,
+          toDate: addr.toDate ? parseLocalDate(addr.toDate) : null,
         })),
       });
     }
@@ -225,8 +265,8 @@ export async function createDriverApplication(
           state: record.state,
           zip: record.zip || null,
           positionHeld: record.positionHeld || null,
-          dateFrom: record.dateFrom ? new Date(record.dateFrom) : null,
-          dateTo: record.dateTo ? new Date(record.dateTo) : null,
+          dateFrom: record.dateFrom ? parseLocalDate(record.dateFrom) : null,
+          dateTo: record.dateTo ? parseLocalDate(record.dateTo) : null,
           reasonForLeaving: record.reasonForLeaving || null,
           equipmentClass: record.equipmentClass || null,
           wasSubjectToFMCSR: record.wasSubjectToFMCSR,
@@ -258,7 +298,7 @@ export async function createDriverApplication(
           applicationId: app.id,
           type: consent.type,
           accepted: consent.accepted,
-          signedAt: consent.signedAt ? new Date(consent.signedAt) : null,
+          signedAt: consent.signedAt ? parseLocalDate(consent.signedAt) : null,
           signatureUrl,
           signaturePublicId,
           formVersion: consent.formVersion || null,

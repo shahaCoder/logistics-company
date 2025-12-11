@@ -208,6 +208,7 @@ export default function Step8MVR({
               </label>
               <input
                 type="date"
+                lang="en-US"
                 {...register("mvrDateSigned")}
                 className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
                   errors.mvrDateSigned ? "border-red-500" : "border-gray-300"

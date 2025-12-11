@@ -279,6 +279,7 @@ export default function Step1ApplicantInfo({
           </label>
           <input
             type="date"
+            lang="en-US"
             {...register("dateOfBirth")}
             className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
               errors.dateOfBirth ? "border-red-500" : "border-gray-300"
