@@ -6,6 +6,56 @@ import Image from "next/image";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
+/**
+ * Format date in American format (MM/DD/YYYY)
+ * Handles date strings from database (ISO format) and Date objects
+ * Parses dates correctly to avoid timezone shifts (e.g., 01/01/1950 becoming 12/31/1949)
+ */
+function formatDateUS(date: string | Date | null | undefined): string {
+  if (!date) return 'N/A';
+  
+  try {
+    let year: number, month: number, day: number;
+    
+    if (typeof date === 'string') {
+      // Parse ISO date string (e.g., "1950-01-01T00:00:00.000Z" or "1950-01-01")
+      // Extract date components directly to avoid UTC timezone conversion
+      const isoMatch = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (isoMatch) {
+        year = parseInt(isoMatch[1], 10);
+        month = parseInt(isoMatch[2], 10);
+        day = parseInt(isoMatch[3], 10);
+      } else {
+        // Fallback to Date parsing if format is unexpected
+        const dateObj = new Date(date);
+        if (isNaN(dateObj.getTime())) {
+          return 'Invalid Date';
+        }
+        year = dateObj.getFullYear();
+        month = dateObj.getMonth() + 1;
+        day = dateObj.getDate();
+      }
+    } else {
+      // Date object - use it directly
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      year = date.getFullYear();
+      month = date.getMonth() + 1;
+      day = date.getDate();
+    }
+    
+    // Format as MM/DD/YYYY (American format)
+    const monthStr = String(month).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    
+    return `${monthStr}/${dayStr}/${year}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
+  }
+}
+
 interface Application {
   id: string;
   firstName: string;
@@ -235,7 +285,7 @@ export default function ApplicationDetailPage() {
       addText("Applicant Information", 15, true);
       yPos += sectionSpacing;
       addText(`Name: ${application.firstName} ${application.lastName}`, 11);
-      addText(`Date of Birth: ${new Date(application.dateOfBirth).toLocaleDateString()}`, 11);
+      addText(`Date of Birth: ${formatDateUS(application.dateOfBirth)}`, 11);
       addText(`Phone: ${application.phone}`, 11);
       addText(`Email: ${application.email}`, 11);
       if (fullSSN) {
@@ -252,7 +302,7 @@ export default function ApplicationDetailPage() {
         yPos += lineHeight;
         addText("Previous Addresses:", 11, true);
         application.previousAddresses.forEach(addr => {
-          const addrText = `${addr.addressLine1}, ${addr.city}, ${addr.state} ${addr.zip}${addr.fromDate && addr.toDate ? ` (${new Date(addr.fromDate).toLocaleDateString()} - ${new Date(addr.toDate).toLocaleDateString()})` : ''}`;
+          const addrText = `${addr.addressLine1}, ${addr.city}, ${addr.state} ${addr.zip}${addr.fromDate && addr.toDate ? ` (${formatDateUS(addr.fromDate)} - ${formatDateUS(addr.toDate)})` : ''}`;
           addText(addrText, 10);
         });
       }
@@ -265,7 +315,7 @@ export default function ApplicationDetailPage() {
         addText(`License Number: ${application.license.licenseNumber}`, 11);
         addText(`State: ${application.license.state}`, 11);
         addText(`Class: ${application.license.class}`, 11);
-        addText(`Expires: ${application.license.expiresAt ? new Date(application.license.expiresAt).toLocaleDateString() : 'N/A'}`, 11);
+        addText(`Expires: ${application.license.expiresAt ? formatDateUS(application.license.expiresAt) : 'N/A'}`, 11);
         if (application.license.endorsements) {
           addText(`Endorsements: ${application.license.endorsements}`, 11);
         }
@@ -280,7 +330,7 @@ export default function ApplicationDetailPage() {
         addText("Medical Card", 15, true);
         yPos += sectionSpacing;
         if (application.medicalCard.expiresAt) {
-          addText(`Expiration Date: ${new Date(application.medicalCard.expiresAt).toLocaleDateString()}`, 11);
+          addText(`Expiration Date: ${formatDateUS(application.medicalCard.expiresAt)}`, 11);
         }
         yPos += sectionSpacing * 2;
       }
@@ -297,7 +347,7 @@ export default function ApplicationDetailPage() {
           if (record.employerEmail) addText(`Email: ${record.employerEmail}`, 10);
           if (record.positionHeld) addText(`Position: ${record.positionHeld}`, 10);
           if (record.dateFrom && record.dateTo) {
-            addText(`Employment Period: ${new Date(record.dateFrom).toLocaleDateString()} - ${new Date(record.dateTo).toLocaleDateString()}`, 10);
+            addText(`Employment Period: ${formatDateUS(record.dateFrom)} - ${formatDateUS(record.dateTo)}`, 10);
           }
           if (record.reasonForLeaving) addText(`Reason for Leaving: ${record.reasonForLeaving}`, 10);
           if (record.equipmentClass) addText(`Equipment Class: ${record.equipmentClass}`, 10);
@@ -553,7 +603,41 @@ export default function ApplicationDetailPage() {
     );
   }
 
-  const age = new Date().getFullYear() - new Date(application.dateOfBirth).getFullYear();
+  // Calculate age correctly, accounting for whether birthday has passed this year
+  // Uses the same date parsing logic as formatDateUS to avoid timezone shifts
+  const calculateAge = (dateOfBirth: string): number => {
+    // Parse date components directly to avoid UTC timezone conversion
+    const isoMatch = dateOfBirth.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!isoMatch) {
+      // Fallback to Date parsing if format is unexpected
+      const birthDate = new Date(dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+    
+    const birthYear = parseInt(isoMatch[1], 10);
+    const birthMonth = parseInt(isoMatch[2], 10);
+    const birthDay = parseInt(isoMatch[3], 10);
+    
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth() + 1;
+    const todayDay = today.getDate();
+    
+    let age = todayYear - birthYear;
+    if (todayMonth < birthMonth || (todayMonth === birthMonth && todayDay < birthDay)) {
+      age--;
+    }
+    
+    return age;
+  };
+  
+  const age = application ? calculateAge(application.dateOfBirth) : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -592,7 +676,7 @@ export default function ApplicationDetailPage() {
               <div>
                 <label className="text-sm font-medium text-gray-500">Date of Birth</label>
                 <p className="text-gray-900">
-                  {new Date(application.dateOfBirth).toLocaleDateString()} (Age: {age})
+                  {formatDateUS(application.dateOfBirth)} (Age: {age})
                 </p>
               </div>
               <div>
@@ -651,8 +735,8 @@ export default function ApplicationDetailPage() {
                     {addr.addressLine1}, {addr.city}, {addr.state} {addr.zip}
                     {addr.fromDate && addr.toDate && (
                       <span className="text-gray-600 ml-2">
-                        ({new Date(addr.fromDate).toLocaleDateString()} -{" "}
-                        {new Date(addr.toDate).toLocaleDateString()})
+                        ({formatDateUS(addr.fromDate)} -{" "}
+                        {formatDateUS(addr.toDate)})
                       </span>
                     )}
                   </div>
@@ -685,7 +769,7 @@ export default function ApplicationDetailPage() {
                 <div>
                   <label className="text-sm font-medium text-gray-500">Expires</label>
                   <p className="text-gray-900">
-                    {new Date(application.license.expiresAt).toLocaleDateString()}
+                    {formatDateUS(application.license.expiresAt)}
                   </p>
                 </div>
                 {application.license.endorsements && (
@@ -758,7 +842,7 @@ export default function ApplicationDetailPage() {
                     Expiration Date
                   </label>
                   <p className="text-gray-900">
-                    {new Date(application.medicalCard.expiresAt).toLocaleDateString()}
+                    {formatDateUS(application.medicalCard.expiresAt)}
                   </p>
                 </div>
               )}
@@ -868,8 +952,8 @@ export default function ApplicationDetailPage() {
                     <div>
                       <span className="text-gray-500">Dates: </span>
                       <span className="text-gray-900">
-                        {new Date(record.dateFrom).toLocaleDateString()} -{" "}
-                        {new Date(record.dateTo).toLocaleDateString()}
+                        {formatDateUS(record.dateFrom)} -{" "}
+                        {formatDateUS(record.dateTo)}
                       </span>
                     </div>
                   )}
