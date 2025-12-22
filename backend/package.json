@@ -15,7 +15,8 @@
     "seed": "tsx prisma/seed.ts",
     "check-admin": "tsx check-admin.js",
     "test-login": "tsx test-login.js",
-    "reset-admin": "tsx reset-admin.js"
+    "reset-admin": "tsx reset-admin.js",
+    "fix-signature-date": "node fix-signature-date.js"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
