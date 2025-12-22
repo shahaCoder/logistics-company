@@ -69,6 +69,7 @@ export default function FreightSolutionsPage() {
 
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // читаем env один раз (и красиво валидируем)
@@ -214,6 +215,7 @@ export default function FreightSolutionsPage() {
 
     setLoading(true);
     setStatus(null);
+    setSubmitSuccess(false);
     setErrors({});
 
     try {
@@ -303,7 +305,8 @@ Notes:  ${form.notes || "-"}
         }
       }
 
-      setStatus("Sent! Our dispatch will contact you shortly.");
+      setSubmitSuccess(true);
+      setStatus(null);
       setForm({
         companyName: "",
         contactName: "",
@@ -325,6 +328,14 @@ Notes:  ${form.notes || "-"}
         website: "",
       });
       setConsent(false);
+      
+      // Scroll to success message
+      setTimeout(() => {
+        const successElement = document.getElementById('freight-success-message');
+        if (successElement) {
+          successElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     } catch (err: any) {
       // Log error in development only
       if (process.env.NODE_ENV === "development") {
@@ -928,8 +939,66 @@ Notes:  ${form.notes || "-"}
               </button>
             </div>
 
-            {status && (
-              <p className="mt-4 text-sm text-gray-700">{status}</p>
+            {submitSuccess && (
+              <div 
+                id="freight-success-message"
+                className="mt-6 p-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-md"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="w-8 h-8 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-green-800 mb-2">
+                      Request Submitted Successfully!
+                    </h3>
+                    <p className="text-green-700">
+                      Your freight request has been received. Our dispatch team will contact you shortly to discuss your shipping needs and provide a quote.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSubmitSuccess(false)}
+                    className="flex-shrink-0 text-green-600 hover:text-green-800 transition-colors"
+                    aria-label="Close"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {status && !submitSuccess && (
+              <div className={`mt-4 p-4 rounded-lg ${
+                status.includes("Failed") || status.includes("error") || status.includes("Spam")
+                  ? "bg-red-50 border-l-4 border-red-500 text-red-700"
+                  : "bg-blue-50 border-l-4 border-blue-500 text-blue-700"
+              }`}>
+                <p className="text-sm font-medium">{status}</p>
+              </div>
             )}
           </form>
         </div>

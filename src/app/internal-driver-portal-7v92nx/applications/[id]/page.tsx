@@ -394,7 +394,7 @@ export default function ApplicationDetailPage() {
         }
 
         if (consent.signedAt) {
-          addText(`Signed: ${new Date(consent.signedAt).toLocaleString()}`, 9);
+          addText(`Signed: ${formatDateUS(consent.signedAt)}`, 9);
         }
 
         if (signatureImg) {
@@ -993,7 +993,7 @@ export default function ApplicationDetailPage() {
                 </div>
                 {consent.signedAt && (
                   <p className="text-sm text-gray-600 mt-1">
-                    Signed: {new Date(consent.signedAt).toLocaleString()}
+                    Signed: {formatDateUS(consent.signedAt)}
                   </p>
                 )}
                 {consent.signatureUrl && (
