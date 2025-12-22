@@ -789,20 +789,69 @@ export default function ApplicationDetailPage() {
                     <label className="text-sm font-medium text-gray-500 mb-2 block">
                       Front
                     </label>
-                    <a
-                      href={application.license.frontImageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <Image
-                        src={application.license.frontImageUrl}
-                        alt="License Front"
-                        width={300}
-                        height={200}
-                        className="rounded border"
-                      />
-                    </a>
+                    {(() => {
+                      const url = application.license.frontImageUrl!;
+                      // Check if it's a PDF by URL pattern or resource type
+                      const isPDF = url.toLowerCase().includes('.pdf') || 
+                                   url.toLowerCase().includes('/raw/upload/') ||
+                                   url.toLowerCase().endsWith('.pdf') ||
+                                   url.includes('/v1/raw/upload/');
+                      
+                      if (isPDF) {
+                        // Extract filename from URL
+                        let fileName = 'license-front.pdf';
+                        try {
+                          const urlObj = new URL(url);
+                          const pathParts = urlObj.pathname.split('/');
+                          // Try to find filename in path
+                          for (let i = pathParts.length - 1; i >= 0; i--) {
+                            if (pathParts[i] && pathParts[i].includes('.')) {
+                              fileName = pathParts[i];
+                              break;
+                            }
+                          }
+                          // If no extension found, add .pdf
+                          if (!fileName.toLowerCase().endsWith('.pdf')) {
+                            fileName = fileName + '.pdf';
+                          }
+                        } catch (e) {
+                          // If URL parsing fails, use default
+                          fileName = 'license-front.pdf';
+                        }
+                        
+                        return (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download={fileName}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>{fileName}</span>
+                          </a>
+                        );
+                      } else {
+                        return (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                          >
+                            <Image
+                              src={url}
+                              alt="License Front"
+                              width={300}
+                              height={200}
+                              className="rounded border"
+                            />
+                          </a>
+                        );
+                      }
+                    })()}
                   </div>
                 )}
                 {application.license.backImageUrl && (
@@ -810,20 +859,69 @@ export default function ApplicationDetailPage() {
                     <label className="text-sm font-medium text-gray-500 mb-2 block">
                       Back
                     </label>
-                    <a
-                      href={application.license.backImageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <Image
-                        src={application.license.backImageUrl}
-                        alt="License Back"
-                        width={300}
-                        height={200}
-                        className="rounded border"
-                      />
-                    </a>
+                    {(() => {
+                      const url = application.license.backImageUrl!;
+                      // Check if it's a PDF by URL pattern or resource type
+                      const isPDF = url.toLowerCase().includes('.pdf') || 
+                                   url.toLowerCase().includes('/raw/upload/') ||
+                                   url.toLowerCase().endsWith('.pdf') ||
+                                   url.includes('/v1/raw/upload/');
+                      
+                      if (isPDF) {
+                        // Extract filename from URL
+                        let fileName = 'license-back.pdf';
+                        try {
+                          const urlObj = new URL(url);
+                          const pathParts = urlObj.pathname.split('/');
+                          // Try to find filename in path
+                          for (let i = pathParts.length - 1; i >= 0; i--) {
+                            if (pathParts[i] && pathParts[i].includes('.')) {
+                              fileName = pathParts[i];
+                              break;
+                            }
+                          }
+                          // If no extension found, add .pdf
+                          if (!fileName.toLowerCase().endsWith('.pdf')) {
+                            fileName = fileName + '.pdf';
+                          }
+                        } catch (e) {
+                          // If URL parsing fails, use default
+                          fileName = 'license-back.pdf';
+                        }
+                        
+                        return (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download={fileName}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>{fileName}</span>
+                          </a>
+                        );
+                      } else {
+                        return (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                          >
+                            <Image
+                              src={url}
+                              alt="License Back"
+                              width={300}
+                              height={200}
+                              className="rounded border"
+                            />
+                          </a>
+                        );
+                      }
+                    })()}
                   </div>
                 )}
               </div>
