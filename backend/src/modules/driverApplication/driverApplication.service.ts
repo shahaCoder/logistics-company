@@ -10,34 +10,58 @@ import {
 const prisma = new PrismaClient();
 
 /**
- * Parse a date string in YYYY-MM-DD format as a local date (not UTC)
+ * Parse a date string in YYYY-MM-DD or YYYY-MM format as a local date (not UTC)
  * This prevents timezone-related date shifts (e.g., 10/31/2025 becoming 11/01/2025)
+ * If only YYYY-MM format is provided, defaults to the first day of the month
  */
 function parseLocalDate(dateString: string): Date {
-  // Validate format: YYYY-MM-DD
-  const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
-  const match = dateString.match(dateRegex);
-  if (!match) {
-    throw new Error(`Invalid date format: ${dateString}. Expected YYYY-MM-DD`);
+  // Try YYYY-MM-DD format first
+  const fullDateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const fullMatch = dateString.match(fullDateRegex);
+  
+  if (fullMatch) {
+    const year = parseInt(fullMatch[1], 10);
+    const month = parseInt(fullMatch[2], 10);
+    const day = parseInt(fullMatch[3], 10);
+    
+    // Create date in local timezone (not UTC)
+    const date = new Date(year, month - 1, day);
+    
+    // Verify the date is valid (handles cases like 2025-02-30)
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() + 1 !== month ||
+      date.getDate() !== day
+    ) {
+      throw new Error(`Invalid date: ${dateString}`);
+    }
+    
+    return date;
   }
   
-  const year = parseInt(match[1], 10);
-  const month = parseInt(match[2], 10);
-  const day = parseInt(match[3], 10);
+  // Try YYYY-MM format (month input type)
+  const monthDateRegex = /^(\d{4})-(\d{2})$/;
+  const monthMatch = dateString.match(monthDateRegex);
   
-  // Create date in local timezone (not UTC)
-  const date = new Date(year, month - 1, day);
-  
-  // Verify the date is valid (handles cases like 2025-02-30)
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() + 1 !== month ||
-    date.getDate() !== day
-  ) {
-    throw new Error(`Invalid date: ${dateString}`);
+  if (monthMatch) {
+    const year = parseInt(monthMatch[1], 10);
+    const month = parseInt(monthMatch[2], 10);
+    
+    // Default to first day of the month for YYYY-MM format
+    const date = new Date(year, month - 1, 1);
+    
+    // Verify the date is valid
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() + 1 !== month
+    ) {
+      throw new Error(`Invalid date: ${dateString}`);
+    }
+    
+    return date;
   }
   
-  return date;
+  throw new Error(`Invalid date format: ${dateString}. Expected YYYY-MM-DD or YYYY-MM`);
 }
 
 /**

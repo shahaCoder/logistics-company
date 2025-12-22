@@ -50,7 +50,7 @@ export default function FreightSolutionsPage() {
     email: "",
     phone: "",
     isBroker: false,
-    equipment: "",
+    equipment: "Dry Van",
     cargo: "",
     weight: "",
     pallets: "",
@@ -159,9 +159,7 @@ export default function FreightSolutionsPage() {
       newErrors.phone =
         getValidationError("phone", form.phone) || "Invalid phone number";
     }
-    if (!form.equipment) {
-      newErrors.equipment = "Please select equipment type";
-    }
+    // Equipment is always Dry Van, no validation needed
     if (!validateCargo(form.cargo)) {
       newErrors.cargo =
         getValidationError("cargo", form.cargo) || "Invalid cargo description";
@@ -313,7 +311,7 @@ Notes:  ${form.notes || "-"}
         email: "",
         phone: "",
         isBroker: false,
-        equipment: "",
+        equipment: "Dry Van",
         cargo: "",
         weight: "",
         pallets: "",
@@ -643,31 +641,18 @@ Notes:  ${form.notes || "-"}
                 </label>
               </Field>
 
-              <Field label="Equipment Type" required>
-                <select
-                  name="equipment"
-                  value={form.equipment}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm ${
-                    errors.equipment ? "border-red-500" : "border-gray-300"
-                  }`}
-                >
-                  <option value="" disabled>
-                    Select equipment
-                  </option>
-                  <option value="Dry Van">Dry Van</option>
-                  <option value="Reefer">Reefer</option>
-                  <option value="Flatbed">Flatbed</option>
-                  <option value="Step Deck">Step Deck</option>
-                  <option value="Power Only">Power Only</option>
-                </select>
-                {errors.equipment && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.equipment}
-                  </p>
-                )}
-              </Field>
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-1">
+                  Equipment Type
+                </label>
+                <div className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-gray-700">
+                  Dry Van
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  We currently only provide Dry Van equipment.
+                </p>
+                <input type="hidden" name="equipment" value="Dry Van" />
+              </div>
             </div>
 
             {/* cargo */}
@@ -837,13 +822,12 @@ Notes:  ${form.notes || "-"}
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
                     />
                   </Field>
-                  <Field label="Time" required>
+                  <Field label="Time (optional)">
                     <input
                       type="time"
                       name="deliveryTime"
                       value={form.deliveryTime}
                       onChange={handleChange}
-                      required
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all shadow-sm"
                     />
                   </Field>
