@@ -262,40 +262,82 @@ export async function createDriverApplication(
     // Create previous addresses
     if (dto.previousAddresses && dto.previousAddresses.length > 0) {
       await tx.previousAddress.createMany({
-        data: dto.previousAddresses.map((addr) => ({
-          applicationId: app.id,
-          addressLine1: addr.addressLine1,
-          city: addr.city,
-          state: addr.state,
-          zip: addr.zip,
-          fromDate: addr.fromDate ? parseLocalDate(addr.fromDate) : null,
-          toDate: addr.toDate ? parseLocalDate(addr.toDate) : null,
-        })),
+        data: dto.previousAddresses.map((addr, index) => {
+          let fromDate: Date | null = null;
+          let toDate: Date | null = null;
+          
+          if (addr.fromDate) {
+            try {
+              fromDate = parseLocalDate(addr.fromDate);
+            } catch (error) {
+              throw new Error(`Invalid "from date" in previous address ${index + 1}: ${error instanceof Error ? error.message : 'Invalid format'}. Please enter a valid date.`);
+            }
+          }
+          
+          if (addr.toDate) {
+            try {
+              toDate = parseLocalDate(addr.toDate);
+            } catch (error) {
+              throw new Error(`Invalid "to date" in previous address ${index + 1}: ${error instanceof Error ? error.message : 'Invalid format'}. Please enter a valid date.`);
+            }
+          }
+          
+          return {
+            applicationId: app.id,
+            addressLine1: addr.addressLine1,
+            city: addr.city,
+            state: addr.state,
+            zip: addr.zip,
+            fromDate,
+            toDate,
+          };
+        }),
       });
     }
 
     // Create employment records
     if (dto.employmentRecords && dto.employmentRecords.length > 0) {
       await tx.employmentRecord.createMany({
-        data: dto.employmentRecords.map((record) => ({
-          applicationId: app.id,
-          employerName: record.employerName,
-          employerPhone: record.employerPhone || null,
-          employerFax: record.employerFax || null,
-          employerEmail: record.employerEmail || null,
-          addressLine1: record.addressLine1,
-          country: record.country || 'US',
-          city: record.city,
-          state: record.state,
-          zip: record.zip || null,
-          positionHeld: record.positionHeld || null,
-          dateFrom: record.dateFrom ? parseLocalDate(record.dateFrom) : null,
-          dateTo: record.dateTo ? parseLocalDate(record.dateTo) : null,
-          reasonForLeaving: record.reasonForLeaving || null,
-          equipmentClass: record.equipmentClass || null,
-          wasSubjectToFMCSR: record.wasSubjectToFMCSR,
-          wasSafetySensitive: record.wasSafetySensitive,
-        })),
+        data: dto.employmentRecords.map((record, index) => {
+          let dateFrom: Date | null = null;
+          let dateTo: Date | null = null;
+          
+          if (record.dateFrom) {
+            try {
+              dateFrom = parseLocalDate(record.dateFrom);
+            } catch (error) {
+              throw new Error(`Invalid "date from" in employment record ${index + 1} (${record.employerName || 'Unknown employer'}): ${error instanceof Error ? error.message : 'Invalid format'}. Please enter a valid date (MM/YYYY format).`);
+            }
+          }
+          
+          if (record.dateTo) {
+            try {
+              dateTo = parseLocalDate(record.dateTo);
+            } catch (error) {
+              throw new Error(`Invalid "date to" in employment record ${index + 1} (${record.employerName || 'Unknown employer'}): ${error instanceof Error ? error.message : 'Invalid format'}. Please enter a valid date (MM/YYYY format).`);
+            }
+          }
+          
+          return {
+            applicationId: app.id,
+            employerName: record.employerName,
+            employerPhone: record.employerPhone || null,
+            employerFax: record.employerFax || null,
+            employerEmail: record.employerEmail || null,
+            addressLine1: record.addressLine1,
+            country: record.country || 'US',
+            city: record.city,
+            state: record.state,
+            zip: record.zip || null,
+            positionHeld: record.positionHeld || null,
+            dateFrom,
+            dateTo,
+            reasonForLeaving: record.reasonForLeaving || null,
+            equipmentClass: record.equipmentClass || null,
+            wasSubjectToFMCSR: record.wasSubjectToFMCSR,
+            wasSafetySensitive: record.wasSafetySensitive,
+          };
+        }),
       });
     }
 

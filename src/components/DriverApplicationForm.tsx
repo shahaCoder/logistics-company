@@ -946,25 +946,51 @@ export default function DriverApplicationForm() {
         // Проверяем конкретные типы ошибок
         if (response.status === 400) {
           // Bad Request - обычно валидация
-          if (errorMessage.includes("Validation failed") || 
+          
+          // Обработка ошибок дат с конкретной информацией
+          if (errorMessage.includes("date from") || errorMessage.includes("date to") || errorMessage.includes("Invalid \"date")) {
+            // Извлекаем информацию об ошибке даты
+            const dateMatch = errorMessage.match(/(employment record|previous address) (\d+)/i);
+            const employerMatch = errorMessage.match(/\(([^)]+)\)/);
+            
+            if (dateMatch) {
+              const recordType = dateMatch[1] || "record";
+              const recordNum = dateMatch[2];
+              const employer = employerMatch ? employerMatch[1] : "";
+              
+              if (errorMessage.includes("date from")) {
+                userFriendlyMessage = `Please check the "Date From" field in ${recordType} ${recordNum}${employer ? ` (${employer})` : ''}. Make sure you selected a valid month and year (MM/YYYY format).`;
+              } else if (errorMessage.includes("date to")) {
+                userFriendlyMessage = `Please check the "Date To" field in ${recordType} ${recordNum}${employer ? ` (${employer})` : ''}. Make sure you selected a valid month and year (MM/YYYY format).`;
+              } else {
+                userFriendlyMessage = `Please check the date fields in ${recordType} ${recordNum}${employer ? ` (${employer})` : ''}. Dates should be in MM/YYYY format.`;
+              }
+            } else {
+              userFriendlyMessage = "Please check all date fields in Employment History and Previous Addresses sections. Make sure you selected valid months and years (MM/YYYY format).";
+            }
+          } else if (errorMessage.includes("date of birth") || errorMessage.includes("Date of birth")) {
+            userFriendlyMessage = "Please check your Date of Birth. Make sure you selected a valid date and you are at least 21 years old.";
+          } else if (errorMessage.includes("expiration") || errorMessage.includes("license expiration")) {
+            userFriendlyMessage = "Please check your License Expiration Date. Make sure you selected a valid date and your license is not expired.";
+          } else if (errorMessage.includes("medical card expiration")) {
+            userFriendlyMessage = "Please check your Medical Card Expiration Date. Make sure you selected a valid date if provided.";
+          } else if (errorMessage.includes("Validation failed") || 
               errorMessage.includes("validation") || 
               errorMessage.includes("required") ||
               errorMessage.includes("invalid") ||
               errorMessage.toLowerCase().includes("field")) {
-            userFriendlyMessage = "Please check all required fields and ensure all information is correct.";
-          } else if (errorMessage.includes("date") || errorMessage.includes("Date") || errorMessage.includes("expiration")) {
-            userFriendlyMessage = "Please check all date fields and ensure they are valid dates in the correct format.";
+            userFriendlyMessage = "Please check all required fields and ensure all information is correct. Review each step carefully.";
           } else if (errorMessage.includes("File") || errorMessage.includes("file") || errorMessage.includes("upload")) {
             userFriendlyMessage = "There was an issue with one of your uploaded files. Please check that all files are valid images or PDFs and try again.";
           } else {
-            userFriendlyMessage = "Please check all required fields and try again.";
+            userFriendlyMessage = errorMessage || "Please check all required fields and try again.";
           }
         } else if (response.status === 422) {
           // Unprocessable Entity - валидация данных
-          userFriendlyMessage = "Please check all required fields and ensure all information is correct.";
+          userFriendlyMessage = "Please check all required fields and ensure all information is correct. Review each step carefully.";
         } else if (response.status === 413) {
           // Payload Too Large
-          userFriendlyMessage = "File size is too large. Please reduce the size of your uploaded files and try again.";
+          userFriendlyMessage = "File size is too large. Please reduce the size of your uploaded files (each file should be less than 10MB) and try again.";
         } else if (response.status === 429) {
           userFriendlyMessage = "Too many requests. Please wait a moment and try again.";
         } else if (response.status >= 500) {

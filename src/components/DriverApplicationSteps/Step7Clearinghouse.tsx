@@ -100,7 +100,7 @@ export default function Step7Clearinghouse({
                 Prospective Employee Signature <span className="text-red-600">*</span>
               </label>
               <div className="mb-3">
-                <div className="flex gap-4 mb-3">
+                <div className="flex flex-col sm:flex-row gap-4 mb-3">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"

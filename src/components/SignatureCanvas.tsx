@@ -217,9 +217,10 @@ export default function SignatureCanvasComponent({
     <div className="space-y-3 w-full">
       <div
         ref={canvasRef}
-        className="border-2 border-gray-300 rounded-lg bg-white w-full overflow-hidden"
+        className="border-2 border-gray-300 rounded-lg bg-white w-full overflow-hidden mx-auto"
         style={{ 
           maxWidth: `${width}px`,
+          width: "100%",
           aspectRatio: `${width} / ${height}`,
           minHeight: "150px",
         }}
