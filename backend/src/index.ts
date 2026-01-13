@@ -9,6 +9,7 @@ import authRouter from './modules/auth/auth.controller.js';
 import adminApplicationsRouter from './modules/admin-applications/admin-applications.controller.js';
 import { publicRouter as requestsPublicRouter, adminRouter as requestsAdminRouter } from './modules/requests/requests.controller.js';
 import trucksRouter from './modules/trucks/trucks.controller.js';
+import { startSamsaraSyncJob } from './services/samsara-sync.service.js';
 
 // Load environment variables
 dotenv.config();
@@ -114,13 +115,6 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  
-  // Start Samsara sync job
-  try {
-    const { startSamsaraSyncJob } = await import('./services/samsara-sync.service.js');
-    startSamsaraSyncJob();
-  } catch (error) {
-    console.error('Failed to start Samsara sync job:', error);
-  }
+  startSamsaraSyncJob();
 });
 
