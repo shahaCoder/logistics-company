@@ -21,6 +21,14 @@ export default function TrucksPage() {
   const [trucks, setTrucks] = useState<Truck[]>([]);
   const [loading, setLoading] = useState(true);
   const [resettingId, setResettingId] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    currentMiles: "",
+    lastOilChangeMiles: "",
+    oilChangeIntervalMiles: "10000",
+  });
 
   const fetchTrucks = async () => {
     setLoading(true);
@@ -36,14 +44,16 @@ export default function TrucksPage() {
       }
 
       if (!response.ok) {
-        throw new Error("Failed to fetch trucks");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to fetch trucks");
       }
 
       const data = await response.json();
       setTrucks(data);
     } catch (error) {
       console.error("Error fetching trucks:", error);
-      alert("Failed to load trucks. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to load trucks. Please try again.";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -88,6 +98,54 @@ export default function TrucksPage() {
     }
   };
 
+  const handleAddTruck = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const response = await fetch(`${apiUrl}/api/admin/trucks`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          currentMiles: formData.currentMiles ? parseInt(formData.currentMiles) : 0,
+          lastOilChangeMiles: formData.lastOilChangeMiles ? parseInt(formData.lastOilChangeMiles) : (formData.currentMiles ? parseInt(formData.currentMiles) : 0),
+          oilChangeIntervalMiles: formData.oilChangeIntervalMiles ? parseInt(formData.oilChangeIntervalMiles) : 10000,
+        }),
+      });
+
+      if (response.status === 401) {
+        router.push("/internal-driver-portal-7v92nx/login");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to create truck");
+      }
+
+      // Close modal and refresh list
+      setShowAddModal(false);
+      setFormData({
+        name: "",
+        currentMiles: "",
+        lastOilChangeMiles: "",
+        oilChangeIntervalMiles: "10000",
+      });
+      await fetchTrucks();
+    } catch (error) {
+      console.error("Error creating truck:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to create truck. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const formatMiles = (miles: number): string => {
     return miles.toLocaleString("en-US");
   };
@@ -124,12 +182,136 @@ export default function TrucksPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Trucks & Oil Change Status</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Track oil change status for all trucks
-        </p>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Trucks & Oil Change Status</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Track oil change status for all trucks
+          </p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add Truck
+        </button>
       </div>
+
+      {/* Add Truck Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">Add New Truck</h2>
+                <button
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setFormData({
+                      name: "",
+                      currentMiles: "",
+                      lastOilChangeMiles: "",
+                      oilChangeIntervalMiles: "10000",
+                    });
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleAddTruck} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Truck Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="e.g., Truck-001"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Current Miles
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.currentMiles}
+                    onChange={(e) => setFormData({ ...formData, currentMiles: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Oil Change Miles
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.lastOilChangeMiles}
+                    onChange={(e) => setFormData({ ...formData, lastOilChangeMiles: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="Will use current miles if empty"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Oil Change Interval (Miles)
+                  </label>
+                  <input
+                    type="number"
+                    min="1000"
+                    value={formData.oilChangeIntervalMiles}
+                    onChange={(e) => setFormData({ ...formData, oilChangeIntervalMiles: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="10000"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddModal(false);
+                      setFormData({
+                        name: "",
+                        currentMiles: "",
+                        lastOilChangeMiles: "",
+                        oilChangeIntervalMiles: "10000",
+                      });
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                    disabled={creating}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creating}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {creating ? "Creating..." : "Create Truck"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {trucks.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
