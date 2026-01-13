@@ -53,8 +53,8 @@ export async function syncSamsaraOdometer(): Promise<void> {
     // Create a map of samsaraVehicleId -> odometerMiles
     const odometerMap = new Map<string, number>();
     for (const vehicle of vehicleStats) {
-      if (vehicle.odometerMiles !== undefined) {
-        odometerMap.set(vehicle.vehicleId, vehicle.odometerMiles);
+      if (vehicle.id && vehicle.odometerMiles !== undefined) {
+        odometerMap.set(vehicle.id, vehicle.odometerMiles);
       }
     }
 

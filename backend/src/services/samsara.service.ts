@@ -6,7 +6,7 @@
 const SAMSARA_API_BASE = 'https://api.samsara.com';
 
 export interface SamsaraVehicleStats {
-  vehicleId: string;
+  id: string;
   name?: string;
   odometerMeters?: number;
   odometerMiles?: number;
@@ -56,7 +56,7 @@ export async function fetchVehicleStatsFeed(apiToken: string): Promise<SamsaraVe
     const odometerMiles = Math.round(odometerMeters / 1609.344);
     
     return {
-      vehicleId: vehicle.vehicleId,
+      id: vehicle.vehicleId,
       name: vehicle.name,
       odometerMeters,
       odometerMiles,
