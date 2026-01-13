@@ -19,7 +19,7 @@
     "fix-signature-date": "node fix-signature-date.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.20.0",
+    "@prisma/client": "^5.22.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.0.3",
     "cookie-parser": "^1.4.7",
