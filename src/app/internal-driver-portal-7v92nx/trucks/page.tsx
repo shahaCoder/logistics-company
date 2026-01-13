@@ -26,7 +26,7 @@ export default function TrucksPage() {
   const [formData, setFormData] = useState({
     name: "",
     currentMiles: "",
-    lastOilChangeMiles: "",
+    expiresInMiles: "",
     oilChangeIntervalMiles: "10000",
   });
 
@@ -113,7 +113,7 @@ export default function TrucksPage() {
         body: JSON.stringify({
           name: formData.name,
           currentMiles: formData.currentMiles ? parseInt(formData.currentMiles) : 0,
-          lastOilChangeMiles: formData.lastOilChangeMiles ? parseInt(formData.lastOilChangeMiles) : (formData.currentMiles ? parseInt(formData.currentMiles) : 0),
+          expiresInMiles: formData.expiresInMiles ? parseInt(formData.expiresInMiles) : undefined,
           oilChangeIntervalMiles: formData.oilChangeIntervalMiles ? parseInt(formData.oilChangeIntervalMiles) : 10000,
         }),
       });
@@ -133,7 +133,7 @@ export default function TrucksPage() {
       setFormData({
         name: "",
         currentMiles: "",
-        lastOilChangeMiles: "",
+        expiresInMiles: "",
         oilChangeIntervalMiles: "10000",
       });
       await fetchTrucks();
@@ -256,15 +256,15 @@ export default function TrucksPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Last Oil Change Miles
+                    Expires In (Miles)
                   </label>
                   <input
                     type="number"
                     min="0"
-                    value={formData.lastOilChangeMiles}
-                    onChange={(e) => setFormData({ ...formData, lastOilChangeMiles: e.target.value })}
+                    value={formData.expiresInMiles}
+                    onChange={(e) => setFormData({ ...formData, expiresInMiles: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
-                    placeholder="Will use current miles if empty"
+                    placeholder="Miles until next oil change"
                   />
                 </div>
 

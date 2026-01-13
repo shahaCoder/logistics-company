@@ -20,7 +20,7 @@ router.use(authRequired('MANAGER'));
 const createTruckSchema = z.object({
   name: z.string().min(1, 'Truck name is required'),
   currentMiles: z.number().int().min(0).optional(),
-  lastOilChangeMiles: z.number().int().min(0).optional(),
+  expiresInMiles: z.number().int().min(0).optional(),
   oilChangeIntervalMiles: z.number().int().min(1000).max(50000).optional(),
 });
 

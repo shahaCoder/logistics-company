@@ -84,15 +84,29 @@ export async function getTruckById(id: string) {
 export async function createTruck(data: {
   name: string;
   currentMiles?: number;
-  lastOilChangeMiles?: number;
+  expiresInMiles?: number;
   oilChangeIntervalMiles?: number;
 }) {
+  const currentMiles = data.currentMiles || 0;
+  const oilChangeIntervalMiles = data.oilChangeIntervalMiles || 10000;
+  
+  // Calculate lastOilChangeMiles from expiresInMiles
+  // expiresInMiles = oilChangeIntervalMiles - (currentMiles - lastOilChangeMiles)
+  // lastOilChangeMiles = currentMiles + expiresInMiles - oilChangeIntervalMiles
+  let lastOilChangeMiles: number;
+  if (data.expiresInMiles !== undefined) {
+    lastOilChangeMiles = currentMiles + data.expiresInMiles - oilChangeIntervalMiles;
+  } else {
+    // If expiresInMiles not provided, assume oil change was just done
+    lastOilChangeMiles = currentMiles;
+  }
+  
   return prisma.truck.create({
     data: {
       name: data.name,
-      currentMiles: data.currentMiles || 0,
-      lastOilChangeMiles: data.lastOilChangeMiles || data.currentMiles || 0,
-      oilChangeIntervalMiles: data.oilChangeIntervalMiles || 10000,
+      currentMiles,
+      lastOilChangeMiles,
+      oilChangeIntervalMiles,
     },
   });
 }
