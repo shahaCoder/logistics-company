@@ -7,11 +7,11 @@ interface Truck {
   id: string;
   name: string;
   currentMiles: number;
-  lastOilChangeMiles: number;
+  lastOilChangeMiles?: number | null;
   oilChangeIntervalMiles: number;
   milesSinceLastOilChange: number;
   milesUntilNextOilChange: number;
-  status: "good" | "overdue";
+  status: "Good" | "Soon" | "Overdue";
   createdAt: string;
   updatedAt: string;
 }
@@ -91,8 +91,8 @@ export default function TrucksPage() {
     setResettingId(truckId);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const response = await fetch(`${apiUrl}/api/admin/trucks/${truckId}/reset-oil-change`, {
-        method: "PATCH",
+      const response = await fetch(`${apiUrl}/api/admin/trucks/${truckId}/oil/reset`, {
+        method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
@@ -269,9 +269,11 @@ export default function TrucksPage() {
 
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case "good":
+      case "Good":
         return "bg-green-100 text-green-800 border-green-300";
-      case "overdue":
+      case "Soon":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "Overdue":
         return "bg-red-100 text-red-800 border-red-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
@@ -279,14 +281,7 @@ export default function TrucksPage() {
   };
 
   const getStatusText = (status: string): string => {
-    switch (status) {
-      case "good":
-        return "Good";
-      case "overdue":
-        return "Overdue";
-      default:
-        return "Unknown";
-    }
+    return status;
   };
 
   if (loading) {

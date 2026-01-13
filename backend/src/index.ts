@@ -114,5 +114,13 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
+  
+  // Start Samsara sync job
+  try {
+    const { startSamsaraSyncJob } = await import('./services/samsara-sync.service.js');
+    startSamsaraSyncJob();
+  } catch (error) {
+    console.error('Failed to start Samsara sync job:', error);
+  }
 });
 

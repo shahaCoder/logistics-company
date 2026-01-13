@@ -19,6 +19,7 @@ router.use(authRequired('MANAGER'));
 
 const createTruckSchema = z.object({
   name: z.string().min(1, 'Truck name is required'),
+  samsaraVehicleId: z.string().nullable().optional(),
   currentMiles: z.number().int().min(0).optional(),
   expiresInMiles: z.number().int().min(0).optional(),
   oilChangeIntervalMiles: z.number().int().min(1000).max(50000).optional(),
@@ -110,8 +111,56 @@ router.post('/trucks', async (req: AuthRequest, res: Response) => {
 });
 
 /**
- * PATCH /api/admin/trucks/:id/reset-oil-change
- * Reset oil change (set lastOilChangeMiles to currentMiles)
+ * POST /api/admin/trucks/:id/oil/reset
+ * Reset oil change (set lastOilChangeMiles to currentMiles and lastOilChangeAt to now)
+ */
+router.post('/trucks/:id/oil/reset', async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { id } = req.params;
+
+    try {
+      await resetOilChange(id);
+      const truck = await getTruckById(id);
+
+      if (!truck) {
+        return res.status(404).json({ error: 'Truck not found' });
+      }
+
+      // Audit log
+      await createAuditLog({
+        adminId: req.user.id,
+        adminEmail: req.user.email,
+        action: AuditAction.UPDATE_STATUS,
+        resourceId: id,
+        resourceType: 'Truck',
+        ipAddress: req.ip || req.socket.remoteAddress,
+        userAgent: req.get('user-agent'),
+        details: {
+          action: 'reset_oil_change',
+          newLastOilChangeMiles: truck.lastOilChangeMiles,
+        },
+      });
+
+      res.json(truck);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Truck not found') {
+        return res.status(404).json({ error: 'Truck not found' });
+      }
+      throw error;
+    }
+  } catch (error) {
+    console.error('Reset oil change error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * PATCH /api/admin/trucks/:id/reset-oil-change (DEPRECATED - kept for compatibility)
+ * Reset oil change - uses same logic as POST endpoint
  */
 router.patch('/trucks/:id/reset-oil-change', async (req: AuthRequest, res: Response) => {
   try {
@@ -122,13 +171,18 @@ router.patch('/trucks/:id/reset-oil-change', async (req: AuthRequest, res: Respo
     const { id } = req.params;
 
     try {
-      const truck = await resetOilChange(id);
+      await resetOilChange(id);
+      const truck = await getTruckById(id);
+
+      if (!truck) {
+        return res.status(404).json({ error: 'Truck not found' });
+      }
 
       // Audit log
       await createAuditLog({
         adminId: req.user.id,
         adminEmail: req.user.email,
-        action: AuditAction.UPDATE_STATUS, // Using existing action
+        action: AuditAction.UPDATE_STATUS,
         resourceId: id,
         resourceType: 'Truck',
         ipAddress: req.ip || req.socket.remoteAddress,
