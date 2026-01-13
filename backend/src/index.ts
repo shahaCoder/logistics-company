@@ -8,6 +8,7 @@ import driverApplicationRouter from './modules/driverApplication/driverApplicati
 import authRouter from './modules/auth/auth.controller.js';
 import adminApplicationsRouter from './modules/admin-applications/admin-applications.controller.js';
 import { publicRouter as requestsPublicRouter, adminRouter as requestsAdminRouter } from './modules/requests/requests.controller.js';
+import trucksRouter from './modules/trucks/trucks.controller.js';
 
 // Load environment variables
 dotenv.config();
@@ -76,6 +77,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/admin', adminApplicationsRouter);
 // Admin requests routes
 app.use('/api/admin/requests', requestsAdminRouter);
+// Admin trucks routes
+app.use('/api/admin', trucksRouter);
 
 // 404 handler
 app.use((req, res) => {
