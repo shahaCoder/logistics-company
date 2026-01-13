@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 interface Truck {
@@ -27,6 +27,8 @@ export default function TrucksPage() {
   const [creating, setCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | null>(null);
+  const menuButtonRefs = useRef<Record<string, HTMLButtonElement>>({});
   const [formData, setFormData] = useState({
     name: "",
     currentMiles: "",
@@ -127,6 +129,7 @@ export default function TrucksPage() {
     });
     setShowEditModal(true);
     setOpenMenuId(null);
+    setMenuPosition(null);
   };
 
   const handleUpdateTruck = async (e: React.FormEvent) => {
@@ -208,6 +211,7 @@ export default function TrucksPage() {
     } finally {
       setDeletingId(null);
       setOpenMenuId(null);
+      setMenuPosition(null);
     }
   };
 
@@ -600,9 +604,25 @@ export default function TrucksPage() {
                         </button>
                         <div className="relative">
                           <button
+                            ref={(el) => {
+                              if (el) menuButtonRefs.current[truck.id] = el;
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setOpenMenuId(openMenuId === truck.id ? null : truck.id);
+                              if (openMenuId === truck.id) {
+                                setOpenMenuId(null);
+                                setMenuPosition(null);
+                              } else {
+                                const button = menuButtonRefs.current[truck.id];
+                                if (button) {
+                                  const rect = button.getBoundingClientRect();
+                                  setMenuPosition({
+                                    top: rect.bottom + 4,
+                                    right: window.innerWidth - rect.right,
+                                  });
+                                }
+                                setOpenMenuId(truck.id);
+                              }
                             }}
                             className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                           >
@@ -610,39 +630,6 @@ export default function TrucksPage() {
                               <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                             </svg>
                           </button>
-                          {openMenuId === truck.id && (
-                            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg z-[100] border border-gray-200">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditTruck(truck);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Edit
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteTruck(truck.id, truck.name);
-                                }}
-                                disabled={deletingId === truck.id}
-                                className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${
-                                  deletingId === truck.id
-                                    ? "text-gray-400 cursor-not-allowed"
-                                    : "text-red-600 hover:bg-gray-100"
-                                }`}
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                {deletingId === truck.id ? "Deleting..." : "Delete"}
-                              </button>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </td>
@@ -652,6 +639,62 @@ export default function TrucksPage() {
             </table>
           </div>
         </div>
+      )}
+
+      {/* Dropdown Menu (Fixed Position) */}
+      {openMenuId && menuPosition && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => {
+              setOpenMenuId(null);
+              setMenuPosition(null);
+            }}
+          />
+          <div
+            className="fixed w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200"
+            style={{
+              top: `${menuPosition.top}px`,
+              right: `${menuPosition.right}px`,
+            }}
+          >
+            {trucks
+              .filter((t) => t.id === openMenuId)
+              .map((truck) => (
+                <div key={truck.id}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditTruck(truck);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteTruck(truck.id, truck.name);
+                    }}
+                    disabled={deletingId === truck.id}
+                    className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${
+                      deletingId === truck.id
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "text-red-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    {deletingId === truck.id ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              ))}
+          </div>
+        </>
       )}
     </div>
   );
