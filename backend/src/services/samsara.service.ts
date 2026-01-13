@@ -3,7 +3,7 @@
  * Fetches vehicle odometer data from Samsara Fleet Management API
  */
 
-const SAMSARA_API_BASE = 'https://api.samsara.com/v1';
+const SAMSARA_API_BASE = 'https://api.samsara.com';
 
 export interface SamsaraVehicleStats {
   vehicleId: string;
@@ -44,7 +44,7 @@ export async function fetchVehicleStatsFeed(apiToken: string): Promise<SamsaraVe
     throw new Error(`Samsara API error (${response.status}): ${errorText}`);
   }
 
-  const data: SamsaraStatsFeedResponse = await response.json();
+  const data = await response.json() as SamsaraStatsFeedResponse;
   
   if (!data.data) {
     return [];
