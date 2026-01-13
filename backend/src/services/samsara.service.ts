@@ -29,7 +29,8 @@ export interface SamsaraStatsFeedResponse {
  * Uses /fleet/vehicles/stats/feed endpoint
  */
 export async function fetchVehicleStatsFeed(apiToken: string): Promise<SamsaraVehicleStats[]> {
-  const url = `${SAMSARA_API_BASE}/fleet/vehicles/stats/feed`;
+    const url = `${SAMSARA_API_BASE}/fleet/vehicles/stats/feed?types=odometerMeters`;
+
   
   const response = await fetch(url, {
     method: 'GET',
