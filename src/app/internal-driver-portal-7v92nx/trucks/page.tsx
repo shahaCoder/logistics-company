@@ -213,7 +213,7 @@ export default function TrucksPage() {
                     setFormData({
                       name: "",
                       currentMiles: "",
-                      lastOilChangeMiles: "",
+                      expiresInMiles: "",
                       oilChangeIntervalMiles: "10000",
                     });
                   }}
@@ -290,7 +290,7 @@ export default function TrucksPage() {
                       setFormData({
                         name: "",
                         currentMiles: "",
-                        lastOilChangeMiles: "",
+                        expiresInMiles: "",
                         oilChangeIntervalMiles: "10000",
                       });
                     }}
