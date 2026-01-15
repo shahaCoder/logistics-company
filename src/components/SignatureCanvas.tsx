@@ -246,7 +246,8 @@ export default function SignatureCanvasComponent({
         <button
           type="button"
           onClick={handleClear}
-          className="flex-1 sm:flex-initial px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm font-medium transition"
+          disabled={false}
+          className="flex-1 sm:flex-initial px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Clear
         </button>

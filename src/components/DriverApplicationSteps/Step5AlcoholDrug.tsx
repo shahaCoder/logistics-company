@@ -51,9 +51,13 @@ export default function Step5AlcoholDrug({
     }
   }, [signatureFile, signatureMode]);
 
-  // Set default date signed to today
+  // Set default date signed to today (using local date, not UTC)
   useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const today = `${year}-${month}-${day}`;
     if (!watch("alcoholDrugDateSigned")) {
       setValue("alcoholDrugDateSigned", today);
     }
