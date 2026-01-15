@@ -91,68 +91,65 @@ export default function Step8MVR({
 
         {/* Signature Section */}
         <div className="border-t pt-6">
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Signature Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-800 mb-2">
+              <label className="block text-sm font-medium text-gray-800 mb-3">
                 Prospective Employee Signature <span className="text-red-600">*</span>
               </label>
-              <div className="mb-3">
-                <div className="flex flex-col sm:flex-row gap-4 mb-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      checked={signatureMode === "draw"}
-                      onChange={() => {
-                        setSignatureMode("draw");
-                        // Only clear text signature if switching from text mode
-                        if (signatureText && signatureText !== "Drawn signature") {
-                          setValue("mvrSignature", "");
-                        }
-                      }}
-                      className="h-4 w-4 accent-red-600"
-                    />
-                    <span>Draw Signature</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      checked={signatureMode === "text"}
-                      onChange={() => {
-                        setSignatureMode("text");
-                        // Only clear file signature if switching from draw mode
-                        if (signatureFile) {
-                          setValue("mvrSignatureFile", undefined);
-                        }
-                        // Clear "Drawn signature" placeholder if present
-                        if (signatureText === "Drawn signature") {
-                          setValue("mvrSignature", "");
-                        }
-                      }}
-                      className="h-4 w-4 accent-red-600"
-                    />
-                    <span>Type Name</span>
-                  </label>
-                </div>
+              
+              {/* Radio buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    checked={signatureMode === "draw"}
+                    onChange={() => {
+                      setSignatureMode("draw");
+                      if (signatureText && signatureText !== "Drawn signature") {
+                        setValue("mvrSignature", "");
+                      }
+                    }}
+                    className="h-4 w-4 accent-red-600"
+                  />
+                  <span className="text-sm text-gray-700">Draw Signature</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    checked={signatureMode === "text"}
+                    onChange={() => {
+                      setSignatureMode("text");
+                      if (signatureFile) {
+                        setValue("mvrSignatureFile", undefined);
+                      }
+                      if (signatureText === "Drawn signature") {
+                        setValue("mvrSignature", "");
+                      }
+                    }}
+                    className="h-4 w-4 accent-red-600"
+                  />
+                  <span className="text-sm text-gray-700">Type Name</span>
+                </label>
               </div>
 
+              {/* Signature input area */}
               {signatureMode === "draw" ? (
                 <div className="w-full">
                   {signatureFile && (
-                    <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                    <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
                       ✓ Signature saved (drawn signature)
                     </div>
                   )}
                   <SignatureCanvas
                     initialDataUrl={signatureDataUrl}
                     onSave={(dataUrl) => {
-                      // Prevent any potential form submission
                       fetch(dataUrl)
                         .then((res) => res.blob())
                         .then((blob) => {
                           const file = new File([blob], "signature.png", {
                             type: "image/png",
                           });
-                          // Use shouldValidate: false to prevent auto-submit
                           setValue("mvrSignatureFile", file, {
                             shouldValidate: false,
                           });
@@ -178,7 +175,7 @@ export default function Step8MVR({
               ) : (
                 <div>
                   {signatureText && signatureText.trim() !== "" && signatureText !== "Drawn signature" && (
-                    <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                    <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
                       ✓ Signature saved: {signatureText}
                     </div>
                   )}
@@ -189,7 +186,6 @@ export default function Step8MVR({
                       }
                     })}
                     onKeyDown={(e) => {
-                      // Prevent form submission on Enter key
                       if (e.key === 'Enter') {
                         e.preventDefault();
                       }
@@ -206,8 +202,9 @@ export default function Step8MVR({
               )}
             </div>
 
+            {/* Date Signed Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-800 mb-1">
+              <label className="block text-sm font-medium text-gray-800 mb-2">
                 Date Signed <span className="text-red-600">*</span>
               </label>
               <input

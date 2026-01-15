@@ -214,47 +214,52 @@ export default function SignatureCanvasComponent({
   }, [saveSignature]);
 
   return (
-    <div className="space-y-3 w-full">
-      <div
-        ref={canvasRef}
-        className="border-2 border-gray-300 rounded-lg bg-white w-full overflow-hidden mx-auto"
-        style={{ 
-          maxWidth: `${width}px`,
-          width: "100%",
-          aspectRatio: `${width} / ${height}`,
-          minHeight: "150px",
-        }}
-      >
-        <SignatureCanvas
-          ref={sigPadRef}
-          canvasProps={{
-            width: canvasSize.width,
-            height: canvasSize.height,
-            className: "signature-canvas",
-            style: {
-              width: "100%",
-              height: "100%",
-              touchAction: "none",
-              display: "block",
-            },
+    <div className="w-full">
+      {/* Canvas on the left */}
+      <div className="flex flex-col items-start gap-3">
+        <div
+          ref={canvasRef}
+          className="border-2 border-gray-300 rounded-lg bg-white overflow-hidden"
+          style={{ 
+            maxWidth: `${width}px`,
+            width: "100%",
+            aspectRatio: `${width} / ${height}`,
+            minHeight: "150px",
           }}
-          backgroundColor={backgroundColor}
-          penColor={penColor}
-        />
-      </div>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <button
-          type="button"
-          onClick={handleClear}
-          disabled={false}
-          className="flex-1 sm:flex-initial px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Clear
-        </button>
+          <SignatureCanvas
+            ref={sigPadRef}
+            canvasProps={{
+              width: canvasSize.width,
+              height: canvasSize.height,
+              className: "signature-canvas",
+              style: {
+                width: "100%",
+                height: "100%",
+                touchAction: "none",
+                display: "block",
+              },
+            }}
+            backgroundColor={backgroundColor}
+            penColor={penColor}
+          />
+        </div>
+        
+        {/* Clear button and instruction below canvas */}
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleClear}
+            disabled={false}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Clear
+          </button>
+          <p className="text-xs text-gray-500">
+            Draw your signature above
+          </p>
+        </div>
       </div>
-      <p className="text-xs text-gray-500 text-center sm:text-left">
-        Draw your signature above
-      </p>
     </div>
   );
 }
