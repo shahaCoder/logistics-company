@@ -14,6 +14,41 @@ import { startSamsaraSyncJob } from './services/samsara-sync.service.js';
 // Load environment variables
 dotenv.config();
 
+// Validate required environment variables at startup
+function validateEnvironmentVariables() {
+  const required = [
+    'DATABASE_URL',
+    'JWT_SECRET',
+    'CLOUDINARY_CLOUD_NAME',
+    'CLOUDINARY_API_KEY',
+    'CLOUDINARY_API_SECRET',
+  ];
+
+  const missing: string[] = [];
+  for (const key of required) {
+    if (!process.env[key]) {
+      missing.push(key);
+    }
+  }
+
+  if (missing.length > 0) {
+    console.error('❌ Missing required environment variables:');
+    missing.forEach(key => console.error(`   - ${key}`));
+    console.error('\n⚠️  Please set these variables in your .env file or environment.');
+    console.error('   The application may not work correctly without them.\n');
+    
+    // Don't exit in production - allow graceful degradation
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️  Continuing in development mode, but some features may not work.');
+    }
+  } else {
+    console.log('✅ All required environment variables are set');
+  }
+}
+
+// Run validation
+validateEnvironmentVariables();
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 

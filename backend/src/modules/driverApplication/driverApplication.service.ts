@@ -174,7 +174,11 @@ export async function createDriverApplication(
         licenseFrontPublicId = result.publicId;
       }).catch((error) => {
         console.error('Error uploading license front:', error);
-        throw error;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (errorMessage.includes('Cloudinary is not configured') || errorMessage.includes('api_key')) {
+          throw new Error('File upload service is not configured. Please contact support.');
+        }
+        throw new Error(`Failed to upload license front: ${errorMessage}`);
       });
       uploadPromises.push(upload);
     }
@@ -195,7 +199,11 @@ export async function createDriverApplication(
         licenseBackPublicId = result.publicId;
       }).catch((error) => {
         console.error('Error uploading license back:', error);
-        throw error;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (errorMessage.includes('Cloudinary is not configured') || errorMessage.includes('api_key')) {
+          throw new Error('File upload service is not configured. Please contact support.');
+        }
+        throw new Error(`Failed to upload license back: ${errorMessage}`);
       });
       uploadPromises.push(upload);
     }
@@ -220,7 +228,11 @@ export async function createDriverApplication(
         medicalCardPublicId = result.publicId;
       }).catch((error) => {
         console.error('Error uploading medical card:', error);
-        throw error;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (errorMessage.includes('Cloudinary is not configured') || errorMessage.includes('api_key')) {
+          throw new Error('File upload service is not configured. Please contact support.');
+        }
+        throw new Error(`Failed to upload medical card: ${errorMessage}`);
       });
       uploadPromises.push(upload);
     }
