@@ -1,6 +1,20 @@
 "use client";
 
-import DriverApplicationForm from "@/components/DriverApplicationForm";
+import dynamic from "next/dynamic";
+import { FormSkeleton } from "@/components/LoadingSkeletons";
+
+// Lazy load the form component for better initial page load
+const DriverApplicationForm = dynamic(
+  () => import("@/components/DriverApplicationForm"),
+  {
+    loading: () => (
+      <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 md:p-8">
+        <FormSkeleton />
+      </div>
+    ),
+    ssr: false, // Form uses browser-only APIs (signature canvas, etc.)
+  }
+);
 
 export default function DriverApplicationPage() {
   return (

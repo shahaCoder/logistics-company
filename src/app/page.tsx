@@ -1,19 +1,35 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import Footer from "@/components/Footer";
-import Form from "@/components/Form";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import Reviews from "@/components/Reviews";
 import SecondSec from "@/components/SecondSec";
-import Services from "@/components/Services";
+import {
+  ServicesSkeleton,
+  ReviewsSkeleton,
+  FormSkeleton,
+} from "@/components/LoadingSkeletons";
 import {
   organizationSchema,
   websiteSchema,
   localBusinessSchema,
   createFAQSchema,
 } from "@/utils/structured-data";
+
+// Lazy load components below the fold for better initial page load
+const Services = dynamic(() => import("@/components/Services"), {
+  loading: () => <ServicesSkeleton />,
+});
+
+const Reviews = dynamic(() => import("@/components/Reviews"), {
+  loading: () => <ReviewsSkeleton />,
+});
+
+const Form = dynamic(() => import("@/components/Form"), {
+  loading: () => <FormSkeleton />,
+});
 
 export const metadata: Metadata = {
   title:

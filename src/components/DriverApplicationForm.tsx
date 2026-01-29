@@ -1,19 +1,22 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import confetti from "canvas-confetti";
-import Step1ApplicantInfo from "./DriverApplicationSteps/Step1ApplicantInfo";
-import Step2LicenseInfo from "./DriverApplicationSteps/Step2LicenseInfo";
-import Step3MedicalCard from "./DriverApplicationSteps/Step3MedicalCard";
-import Step4EmploymentHistory from "./DriverApplicationSteps/Step4EmploymentHistory";
-import Step5Authorization from "./DriverApplicationSteps/Step5Authorization";
-import Step6AlcoholDrug from "./DriverApplicationSteps/Step5AlcoholDrug";
-import Step7PSP from "./DriverApplicationSteps/Step6PSP";
-import Step8Clearinghouse from "./DriverApplicationSteps/Step7Clearinghouse";
-import Step9MVR from "./DriverApplicationSteps/Step8MVR";
+import { StepSkeleton } from "./LoadingSkeletons";
+
+// Lazy load each step for code splitting - only load when needed
+const Step1ApplicantInfo = lazy(() => import("./DriverApplicationSteps/Step1ApplicantInfo"));
+const Step2LicenseInfo = lazy(() => import("./DriverApplicationSteps/Step2LicenseInfo"));
+const Step3MedicalCard = lazy(() => import("./DriverApplicationSteps/Step3MedicalCard"));
+const Step4EmploymentHistory = lazy(() => import("./DriverApplicationSteps/Step4EmploymentHistory"));
+const Step5Authorization = lazy(() => import("./DriverApplicationSteps/Step5Authorization"));
+const Step6AlcoholDrug = lazy(() => import("./DriverApplicationSteps/Step5AlcoholDrug"));
+const Step7PSP = lazy(() => import("./DriverApplicationSteps/Step6PSP"));
+const Step8Clearinghouse = lazy(() => import("./DriverApplicationSteps/Step7Clearinghouse"));
+const Step9MVR = lazy(() => import("./DriverApplicationSteps/Step8MVR"));
 
 // Zod schemas for each step
 const previousAddressSchema = z.object({
@@ -1097,67 +1100,85 @@ export default function DriverApplicationForm() {
         noValidate
       >
         {currentStep === 1 && (
-          <Step1ApplicantInfo
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-          />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step1ApplicantInfo
+              register={register}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+            />
+          </Suspense>
         )}
         {currentStep === 2 && (
-          <Step2LicenseInfo
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-          />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step2LicenseInfo
+              register={register}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+            />
+          </Suspense>
         )}
         {currentStep === 3 && (
-          <Step3MedicalCard
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-          />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step3MedicalCard
+              register={register}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+            />
+          </Suspense>
         )}
         {currentStep === 4 && (
-          <Step4EmploymentHistory
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-            getValues={getValues}
-          />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step4EmploymentHistory
+              register={register}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+              getValues={getValues}
+            />
+          </Suspense>
         )}
         {currentStep === 5 && (
-          <Step5Authorization
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-          />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step5Authorization
+              register={register}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+            />
+          </Suspense>
         )}
         {currentStep === 6 && (
-          <Step6AlcoholDrug
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-          />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step6AlcoholDrug
+              register={register}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+            />
+          </Suspense>
         )}
         {currentStep === 7 && (
-          <Step7PSP register={register} errors={errors} watch={watch} setValue={setValue} />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step7PSP register={register} errors={errors} watch={watch} setValue={setValue} />
+          </Suspense>
         )}
         {currentStep === 8 && (
-          <Step8Clearinghouse
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-          />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step8Clearinghouse
+              register={register}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+            />
+          </Suspense>
         )}
         {currentStep === 9 && (
-          <Step9MVR register={register} errors={errors} watch={watch} setValue={setValue} />
+          <Suspense fallback={<StepSkeleton />}>
+            <Step9MVR register={register} errors={errors} watch={watch} setValue={setValue} />
+          </Suspense>
         )}
 
         {/* Error Message */}
