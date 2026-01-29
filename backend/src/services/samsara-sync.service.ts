@@ -62,28 +62,43 @@ export async function syncSamsaraOdometer(): Promise<void> {
       }
     }
 
-    // Update trucks
-    let updatedCount = 0;
+    // Update trucks using batch operations (much faster than individual updates)
+    const updates: Array<{ samsaraVehicleId: string; odometerMiles: number; truckName: string }> = [];
+    
     for (const truck of trucks) {
       if (truck.samsaraVehicleId) {
         const odometerMiles = odometerMap.get(truck.samsaraVehicleId);
         if (odometerMiles !== undefined) {
-          await prisma.truck.updateMany({
-            where: { samsaraVehicleId: truck.samsaraVehicleId },
-            data: {
-              currentMiles: odometerMiles,
-              currentMilesUpdatedAt: new Date(),
-            },
+          updates.push({
+            samsaraVehicleId: truck.samsaraVehicleId,
+            odometerMiles,
+            truckName: truck.name,
           });
-          updatedCount++;
-          console.log(`[Samsara Sync] Updated ${truck.name} (${truck.samsaraVehicleId}): ${odometerMiles} miles`);
         } else {
           console.warn(`[Samsara Sync] No odometer data found for truck ${truck.name} (${truck.samsaraVehicleId})`);
         }
       }
     }
 
-    console.log(`[Samsara Sync] Completed: updated ${updatedCount} trucks`);
+    // Execute all updates in parallel using Promise.all
+    if (updates.length > 0) {
+      const updatePromises = updates.map(({ samsaraVehicleId, odometerMiles, truckName }) =>
+        prisma.truck.updateMany({
+          where: { samsaraVehicleId },
+          data: {
+            currentMiles: odometerMiles,
+            currentMilesUpdatedAt: new Date(),
+          },
+        }).then(() => {
+          console.log(`[Samsara Sync] Updated ${truckName} (${samsaraVehicleId}): ${odometerMiles} miles`);
+        })
+      );
+
+      await Promise.all(updatePromises);
+      console.log(`[Samsara Sync] Completed: updated ${updates.length} trucks in batch`);
+    } else {
+      console.log('[Samsara Sync] No trucks to update');
+    }
   } catch (error) {
     console.error('[Samsara Sync] Error syncing odometer:', error);
     // Don't throw - we want the sync to continue even if one sync fails
