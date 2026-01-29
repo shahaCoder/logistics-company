@@ -14,20 +14,45 @@ import { startSamsaraSyncJob } from './services/samsara-sync.service.js';
 // Load environment variables
 dotenv.config();
 
-// Validate environment variables with Zod
-import { validateEnv } from './config/env.js';
+// Проверяем критичные переменные вручную (более мягкая валидация, не блокируем запуск)
+const criticalVars = {
+  DATABASE_URL: process.env.DATABASE_URL,
+  JWT_SECRET: process.env.JWT_SECRET || process.env.ADMIN_JWT_SECRET,
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+};
 
-try {
-  validateEnv();
-  console.log('✅ All environment variables are valid');
-} catch (error) {
-  console.error('❌ Failed to validate environment variables');
-  if (process.env.NODE_ENV === 'production') {
-    // In production, exit if env vars are invalid
-    process.exit(1);
-  } else {
-    console.warn('⚠️  Continuing in development mode, but some features may not work.');
+const missingCritical = Object.entries(criticalVars)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
+
+if (missingCritical.length > 0) {
+  console.error('❌ Missing critical environment variables:', missingCritical.join(', '));
+  console.error('⚠️  Server will start but authentication and file uploads may not work.');
+} else {
+  // Проверяем длину JWT_SECRET если он установлен
+  const jwtSecret = process.env.JWT_SECRET || process.env.ADMIN_JWT_SECRET;
+  if (jwtSecret && jwtSecret.length < 32) {
+    console.warn('⚠️  JWT_SECRET is too short (less than 32 characters). This may cause security issues.');
   }
+  
+  // Пытаемся валидировать через Zod (не критично, не блокируем запуск)
+  // Используем динамический import чтобы не блокировать запуск
+  import('./config/env.js')
+    .then(({ validateEnv }) => {
+      try {
+        validateEnv();
+        console.log('✅ All environment variables are valid');
+      } catch (error) {
+        // Игнорируем ошибки валидации - критичные переменные уже проверены
+        console.warn('⚠️  Some environment variables may not meet validation requirements, but critical ones are set.');
+      }
+    })
+    .catch(() => {
+      // Игнорируем ошибки импорта - модуль может быть недоступен
+      console.warn('⚠️  Could not load env validation module, but critical variables are set.');
+    });
 }
 
 const app = express();

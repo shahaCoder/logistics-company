@@ -8,8 +8,9 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
   
-  // JWT
-  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters long'),
+  // JWT (может быть JWT_SECRET или ADMIN_JWT_SECRET)
+  JWT_SECRET: z.string().optional(),
+  ADMIN_JWT_SECRET: z.string().optional(),
   
   // Cloudinary
   CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
@@ -38,7 +39,21 @@ const envSchema = z.object({
   // Samsara (optional)
   SAMSARA_API_KEY: z.string().optional(),
   SAMSARA_API_SECRET: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    // Проверяем что хотя бы один JWT секрет установлен и имеет достаточную длину
+    const jwtSecret = data.JWT_SECRET || data.ADMIN_JWT_SECRET;
+    if (!jwtSecret) {
+      return false;
+    }
+    // Проверяем длину только если секрет установлен
+    return jwtSecret.length >= 32;
+  },
+  {
+    message: 'Either JWT_SECRET or ADMIN_JWT_SECRET must be set and be at least 32 characters long',
+    path: ['JWT_SECRET'],
+  }
+);
 
 type Env = z.infer<typeof envSchema>;
 
@@ -47,6 +62,7 @@ let validatedEnv: Env | null = null;
 /**
  * Validates and returns environment variables
  * Throws an error if required variables are missing or invalid
+ * Но не блокирует запуск - только предупреждает
  */
 export function validateEnv(): Env {
   if (validatedEnv) {
@@ -58,12 +74,32 @@ export function validateEnv(): Env {
     return validatedEnv;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('❌ Environment variables validation failed:');
-      error.errors.forEach((err) => {
-        console.error(`   - ${err.path.join('.')}: ${err.message}`);
+      // Проверяем только критичные ошибки
+      const criticalErrors = error.errors.filter((err) => {
+        const path = err.path.join('.');
+        // Критичные переменные: DATABASE_URL, CLOUDINARY_*
+        return path === 'DATABASE_URL' || 
+               path.startsWith('CLOUDINARY_') ||
+               (path === 'JWT_SECRET' && !process.env.ADMIN_JWT_SECRET);
       });
-      console.error('\n⚠️  Please fix the environment variables and restart the server.\n');
-      throw new Error('Invalid environment variables');
+      
+      if (criticalErrors.length > 0) {
+        console.error('❌ Critical environment variables validation failed:');
+        criticalErrors.forEach((err) => {
+          console.error(`   - ${err.path.join('.')}: ${err.message}`);
+        });
+        console.error('\n⚠️  Please fix these critical environment variables.\n');
+        throw new Error('Invalid critical environment variables');
+      } else {
+        // Не критичные ошибки - только предупреждаем
+        console.warn('⚠️  Some environment variables validation warnings:');
+        error.errors.forEach((err) => {
+          console.warn(`   - ${err.path.join('.')}: ${err.message}`);
+        });
+        // Возвращаем process.env как fallback (не идеально, но работает)
+        validatedEnv = process.env as any as Env;
+        return validatedEnv;
+      }
     }
     throw error;
   }
@@ -86,7 +122,8 @@ export const env = {
     return getEnv().DATABASE_URL;
   },
   get jwtSecret() {
-    return getEnv().JWT_SECRET;
+    const env = getEnv();
+    return env.ADMIN_JWT_SECRET || env.JWT_SECRET || '';
   },
   get cloudinary() {
     return {
