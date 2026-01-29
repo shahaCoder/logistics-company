@@ -81,6 +81,9 @@ model DriverApplication {
 
   @@index([status])
   @@index([createdAt])
+  @@index([status, createdAt]) // Составной индекс для фильтрации по статусу + сортировки
+  @@index([firstName, lastName]) // Для поиска по имени
+  @@index([email]) // Для поиска по email
 }
 
 model PreviousAddress {
@@ -216,6 +219,7 @@ model FreightRequest {
 
   @@index([createdAt])
   @@index([email])
+  @@index([isBroker, createdAt]) // Для фильтрации брокеров + сортировки
 }
 
 model ContactRequest {
@@ -293,6 +297,9 @@ model Truck {
 
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
+
+  @@index([samsaraVehicleId]) // Для синхронизации с Samsara
+  @@index([createdAt]) // Для сортировки
 }
 
 
