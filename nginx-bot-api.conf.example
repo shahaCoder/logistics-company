@@ -1,0 +1,51 @@
+# Пример конфигурации Nginx для reverse proxy к pti-bot API
+# Добавьте этот блок в ваш основной конфиг Nginx для glco.us
+
+# Если бот на отдельном сервере:
+location /api/bot/ {
+    proxy_pass http://pti-bot-server-ip:4010/api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    
+    # CORS headers
+    add_header 'Access-Control-Allow-Origin' 'https://glco.us' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'X-API-Key, Content-Type' always;
+    
+    # Handle OPTIONS preflight
+    if ($request_method = 'OPTIONS') {
+        return 204;
+    }
+    
+    # Timeouts
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+}
+
+# Если бот на том же сервере (localhost):
+# location /api/bot/ {
+#     proxy_pass http://localhost:4010/api/;
+#     proxy_set_header Host $host;
+#     proxy_set_header X-Real-IP $remote_addr;
+#     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#     proxy_set_header X-Forwarded-Proto $scheme;
+#     
+#     # CORS headers
+#     add_header 'Access-Control-Allow-Origin' 'https://glco.us' always;
+#     add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+#     add_header 'Access-Control-Allow-Headers' 'X-API-Key, Content-Type' always;
+#     
+#     # Handle OPTIONS preflight
+#     if ($request_method = 'OPTIONS') {
+#         return 204;
+#     }
+# }
+
+# Инструкции:
+# 1. Замените pti-bot-server-ip на реальный IP адрес сервера бота
+# 2. Скопируйте этот блок в /etc/nginx/sites-available/glco.us
+# 3. Проверьте конфигурацию: sudo nginx -t
+# 4. Перезагрузите Nginx: sudo systemctl reload nginx
