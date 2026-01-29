@@ -11,8 +11,14 @@ let isSyncing = false;
 
 /**
  * Sync odometer data from Samsara for all trucks with samsaraVehicleId
+ * TODO: Temporarily disabled due to Samsara API error (400: Invalid stat type(s): odometer)
  */
 export async function syncSamsaraOdometer(): Promise<void> {
+  // Temporarily disabled - Samsara API returning 400 error
+  console.log('[Samsara Sync] Sync disabled - API error needs to be fixed');
+  return;
+  
+  /* COMMENTED OUT - Samsara API error
   if (isSyncing) {
     console.log('[Samsara Sync] Sync already in progress, skipping...');
     return;
@@ -84,12 +90,19 @@ export async function syncSamsaraOdometer(): Promise<void> {
   } finally {
     isSyncing = false;
   }
+  */
 }
 
 /**
  * Start the Samsara sync job (runs every 6 hours)
+ * TODO: Temporarily disabled due to Samsara API error
  */
 export function startSamsaraSyncJob(): void {
+  // Temporarily disabled - Samsara API returning 400 error
+  console.log('[Samsara Sync] Sync job disabled - API error needs to be fixed');
+  return;
+  
+  /* COMMENTED OUT - Samsara API error
   const apiToken = getSamsaraApiToken();
   if (!apiToken) {
     console.warn('[Samsara Sync] SAMSARA_API_TOKEN not found, sync job will not start');
@@ -117,6 +130,7 @@ export function startSamsaraSyncJob(): void {
   }, SIX_HOURS_MS);
 
   console.log('[Samsara Sync] Sync job started (runs every 6 hours)');
+  */
 }
 
 /**

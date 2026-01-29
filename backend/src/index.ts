@@ -115,5 +115,6 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  startSamsaraSyncJob();
+  // TODO: Temporarily disabled Samsara sync due to API error (400: Invalid stat type(s): odometer)
+  // startSamsaraSyncJob();
 });
