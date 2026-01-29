@@ -4,54 +4,99 @@ import Redis from 'ioredis';
 // Если Redis недоступен, приложение продолжит работать без кэша
 let redis: Redis | null = null;
 let redisEnabled = false;
+let redisConnectionAttempts = 0;
+const MAX_CONNECTION_ATTEMPTS = 3;
+let lastErrorLogTime = 0;
+const ERROR_LOG_INTERVAL = 60000; // Логировать ошибки не чаще раза в минуту
 
 // Инициализация Redis (с обработкой ошибок)
 try {
   const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
   redis = new Redis(redisUrl, {
-    maxRetriesPerRequest: 3,
+    maxRetriesPerRequest: 1, // Уменьшаем количество попыток
     retryStrategy: (times) => {
-      const delay = Math.min(times * 50, 2000);
+      // Останавливаем попытки переподключения после MAX_CONNECTION_ATTEMPTS
+      if (times > MAX_CONNECTION_ATTEMPTS) {
+        redisEnabled = false;
+        return null; // Останавливаем переподключение
+      }
+      const delay = Math.min(times * 100, 1000);
       return delay;
     },
     reconnectOnError: (err) => {
+      // Не переподключаться автоматически - только для READONLY ошибок
       const targetError = 'READONLY';
       if (err.message.includes(targetError)) {
-        return true; // Reconnect on READONLY error
+        return true;
       }
+      // Для всех остальных ошибок не переподключаемся
+      redisEnabled = false;
       return false;
     },
     lazyConnect: true, // Не подключаться сразу, только при первом использовании
+    enableOfflineQueue: false, // Отключаем очередь офлайн команд
+    enableReadyCheck: false, // Отключаем проверку готовности для быстрого отказа
   });
 
   redis.on('error', (err) => {
-    console.warn('Redis Client Error:', err.message);
+    const now = Date.now();
+    // Логируем ошибки не чаще раза в минуту
+    if (now - lastErrorLogTime > ERROR_LOG_INTERVAL) {
+      console.warn('⚠️ Redis unavailable, continuing without cache');
+      lastErrorLogTime = now;
+    }
     redisEnabled = false;
+    redisConnectionAttempts++;
+    
+    // Если слишком много ошибок, отключаем Redis полностью
+    if (redisConnectionAttempts >= MAX_CONNECTION_ATTEMPTS && redis) {
+      try {
+        redis.disconnect();
+      } catch (e) {
+        // Игнорируем ошибки при отключении
+      }
+    }
   });
 
   redis.on('connect', () => {
     console.log('✅ Redis connected');
     redisEnabled = true;
+    redisConnectionAttempts = 0; // Сбрасываем счетчик при успешном подключении
   });
 
   redis.on('ready', () => {
     console.log('✅ Redis ready');
     redisEnabled = true;
+    redisConnectionAttempts = 0;
   });
 
   redis.on('close', () => {
-    console.warn('⚠️ Redis connection closed');
     redisEnabled = false;
+    // Не логируем close - это нормально при отключении
   });
 
   // Попытка подключения (не блокирующая)
   redis.connect().catch((err) => {
-    console.warn('⚠️ Redis connection failed, continuing without cache:', err.message);
+    redisConnectionAttempts++;
+    if (redisConnectionAttempts === 1) {
+      // Логируем только при первой попытке
+      console.warn('⚠️ Redis connection failed, continuing without cache');
+    }
     redisEnabled = false;
+    
+    // Если не удалось подключиться, отключаем клиент
+    if (redisConnectionAttempts >= MAX_CONNECTION_ATTEMPTS && redis) {
+      try {
+        redis.disconnect();
+      } catch (e) {
+        // Игнорируем ошибки
+      }
+    }
   });
 } catch (error) {
-  console.warn('⚠️ Redis initialization failed, continuing without cache:', error);
+  console.warn('⚠️ Redis initialization failed, continuing without cache');
   redisEnabled = false;
+  redis = null;
 }
 
 /**
@@ -74,14 +119,16 @@ export async function getCached<T>(
       try {
         return JSON.parse(cached) as T;
       } catch (parseError) {
-        console.warn(`Redis: Failed to parse cached data for key ${key}`);
         // Если не удалось распарсить, удаляем битый ключ и продолжаем
         await redis.del(key).catch(() => {});
       }
     }
   } catch (error) {
-    console.warn(`Redis: Get error for key ${key}:`, error instanceof Error ? error.message : error);
-    // Продолжаем выполнение без кэша
+    // Тихая обработка ошибок - не логируем каждую ошибку
+    // Если ошибка критичная, она будет обработана в обработчике событий
+    if (!redisEnabled) {
+      return fetcher();
+    }
   }
 
   // Выполняем fetcher
@@ -92,8 +139,8 @@ export async function getCached<T>(
     try {
       await redis.setex(key, ttl, JSON.stringify(data));
     } catch (error) {
-      console.warn(`Redis: Set error for key ${key}:`, error instanceof Error ? error.message : error);
-      // Не критично, продолжаем работу
+      // Тихая обработка - не логируем каждую ошибку
+      // Redis будет отключен через обработчик событий если нужно
     }
   }
 
@@ -114,7 +161,8 @@ export async function invalidateCache(pattern: string): Promise<void> {
       await redis.del(...keys);
     }
   } catch (error) {
-    console.warn(`Redis: Invalidate error for pattern ${pattern}:`, error instanceof Error ? error.message : error);
+    // Тихая обработка ошибок
+    // Redis будет отключен через обработчик событий если нужно
   }
 }
 
@@ -129,7 +177,8 @@ export async function deleteCache(key: string): Promise<void> {
   try {
     await redis.del(key);
   } catch (error) {
-    console.warn(`Redis: Delete error for key ${key}:`, error instanceof Error ? error.message : error);
+    // Тихая обработка ошибок
+    // Redis будет отключен через обработчик событий если нужно
   }
 }
 
