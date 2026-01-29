@@ -121,15 +121,27 @@ const fullFormSchema = z.object({
   otherLicenses: z.array(otherLicenseSchema).optional(),
   licenseFrontFile: z
     .any()
-    .refine((file) => file instanceof File && file.size > 0, "Front license copy is required"),
+    .refine((file) => {
+      if (!file) return false;
+      if (file instanceof File) return file.size > 0;
+      return false;
+    }, "Front license copy is required"),
   licenseBackFile: z
     .any()
-    .refine((file) => file instanceof File && file.size > 0, "Back license copy is required"),
+    .refine((file) => {
+      if (!file) return false;
+      if (file instanceof File) return file.size > 0;
+      return false;
+    }, "Back license copy is required"),
 
   // Step 3
   medicalCardFile: z
     .any()
-    .refine((file) => file instanceof File && file.size > 0, "Medical card copy is required"),
+    .refine((file) => {
+      if (!file) return false;
+      if (file instanceof File) return file.size > 0;
+      return false;
+    }, "Medical card copy is required"),
   medicalCardExpiresAt: z.string().optional().refine(
     (val) => {
       // If empty or undefined, it's valid (optional field)
@@ -173,7 +185,7 @@ const fullFormSchema = z.object({
 
   // Step 5 - Authorization
   authorizationSignature: z.string().optional(),
-  authorizationSignatureFile: z.instanceof(File).optional(),
+  authorizationSignatureFile: z.any().optional(),
   authorizationDateSigned: z.string().min(1, "Date signed is required"),
 
   // Step 6
@@ -186,33 +198,36 @@ const fullFormSchema = z.object({
   alcoholDrugReturnToDuty: z.boolean().optional(),
   alcoholDrugName: z.string().min(1, "Name is required"),
   alcoholDrugSignature: z.string().optional(),
-  alcoholDrugSignatureFile: z.instanceof(File).optional(),
+  alcoholDrugSignatureFile: z.any().optional(),
   alcoholDrugDateSigned: z.string().min(1, "Date signed is required"),
 
   // Step 7
   pspFullName: z.string().min(1, "Full name is required"),
   pspSignature: z.string().optional(),
-  pspSignatureFile: z.instanceof(File).optional(),
+  pspSignatureFile: z.any().optional(),
   pspDateSigned: z.string().min(1, "Date signed is required"),
 
   // Step 8
   clearinghouseSignature: z.string().optional(),
-  clearinghouseSignatureFile: z.instanceof(File).optional(),
+  clearinghouseSignatureFile: z.any().optional(),
   clearinghouseDateSigned: z.string().min(1, "Date signed is required"),
   clearinghouseRegistered: z.boolean(),
 
   // Step 9
   mvrSignature: z.string().optional(),
-  mvrSignatureFile: z.instanceof(File).optional(),
+  mvrSignatureFile: z.any().optional(),
   mvrDateSigned: z.string().min(1, "Date signed is required"),
 }).superRefine((data, ctx) => {
+  // Validate applicantType
   if (!data.applicantType) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Please select your driver type",
+      message: "Please select your driver type (Company Driver or Owner Operator)",
       path: ["applicantType"],
     });
   }
+  
+  // Validate Owner Operator fields
   if (data.applicantType === "OWNER_OPERATOR") {
     if (!data.truckYear || !data.truckYear.trim()) {
       ctx.addIssue({
@@ -228,6 +243,52 @@ const fullFormSchema = z.object({
         path: ["truckMake"],
       });
     }
+  }
+  
+  // Validate signatures - at least one must be provided (signature string OR file)
+  // Step 5 - Authorization
+  if (!data.authorizationSignature && !data.authorizationSignatureFile) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please provide your signature (draw or upload)",
+      path: ["authorizationSignature"],
+    });
+  }
+  
+  // Step 6 - Alcohol & Drug
+  if (!data.alcoholDrugSignature && !data.alcoholDrugSignatureFile) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please provide your signature (draw or upload)",
+      path: ["alcoholDrugSignature"],
+    });
+  }
+  
+  // Step 7 - PSP
+  if (!data.pspSignature && !data.pspSignatureFile) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please provide your signature (draw or upload)",
+      path: ["pspSignature"],
+    });
+  }
+  
+  // Step 8 - Clearinghouse
+  if (!data.clearinghouseSignature && !data.clearinghouseSignatureFile) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please provide your signature (draw or upload)",
+      path: ["clearinghouseSignature"],
+    });
+  }
+  
+  // Step 9 - MVR
+  if (!data.mvrSignature && !data.mvrSignatureFile) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please provide your signature (draw or upload)",
+      path: ["mvrSignature"],
+    });
   }
 });
 
@@ -320,8 +381,6 @@ export default function DriverApplicationForm() {
   const watchedValues = watch();
 
   const validateCurrentStep = async () => {
-    console.log("=== validateCurrentStep START ===");
-    console.log("Current step:", currentStep);
     let fieldsToValidate: (keyof DriverApplicationFormData)[] = [];
 
     // Helper function to validate date format
@@ -512,76 +571,46 @@ export default function DriverApplicationForm() {
     }
 
     // Trigger validation for all fields in this step
-    console.log("Triggering validation for fields:", fieldsToValidate);
     const isValid = await trigger(fieldsToValidate);
-    console.log("Trigger result:", isValid);
     
     // If trigger returned false, there are validation errors
     if (!isValid) {
-      console.log("Validation failed - trigger returned false");
-      console.log("Fields being validated:", fieldsToValidate);
-      console.log("Current errors object:", errors);
-      
-      // Check each field individually
-      for (const field of fieldsToValidate) {
-        const fieldError = errors[field];
-        if (fieldError) {
-          console.log(`Field "${field}" has error:`, fieldError);
-        } else {
-          console.log(`Field "${field}" is OK`);
-        }
-      }
       return false;
     }
     
-    // Additional manual checks for critical fields that might not be caught by trigger
-    // Check applicantType specifically (radio buttons can be tricky)
+    // Additional manual checks for critical fields
     if (fieldsToValidate.includes("applicantType")) {
       const applicantTypeValue = watchedValues.applicantType;
-      console.log("Checking applicantType:", applicantTypeValue);
       if (!applicantTypeValue || 
           (applicantTypeValue !== "COMPANY_DRIVER" && applicantTypeValue !== "OWNER_OPERATOR")) {
-        console.log("applicantType validation failed:", applicantTypeValue);
         return false;
       }
-      console.log("applicantType is valid");
     }
     
     // Check dateOfBirth
     if (fieldsToValidate.includes("dateOfBirth")) {
       const dateValue = watchedValues.dateOfBirth;
-      console.log("Checking dateOfBirth:", dateValue, "Type:", typeof dateValue);
       if (!dateValue || typeof dateValue !== "string" || dateValue.trim() === "") {
-        console.log("dateOfBirth is empty or invalid type");
         return false;
       }
       if (!isValidDate(dateValue)) {
-        console.log("dateOfBirth format is invalid:", dateValue, "Expected format: YYYY-MM-DD");
         return false;
       }
-      console.log("dateOfBirth is valid");
     }
     
-    // Wait a moment for errors to update, then check one more time
+    // Wait a moment for errors to update
     await new Promise(resolve => setTimeout(resolve, 100));
     
     // Final check: verify no errors exist in the form state
-    console.log("Final error check - errors object:", errors);
     const hasFormErrors = fieldsToValidate.some(field => {
       const fieldError = errors[field];
-      if (fieldError) {
-        console.log(`Field "${field}" has error after trigger:`, fieldError);
-        return true;
-      }
-      return false;
+      return fieldError !== undefined && fieldError !== null;
     });
     
     if (hasFormErrors) {
-      console.log("Final check failed - errors found");
       return false;
     }
     
-    console.log("All validations passed!");
     return true;
   };
 
@@ -708,18 +737,102 @@ export default function DriverApplicationForm() {
   };
 
   const handleNext = async () => {
-    console.log("=== handleNext called ===");
-    console.log("Current step:", currentStep);
-    console.log("Watched values:", watchedValues);
-    console.log("Current errors:", errors);
-    
     // Save any pending signatures before validation
     await saveAllSignatures();
     
     const isValid = await validateCurrentStep();
     
-    console.log("Validation result:", isValid);
-    console.log("Can proceed:", isValid && currentStep < TOTAL_STEPS);
+    if (!isValid) {
+      // Show error message with specific fields
+      const stepFields: Record<number, (keyof DriverApplicationFormData)[]> = {
+        1: ["applicantType", "firstName", "lastName", "dateOfBirth", "phone", "email", "currentAddressLine1", "currentCity", "currentState", "currentZip", "truckYear", "truckMake"],
+        2: ["licenseNumber", "licenseState", "licenseClass", "licenseExpiresAt", "licenseFrontFile", "licenseBackFile"],
+        3: ["medicalCardFile", "medicalCardExpiresAt"],
+        4: ["employmentRecords"],
+        5: ["authorizationDateSigned", "authorizationSignature", "authorizationSignatureFile"],
+        6: ["alcoholDrugName", "alcoholDrugDateSigned", "alcoholDrugSignature", "alcoholDrugSignatureFile"],
+        7: ["pspFullName", "pspDateSigned", "pspSignature", "pspSignatureFile"],
+        8: ["clearinghouseDateSigned", "clearinghouseRegistered", "clearinghouseSignature", "clearinghouseSignatureFile"],
+        9: ["mvrDateSigned", "mvrSignature", "mvrSignatureFile"],
+      };
+      
+      const fields = stepFields[currentStep] || [];
+      const errorMessages: string[] = [];
+      const fieldNameMap: Record<string, string> = {
+        applicantType: "Driver Type",
+        firstName: "First Name",
+        lastName: "Last Name",
+        dateOfBirth: "Date of Birth",
+        phone: "Phone Number",
+        email: "Email Address",
+        currentAddressLine1: "Street Address",
+        currentCity: "City",
+        currentState: "State",
+        currentZip: "Zip Code",
+        truckYear: "Truck Year",
+        truckMake: "Truck Make",
+        licenseNumber: "License Number",
+        licenseState: "License State",
+        licenseClass: "License Class",
+        licenseExpiresAt: "License Expiration Date",
+        licenseFrontFile: "License Front Photo",
+        licenseBackFile: "License Back Photo",
+        medicalCardFile: "Medical Card Document",
+        medicalCardExpiresAt: "Medical Card Expiration Date",
+        employmentRecords: "Employment History",
+        authorizationDateSigned: "Authorization Date",
+        authorizationSignature: "Authorization Signature",
+        authorizationSignatureFile: "Authorization Signature",
+        alcoholDrugName: "Name",
+        alcoholDrugDateSigned: "Date Signed",
+        alcoholDrugSignature: "Signature",
+        alcoholDrugSignatureFile: "Signature",
+        pspFullName: "Full Name",
+        pspDateSigned: "Date Signed",
+        pspSignature: "Signature",
+        pspSignatureFile: "Signature",
+        clearinghouseDateSigned: "Date Signed",
+        clearinghouseRegistered: "Clearinghouse Registration",
+        clearinghouseSignature: "Signature",
+        clearinghouseSignatureFile: "Signature",
+        mvrDateSigned: "Date Signed",
+        mvrSignature: "Signature",
+        mvrSignatureFile: "Signature",
+      };
+      
+      fields.forEach(field => {
+        const error = errors[field];
+        if (error?.message) {
+          const friendlyName = fieldNameMap[field as string] || field.toString();
+          errorMessages.push(`• ${friendlyName}: ${error.message}`);
+        }
+      });
+      
+      if (errorMessages.length > 0) {
+        const stepNames: Record<number, string> = {
+          1: "Applicant Information",
+          2: "License Information",
+          3: "Medical Card",
+          4: "Employment History",
+          5: "Authorization & Certification",
+          6: "Alcohol & Drug Test Statement",
+          7: "PSP Driver Disclosure",
+          8: "FMCSA Clearinghouse Consent",
+          9: "MVR Release Consent",
+        };
+        const stepName = stepNames[currentStep] || `Step ${currentStep}`;
+        setSubmitError(`Please fix the following errors on ${stepName}:\n\n${errorMessages.join('\n')}`);
+      } else {
+        setSubmitError(`Please fill in all required fields on Step ${currentStep} before continuing.`);
+      }
+      
+      // Scroll to top to show errors
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      
+      return;
+    }
     
     if (isValid && currentStep < TOTAL_STEPS) {
       // Auto-fill names when transitioning from Step 1 to Step 2
@@ -1183,14 +1296,22 @@ export default function DriverApplicationForm() {
 
         {/* Error Message */}
         {submitError && (
-          <div className="mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+          <div className="mt-6 p-5 bg-red-50 border-l-4 border-red-500 rounded-lg shadow-sm">
             <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div className="flex-1">
-                <h3 className="text-red-800 font-semibold mb-1">Please fix the following errors:</h3>
-                <p className="text-red-700 text-sm whitespace-pre-line">{submitError}</p>
+                <h3 className="text-red-800 font-bold text-lg mb-2">Please fix the following errors:</h3>
+                <div className="text-red-700 text-sm whitespace-pre-line font-medium leading-relaxed">
+                  {submitError}
+                </div>
+                <button
+                  onClick={() => setSubmitError(null)}
+                  className="mt-3 text-red-600 hover:text-red-800 text-sm font-semibold underline"
+                >
+                  Dismiss
+                </button>
               </div>
             </div>
           </div>
@@ -1256,8 +1377,6 @@ export default function DriverApplicationForm() {
                   },
                   (errors) => {
                     // This callback is called if validation fails
-                    console.log("Validation errors:", errors);
-                    
                     // Find the first step with errors
                     const firstErrorStep = findFirstStepWithErrors(errors);
                     
@@ -1266,16 +1385,16 @@ export default function DriverApplicationForm() {
                       setCurrentStep(firstErrorStep);
                     }
                     
-                    // Collect error messages for display with user-friendly field names
-                    const errorMessages: string[] = [];
+                    // Collect ALL error messages from ALL steps for display
+                    const allErrorMessages: Array<{ step: number; stepName: string; errors: string[] }> = [];
                     const fieldNameMap: Record<string, string> = {
                       applicantType: "Driver Type",
                       firstName: "First Name",
                       lastName: "Last Name",
                       dateOfBirth: "Date of Birth",
-                      phone: "Phone",
-                      email: "Email",
-                      currentAddressLine1: "Address",
+                      phone: "Phone Number",
+                      email: "Email Address",
+                      currentAddressLine1: "Street Address",
                       currentCity: "City",
                       currentState: "State",
                       currentZip: "Zip Code",
@@ -1287,7 +1406,7 @@ export default function DriverApplicationForm() {
                       licenseExpiresAt: "License Expiration Date",
                       licenseFrontFile: "License Front Photo",
                       licenseBackFile: "License Back Photo",
-                      medicalCardFile: "Medical Card",
+                      medicalCardFile: "Medical Card Document",
                       medicalCardExpiresAt: "Medical Card Expiration Date",
                       employmentRecords: "Employment History",
                       authorizationDateSigned: "Authorization Date",
@@ -1322,32 +1441,51 @@ export default function DriverApplicationForm() {
                       9: ["mvrDateSigned", "mvrSignature", "mvrSignatureFile"],
                     };
                     
-                    const fields = stepFields[firstErrorStep] || [];
-                    fields.forEach(field => {
-                      const error = errors[field];
-                      if (error?.message) {
-                        const friendlyName = fieldNameMap[field as string] || field.toString();
-                        errorMessages.push(`• ${friendlyName}: ${error.message}`);
-                      }
-                    });
+                    const stepNames: Record<number, string> = {
+                      1: "Applicant Information",
+                      2: "License Information",
+                      3: "Medical Card",
+                      4: "Employment History",
+                      5: "Authorization & Certification",
+                      6: "Alcohol & Drug Test Statement",
+                      7: "PSP Driver Disclosure",
+                      8: "FMCSA Clearinghouse Consent",
+                      9: "MVR Release Consent",
+                    };
                     
-                    // Show detailed error message
-                    if (errorMessages.length > 0) {
-                      const stepNames: Record<number, string> = {
-                        1: "Applicant Information",
-                        2: "License Information",
-                        3: "Medical Card",
-                        4: "Employment History",
-                        5: "Authorization & Certification",
-                        6: "Alcohol & Drug Test Statement",
-                        7: "PSP Driver Disclosure",
-                        8: "FMCSA Clearinghouse Consent",
-                        9: "MVR Release Consent",
-                      };
-                      const stepName = stepNames[firstErrorStep] || `Step ${firstErrorStep}`;
-                      setSubmitError(`Step ${firstErrorStep} - ${stepName}:\n\n${errorMessages.slice(0, 5).join('\n')}${errorMessages.length > 5 ? `\n\n...and ${errorMessages.length - 5} more error(s)` : ''}`);
+                    // Collect errors from all steps
+                    for (let step = 1; step <= TOTAL_STEPS; step++) {
+                      const fields = stepFields[step] || [];
+                      const stepErrors: string[] = [];
+                      
+                      fields.forEach(field => {
+                        const error = errors[field];
+                        if (error?.message) {
+                          const friendlyName = fieldNameMap[field as string] || field.toString();
+                          stepErrors.push(`  • ${friendlyName}: ${error.message}`);
+                        }
+                      });
+                      
+                      if (stepErrors.length > 0) {
+                        allErrorMessages.push({
+                          step,
+                          stepName: stepNames[step] || `Step ${step}`,
+                          errors: stepErrors,
+                        });
+                      }
+                    }
+                    
+                    // Build comprehensive error message
+                    if (allErrorMessages.length > 0) {
+                      let errorText = "Please fix the following errors before submitting:\n\n";
+                      
+                      allErrorMessages.forEach(({ step, stepName, errors: stepErrors }) => {
+                        errorText += `Step ${step} - ${stepName}:\n${stepErrors.join('\n')}\n\n`;
+                      });
+                      
+                      setSubmitError(errorText.trim());
                     } else {
-                      setSubmitError(`Please check all fields on Step ${firstErrorStep} and fix any errors before submitting.`);
+                      setSubmitError("Please check all fields and fix any errors before submitting.");
                     }
                     
                     // Scroll to first error field
