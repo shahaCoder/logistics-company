@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 interface FreightRequest {
@@ -38,12 +38,23 @@ export default function FreightRequestsPage() {
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<FreightRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchRequests = async () => {
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -52,7 +63,7 @@ export default function FreightRequestsPage() {
         limit: "20",
       });
 
-      if (search.trim()) params.append("search", search.trim());
+      if (debouncedSearch.trim()) params.append("search", debouncedSearch.trim());
 
       const response = await fetch(`${apiUrl}/api/admin/requests/freight?${params}`, {
         credentials: "include",
@@ -71,18 +82,18 @@ export default function FreightRequestsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, debouncedSearch, router]);
 
   useEffect(() => {
     fetchRequests();
-  }, [currentPage, search]);
+  }, [fetchRequests]);
 
-  const handleView = (request: FreightRequest) => {
+  const handleView = useCallback((request: FreightRequest) => {
     setSelectedRequest(request);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleDelete = async (id: string, contactName: string, e?: React.MouseEvent) => {
+  const handleDelete = useCallback(async (id: string, contactName: string, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation();
     }
@@ -119,7 +130,7 @@ export default function FreightRequestsPage() {
     } finally {
       setDeletingId(null);
     }
-  };
+  }, [selectedRequest, router]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

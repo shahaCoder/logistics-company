@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -33,7 +33,7 @@ export default function ApplicationsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -62,7 +62,7 @@ export default function ApplicationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, statusFilter, debouncedSearch, router]);
 
   // Debounce search input
   useEffect(() => {
@@ -76,9 +76,9 @@ export default function ApplicationsPage() {
 
   useEffect(() => {
     fetchApplications();
-  }, [currentPage, statusFilter, debouncedSearch]);
+  }, [fetchApplications]);
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = useCallback(async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete the application for ${name}? This action cannot be undone.`)) {
       return;
     }
@@ -108,9 +108,9 @@ export default function ApplicationsPage() {
     } finally {
       setDeletingId(null);
     }
-  };
+  }, [router]);
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = useCallback((status: string) => {
     const colors: Record<string, string> = {
       NEW: "bg-gray-100 text-gray-800",
       IN_REVIEW: "bg-yellow-100 text-yellow-800",
@@ -126,7 +126,7 @@ export default function ApplicationsPage() {
         {status}
       </span>
     );
-  };
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 interface Truck {
@@ -36,7 +36,7 @@ export default function TrucksPage() {
     oilChangeIntervalMiles: "10000",
   });
 
-  const fetchTrucks = async () => {
+  const fetchTrucks = useCallback(async () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -63,11 +63,11 @@ export default function TrucksPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchTrucks();
-  }, []);
+  }, [fetchTrucks]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function TrucksPage() {
     }
   }, [openMenuId]);
 
-  const handleResetOilChange = async (truckId: string, truckName: string) => {
+  const handleResetOilChange = useCallback(async (truckId: string, truckName: string) => {
     if (!confirm(`Reset oil change for ${truckName}? This will set the last oil change miles to the current miles.`)) {
       return;
     }
@@ -116,9 +116,9 @@ export default function TrucksPage() {
     } finally {
       setResettingId(null);
     }
-  };
+  }, [router]);
 
-  const handleEditTruck = (truck: Truck) => {
+  const handleEditTruck = useCallback((truck: Truck) => {
     setEditingTruck(truck);
     const milesUntilNext = truck.milesUntilNextOilChange;
     setFormData({
@@ -130,9 +130,9 @@ export default function TrucksPage() {
     setShowEditModal(true);
     setOpenMenuId(null);
     setMenuPosition(null);
-  };
+  }, []);
 
-  const handleUpdateTruck = async (e: React.FormEvent) => {
+  const handleUpdateTruck = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTruck) return;
     
@@ -179,9 +179,9 @@ export default function TrucksPage() {
     } finally {
       setCreating(false);
     }
-  };
+  }, [editingTruck, formData, router]);
 
-  const handleDeleteTruck = async (truckId: string, truckName: string) => {
+  const handleDeleteTruck = useCallback(async (truckId: string, truckName: string) => {
     if (!confirm(`Are you sure you want to delete truck ${truckName}? This action cannot be undone.`)) {
       setOpenMenuId(null);
       return;
@@ -213,9 +213,9 @@ export default function TrucksPage() {
       setOpenMenuId(null);
       setMenuPosition(null);
     }
-  };
+  }, [router]);
 
-  const handleAddTruck = async (e: React.FormEvent) => {
+  const handleAddTruck = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setCreating(true);
 
@@ -261,13 +261,13 @@ export default function TrucksPage() {
     } finally {
       setCreating(false);
     }
-  };
+  }, [formData, router]);
 
-  const formatMiles = (miles: number): string => {
+  const formatMiles = useCallback((miles: number): string => {
     return miles.toLocaleString("en-US");
-  };
+  }, []);
 
-  const getStatusColor = (status: string): string => {
+  const getStatusColor = useCallback((status: string): string => {
     switch (status) {
       case "Good":
         return "bg-green-100 text-green-800 border-green-300";
@@ -278,11 +278,11 @@ export default function TrucksPage() {
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
     }
-  };
+  }, []);
 
-  const getStatusText = (status: string): string => {
+  const getStatusText = useCallback((status: string): string => {
     return status;
-  };
+  }, []);
 
   if (loading) {
     return (

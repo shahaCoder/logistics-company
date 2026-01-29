@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 interface ContactRequest {
@@ -24,10 +24,21 @@ export default function ContactRequestsPage() {
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchRequests = async () => {
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -36,7 +47,7 @@ export default function ContactRequestsPage() {
         limit: "20",
       });
 
-      if (search.trim()) params.append("search", search.trim());
+      if (debouncedSearch.trim()) params.append("search", debouncedSearch.trim());
 
       const response = await fetch(`${apiUrl}/api/admin/requests/contact?${params}`, {
         credentials: "include",
@@ -55,13 +66,13 @@ export default function ContactRequestsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, debouncedSearch, router]);
 
   useEffect(() => {
     fetchRequests();
-  }, [currentPage, search]);
+  }, [fetchRequests]);
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = useCallback(async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete the contact message from ${name}? This action cannot be undone.`)) {
       return;
     }
@@ -90,7 +101,7 @@ export default function ContactRequestsPage() {
     } finally {
       setDeletingId(null);
     }
-  };
+  }, [router]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

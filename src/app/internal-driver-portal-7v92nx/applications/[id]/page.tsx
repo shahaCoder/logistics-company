@@ -1,10 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+// Lazy load heavy PDF libraries - only load when user clicks "Download PDF"
+let jsPDF: any = null;
+let html2canvas: any = null;
+
+const loadPDFLibraries = async () => {
+  if (!jsPDF || !html2canvas) {
+    const [jsPDFModule, html2canvasModule] = await Promise.all([
+      import("jspdf"),
+      import("html2canvas"),
+    ]);
+    jsPDF = jsPDFModule.default;
+    html2canvas = html2canvasModule.default;
+  }
+  return { jsPDF, html2canvas };
+};
 
 /**
  * Format date in American format (MM/DD/YYYY)
@@ -143,10 +156,6 @@ export default function ApplicationDetailPage() {
   const [saving, setSaving] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
 
-  useEffect(() => {
-    fetchApplication();
-  }, [id]);
-
   // Helper function to load signature as base64 - simple and reliable
   const loadSignatureAsBase64 = async (url: string): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -195,7 +204,7 @@ export default function ApplicationDetailPage() {
     });
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = useCallback(async () => {
     if (!application) {
       alert("Application data not loaded yet. Please wait.");
       return;
@@ -203,6 +212,8 @@ export default function ApplicationDetailPage() {
 
     setGeneratingPDF(true);
     try {
+      // Lazy load PDF libraries only when needed
+      const { jsPDF: PDF, html2canvas: h2c } = await loadPDFLibraries();
       // Get full SSN - use decrypted SSN if available, otherwise use last 4 digits
       // Note: For PDF generation, if SSN is not already decrypted, we'll use last 4 digits
       // User should decrypt SSN using the modal before generating PDF if full SSN is needed
@@ -241,7 +252,7 @@ export default function ApplicationDetailPage() {
       console.log('All signatures processed. Loaded:', Object.keys(signatureImages).length, 'of', application.legalConsents.length);
 
       // Create PDF directly with jsPDF (no html2canvas = smaller file)
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new PDF("p", "mm", "a4");
       const pageWidth = 210;
       const pageHeight = 297;
       const margin = 20;
@@ -434,7 +445,7 @@ export default function ApplicationDetailPage() {
             });
             
             // Use html2canvas to render the signature container
-            const canvas = await html2canvas(signatureContainer, {
+            const canvas = await h2c(signatureContainer, {
               scale: 2,
               useCORS: true,
               backgroundColor: '#FFFFFF',
@@ -502,9 +513,9 @@ export default function ApplicationDetailPage() {
     } finally {
       setGeneratingPDF(false);
     }
-  };
+  }, [application, decryptedSSN]);
 
-  const fetchApplication = async () => {
+  const fetchApplication = useCallback(async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const response = await fetch(`${apiUrl}/api/admin/applications/${id}`, {
@@ -525,7 +536,11 @@ export default function ApplicationDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, router]);
+
+  useEffect(() => {
+    fetchApplication();
+  }, [fetchApplication]);
 
   const handleDecryptSSN = async () => {
     setDecryptError("");
@@ -605,7 +620,8 @@ export default function ApplicationDetailPage() {
 
   // Calculate age correctly, accounting for whether birthday has passed this year
   // Uses the same date parsing logic as formatDateUS to avoid timezone shifts
-  const calculateAge = (dateOfBirth: string): number => {
+  // Мемоизируем вычисление возраста
+  const calculateAge = useCallback((dateOfBirth: string): number => {
     // Parse date components directly to avoid UTC timezone conversion
     const isoMatch = dateOfBirth.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (!isoMatch) {
@@ -635,9 +651,11 @@ export default function ApplicationDetailPage() {
     }
     
     return age;
-  };
+  }, []);
   
-  const age = application ? calculateAge(application.dateOfBirth) : 0;
+  const age = useMemo(() => {
+    return application ? calculateAge(application.dateOfBirth) : 0;
+  }, [application, calculateAge]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -847,6 +865,8 @@ export default function ApplicationDetailPage() {
                               width={300}
                               height={200}
                               className="rounded border"
+                              loading="lazy"
+                              quality={85}
                             />
                           </a>
                         );
@@ -917,6 +937,8 @@ export default function ApplicationDetailPage() {
                               width={300}
                               height={200}
                               className="rounded border"
+                              loading="lazy"
+                              quality={85}
                             />
                           </a>
                         );
@@ -1007,6 +1029,8 @@ export default function ApplicationDetailPage() {
                             width={400}
                             height={300}
                             className="rounded border"
+                            loading="lazy"
+                            quality={85}
                           />
                         </a>
                       );
@@ -1104,7 +1128,8 @@ export default function ApplicationDetailPage() {
                         width={300}
                         height={150}
                         className="max-w-full h-auto"
-                        unoptimized
+                        loading="lazy"
+                        quality={85}
                       />
                     </div>
                     <a
