@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { FreightRequestDTO, ContactRequestDTO } from './requests.types.js';
-
-const prisma = new PrismaClient();
+import prisma from '../../utils/prisma.js';
 
 export async function createFreightRequest(
   dto: FreightRequestDTO,

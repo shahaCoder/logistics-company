@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../utils/prisma.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-
-const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || JWT_SECRET + '_refresh';

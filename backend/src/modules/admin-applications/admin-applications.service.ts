@@ -1,8 +1,7 @@
-import { PrismaClient, ApplicationStatus } from '@prisma/client';
+import { ApplicationStatus } from '@prisma/client';
 import { decryptSensitive } from '../../utils/crypto.js';
 import { authenticateAdmin } from '../auth/auth.service.js';
-
-const prisma = new PrismaClient();
+import prisma from '../../utils/prisma.js';
 
 /**
  * Get all applications with filters and pagination

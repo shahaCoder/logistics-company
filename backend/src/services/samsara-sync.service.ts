@@ -3,10 +3,8 @@
  * Syncs vehicle odometer readings from Samsara API to database
  */
 
-import { PrismaClient } from '@prisma/client';
 import { fetchVehicleStatsFeed, getSamsaraApiToken } from './samsara.service.js';
-
-const prisma = new PrismaClient();
+import prisma from '../utils/prisma.js';
 
 let syncInterval: NodeJS.Timeout | null = null;
 let isSyncing = false;

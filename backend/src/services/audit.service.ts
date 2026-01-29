@@ -1,6 +1,5 @@
-import { PrismaClient, AuditAction } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { AuditAction } from '@prisma/client';
+import prisma from '../utils/prisma.js';
 
 export interface AuditLogData {
   adminId?: string;

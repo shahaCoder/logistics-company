@@ -1,13 +1,11 @@
-import { PrismaClient } from '@prisma/client';
 import { encryptSensitive } from '../../utils/crypto.js';
 import { uploadToApplicationFolder } from '../../services/cloudinary.js';
+import prisma from '../../utils/prisma.js';
 import {
   DriverApplicationDTO,
   DriverApplicationFiles,
   ApplicationMetadata,
 } from './driverApplication.types.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Parse a date string in YYYY-MM-DD or YYYY-MM format as a local date (not UTC)
