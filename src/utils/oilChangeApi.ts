@@ -8,6 +8,12 @@
 const API_BASE = process.env.NEXT_PUBLIC_BOT_API_BASE || 'https://webhook.glco.us/api';
 const API_KEY = process.env.NEXT_PUBLIC_BOT_API_KEY || '';
 
+// Debug: проверка переменных (удалить после отладки)
+if (typeof window !== 'undefined') {
+  console.log('[OilChangeAPI] API_BASE:', API_BASE);
+  console.log('[OilChangeAPI] API_KEY:', API_KEY ? `${API_KEY.substring(0, 10)}...` : 'NOT SET');
+}
+
 // Вспомогательная функция для проверки HTML ответа
 function checkHtmlResponse(text: string): boolean {
   const trimmed = text.trim();
