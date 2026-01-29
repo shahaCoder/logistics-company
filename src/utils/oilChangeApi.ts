@@ -1,16 +1,12 @@
 /**
  * API functions for managing oil change status via pti-bot API
- * All requests require X-API-Key header for authentication
+ * All requests are proxied through Express backend for security
  */
 
-// Используем API route Next.js для проксирования запросов
-// Это безопаснее, так как API ключ не попадает в клиентский код
-const API_BASE = '/api/oil-change';
-
-// Debug: проверка переменных (удалить после отладки)
-if (typeof window !== 'undefined') {
-  console.log('[OilChangeAPI] Using Next.js API route:', API_BASE);
-}
+// Используем Express backend для проксирования запросов
+// API ключ хранится на сервере и не попадает в клиентский код
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_PATH = '/api/admin/oil-change';
 
 // Вспомогательная функция для проверки HTML ответа
 function checkHtmlResponse(text: string): boolean {
@@ -64,7 +60,7 @@ export interface TrucksListResponse {
  * Get list of all trucks with their oil change status
  */
 export async function getOilChangeList(): Promise<OilChangeListResponse> {
-  const response = await fetch(`${API_BASE}?path=oil-change/list`, {
+  const response = await fetch(`${API_BASE}${API_PATH}/list`, {
     headers: {
       'Accept': 'application/json',
     },
@@ -107,7 +103,7 @@ export async function getOilChangeList(): Promise<OilChangeListResponse> {
  */
 export async function getOilChangeStatus(truckName: string): Promise<OilChangeStatusResponse> {
   const encodedName = encodeURIComponent(truckName);
-  const response = await fetch(`${API_BASE}?path=oil-change/${encodedName}`, {
+  const response = await fetch(`${API_BASE}${API_PATH}/${encodedName}`, {
     headers: {
       'Accept': 'application/json',
     },
@@ -158,7 +154,7 @@ export async function resetOilChange(
     body.mileage = mileage;
   }
 
-  const response = await fetch(`${API_BASE}?path=oil-change/reset`, {
+  const response = await fetch(`${API_BASE}${API_PATH}/reset`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -201,7 +197,7 @@ export async function resetOilChange(
  * Get list of all trucks (for dropdown)
  */
 export async function getTrucksList(): Promise<TrucksListResponse> {
-  const response = await fetch(`${API_BASE}?path=trucks`, {
+  const response = await fetch(`${API_BASE}${API_PATH}/trucks`, {
     headers: {
       'Accept': 'application/json',
     },

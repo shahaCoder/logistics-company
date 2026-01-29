@@ -8,6 +8,15 @@ import { NextRequest, NextResponse } from 'next/server';
 const BOT_API_BASE = process.env.NEXT_PUBLIC_BOT_API_BASE || 'https://webhook.glco.us/api';
 const BOT_API_KEY = process.env.NEXT_PUBLIC_BOT_API_KEY || process.env.BOT_API_KEY || '';
 
+// Debug: логируем переменные окружения (только на сервере)
+if (typeof window === 'undefined') {
+  console.log('[Oil Change API Route] Environment check:');
+  console.log('  NEXT_PUBLIC_BOT_API_BASE:', process.env.NEXT_PUBLIC_BOT_API_BASE || 'not set');
+  console.log('  NEXT_PUBLIC_BOT_API_KEY:', process.env.NEXT_PUBLIC_BOT_API_KEY ? 'SET (' + process.env.NEXT_PUBLIC_BOT_API_KEY.length + ' chars)' : 'NOT SET');
+  console.log('  BOT_API_KEY:', process.env.BOT_API_KEY ? 'SET (' + process.env.BOT_API_KEY.length + ' chars)' : 'NOT SET');
+  console.log('  Final BOT_API_KEY:', BOT_API_KEY ? 'SET' : 'NOT SET');
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
