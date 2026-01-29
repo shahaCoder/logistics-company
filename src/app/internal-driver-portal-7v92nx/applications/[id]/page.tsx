@@ -140,15 +140,11 @@ interface Application {
 }
 
 export default function ApplicationDetailPage() {
+  // ВСЕ хуки должны быть вызваны ПЕРВЫМИ, до любых условных возвратов
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string | undefined;
   const routerRef = useRef(router);
-  
-  // Обновляем ref при изменении router
-  useEffect(() => {
-    routerRef.current = router;
-  }, [router]);
 
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
@@ -161,6 +157,48 @@ export default function ApplicationDetailPage() {
   const [internalNotes, setInternalNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+
+  // Calculate age function - должна быть определена до useMemo
+  const calculateAge = (dateOfBirth: string): number => {
+    // Parse date components directly to avoid UTC timezone conversion
+    const isoMatch = dateOfBirth.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!isoMatch) {
+      // Fallback to Date parsing if format is unexpected
+      const birthDate = new Date(dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+    
+    const birthYear = parseInt(isoMatch[1], 10);
+    const birthMonth = parseInt(isoMatch[2], 10);
+    const birthDay = parseInt(isoMatch[3], 10);
+    
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth() + 1;
+    const todayDay = today.getDate();
+    
+    let age = todayYear - birthYear;
+    if (todayMonth < birthMonth || (todayMonth === birthMonth && todayDay < birthDay)) {
+      age--;
+    }
+    
+    return age;
+  };
+  
+  const age = useMemo(() => {
+    return application ? calculateAge(application.dateOfBirth) : 0;
+  }, [application]);
+
+  // Обновляем ref при изменении router
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   // Helper function to load signature as base64 - simple and reliable
   const loadSignatureAsBase64 = async (url: string): Promise<string> => {
@@ -619,6 +657,7 @@ export default function ApplicationDetailPage() {
     }
   };
 
+  // Теперь можно делать условные возвраты ПОСЛЕ всех хуков
   if (!id) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -642,44 +681,6 @@ export default function ApplicationDetailPage() {
       </div>
     );
   }
-
-  // Calculate age correctly, accounting for whether birthday has passed this year
-  // Uses the same date parsing logic as formatDateUS to avoid timezone shifts
-  const calculateAge = (dateOfBirth: string): number => {
-    // Parse date components directly to avoid UTC timezone conversion
-    const isoMatch = dateOfBirth.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (!isoMatch) {
-      // Fallback to Date parsing if format is unexpected
-      const birthDate = new Date(dateOfBirth);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      return age;
-    }
-    
-    const birthYear = parseInt(isoMatch[1], 10);
-    const birthMonth = parseInt(isoMatch[2], 10);
-    const birthDay = parseInt(isoMatch[3], 10);
-    
-    const today = new Date();
-    const todayYear = today.getFullYear();
-    const todayMonth = today.getMonth() + 1;
-    const todayDay = today.getDate();
-    
-    let age = todayYear - birthYear;
-    if (todayMonth < birthMonth || (todayMonth === birthMonth && todayDay < birthDay)) {
-      age--;
-    }
-    
-    return age;
-  };
-  
-  const age = useMemo(() => {
-    return application ? calculateAge(application.dateOfBirth) : 0;
-  }, [application]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
