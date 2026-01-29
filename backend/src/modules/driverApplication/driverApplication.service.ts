@@ -1,6 +1,7 @@
 import { encryptSensitive } from '../../utils/crypto.js';
 import { uploadToApplicationFolder } from '../../services/cloudinary.js';
 import prisma from '../../utils/prisma.js';
+import { invalidateCache } from '../../services/cache.service.js';
 import {
   DriverApplicationDTO,
   DriverApplicationFiles,
@@ -377,6 +378,9 @@ export async function createDriverApplication(
     maxWait: 10000, // Maximum time to wait for a transaction slot
     timeout: 30000, // Maximum time the transaction can run (30 seconds)
   });
+
+  // Инвалидируем кэш списков приложений после создания нового
+  await invalidateCache('applications:*');
 
   return {
     id: application.id,

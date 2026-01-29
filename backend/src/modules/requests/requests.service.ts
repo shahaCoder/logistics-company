@@ -1,11 +1,12 @@
 import { FreightRequestDTO, ContactRequestDTO } from './requests.types.js';
 import prisma from '../../utils/prisma.js';
+import { getCached, invalidateCache } from '../../services/cache.service.js';
 
 export async function createFreightRequest(
   dto: FreightRequestDTO,
   meta: { ip?: string; userAgent?: string }
 ) {
-  return await prisma.freightRequest.create({
+  const result = await prisma.freightRequest.create({
     data: {
       companyName: dto.companyName || null,
       contactName: dto.contactName,
@@ -28,13 +29,18 @@ export async function createFreightRequest(
       userAgent: meta.userAgent || null,
     },
   });
+
+  // Инвалидируем кэш списков запросов
+  await invalidateCache('freight-requests:*');
+
+  return result;
 }
 
 export async function createContactRequest(
   dto: ContactRequestDTO,
   meta: { ip?: string; userAgent?: string }
 ) {
-  return await prisma.contactRequest.create({
+  const result = await prisma.contactRequest.create({
     data: {
       name: dto.name,
       email: dto.email,
@@ -43,6 +49,11 @@ export async function createContactRequest(
       userAgent: meta.userAgent || null,
     },
   });
+
+  // Инвалидируем кэш списков запросов
+  await invalidateCache('contact-requests:*');
+
+  return result;
 }
 
 export async function getFreightRequests(filters: {
@@ -52,38 +63,48 @@ export async function getFreightRequests(filters: {
 }) {
   const page = filters.page || 1;
   const limit = filters.limit || 20;
-  const skip = (page - 1) * limit;
+  
+  // Создаем ключ кэша
+  const cacheKey = `freight-requests:${filters.search || ''}:${page}:${limit}`;
+  
+  return getCached(
+    cacheKey,
+    async () => {
+      const skip = (page - 1) * limit;
 
-  const where: any = {};
+      const where: any = {};
 
-  if (filters.search) {
-    where.OR = [
-      { contactName: { contains: filters.search, mode: 'insensitive' } },
-      { companyName: { contains: filters.search, mode: 'insensitive' } },
-      { email: { contains: filters.search, mode: 'insensitive' } },
-      { phone: { contains: filters.search, mode: 'insensitive' } },
-    ];
-  }
+      if (filters.search) {
+        where.OR = [
+          { contactName: { contains: filters.search, mode: 'insensitive' } },
+          { companyName: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+          { phone: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
 
-  const [requests, total] = await Promise.all([
-    prisma.freightRequest.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.freightRequest.count({ where }),
-  ]);
+      const [requests, total] = await Promise.all([
+        prisma.freightRequest.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+        }),
+        prisma.freightRequest.count({ where }),
+      ]);
 
-  return {
-    requests,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+      return {
+        requests,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     },
-  };
+    30 // TTL 30 секунд
+  );
 }
 
 export async function getContactRequests(filters: {
@@ -93,37 +114,47 @@ export async function getContactRequests(filters: {
 }) {
   const page = filters.page || 1;
   const limit = filters.limit || 20;
-  const skip = (page - 1) * limit;
+  
+  // Создаем ключ кэша
+  const cacheKey = `contact-requests:${filters.search || ''}:${page}:${limit}`;
+  
+  return getCached(
+    cacheKey,
+    async () => {
+      const skip = (page - 1) * limit;
 
-  const where: any = {};
+      const where: any = {};
 
-  if (filters.search) {
-    where.OR = [
-      { name: { contains: filters.search, mode: 'insensitive' } },
-      { email: { contains: filters.search, mode: 'insensitive' } },
-      { message: { contains: filters.search, mode: 'insensitive' } },
-    ];
-  }
+      if (filters.search) {
+        where.OR = [
+          { name: { contains: filters.search, mode: 'insensitive' } },
+          { email: { contains: filters.search, mode: 'insensitive' } },
+          { message: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
 
-  const [requests, total] = await Promise.all([
-    prisma.contactRequest.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.contactRequest.count({ where }),
-  ]);
+      const [requests, total] = await Promise.all([
+        prisma.contactRequest.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+        }),
+        prisma.contactRequest.count({ where }),
+      ]);
 
-  return {
-    requests,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+      return {
+        requests,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     },
-  };
+    30 // TTL 30 секунд
+  );
 }
 
 export async function deleteFreightRequest(id: string) {
@@ -138,6 +169,9 @@ export async function deleteFreightRequest(id: string) {
   await prisma.freightRequest.delete({
     where: { id },
   });
+
+  // Инвалидируем кэш списков запросов
+  await invalidateCache('freight-requests:*');
 
   return { success: true };
 }
@@ -154,6 +188,9 @@ export async function deleteContactRequest(id: string) {
   await prisma.contactRequest.delete({
     where: { id },
   });
+
+  // Инвалидируем кэш списков запросов
+  await invalidateCache('contact-requests:*');
 
   return { success: true };
 }

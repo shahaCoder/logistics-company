@@ -2,9 +2,11 @@ import { ApplicationStatus } from '@prisma/client';
 import { decryptSensitive } from '../../utils/crypto.js';
 import { authenticateAdmin } from '../auth/auth.service.js';
 import prisma from '../../utils/prisma.js';
+import { getCached, invalidateCache, deleteCache } from '../../services/cache.service.js';
 
 /**
  * Get all applications with filters and pagination
+ * Results are cached for 30 seconds to reduce database load
  */
 export async function getApplications(filters: {
   status?: ApplicationStatus;
@@ -14,78 +16,98 @@ export async function getApplications(filters: {
 }) {
   const page = filters.page || 1;
   const limit = filters.limit || 20;
-  const skip = (page - 1) * limit;
+  
+  // Создаем ключ кэша на основе всех фильтров
+  const cacheKey = `applications:${filters.status || 'all'}:${filters.search || ''}:${page}:${limit}`;
+  
+  return getCached(
+    cacheKey,
+    async () => {
+      const skip = (page - 1) * limit;
 
-  const where: any = {};
+      const where: any = {};
 
-  if (filters.status) {
-    where.status = filters.status;
-  }
+      if (filters.status) {
+        where.status = filters.status;
+      }
 
-  if (filters.search) {
-    // Search only by first name or last name
-    where.OR = [
-      { firstName: { contains: filters.search, mode: 'insensitive' } },
-      { lastName: { contains: filters.search, mode: 'insensitive' } },
-    ];
-  }
+      if (filters.search) {
+        // Search only by first name or last name
+        where.OR = [
+          { firstName: { contains: filters.search, mode: 'insensitive' } },
+          { lastName: { contains: filters.search, mode: 'insensitive' } },
+        ];
+      }
 
-  const [applications, total] = await Promise.all([
-    prisma.driverApplication.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        status: true,
-        createdAt: true,
-        ssnLast4: true,
-      },
-    }),
-    prisma.driverApplication.count({ where }),
-  ]);
+      const [applications, total] = await Promise.all([
+        prisma.driverApplication.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            status: true,
+            createdAt: true,
+            ssnLast4: true,
+          },
+        }),
+        prisma.driverApplication.count({ where }),
+      ]);
 
-  return {
-    applications,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+      return {
+        applications,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
     },
-  };
+    30 // TTL 30 секунд
+  );
 }
 
 /**
  * Get application by ID with all relations
+ * Results are cached for 60 seconds
  */
 export async function getApplicationById(id: string) {
-  return prisma.driverApplication.findUnique({
-    where: { id },
-    include: {
-      previousAddresses: true,
-      license: true,
-      medicalCard: true,
-      employmentRecords: true,
-      legalConsents: true,
-      reviewedBy: {
-        select: {
-          id: true,
-          email: true,
-          role: true,
+  const cacheKey = `application:${id}`;
+  
+  return getCached(
+    cacheKey,
+    async () => {
+      return prisma.driverApplication.findUnique({
+        where: { id },
+        include: {
+          previousAddresses: true,
+          license: true,
+          medicalCard: true,
+          employmentRecords: true,
+          legalConsents: true,
+          reviewedBy: {
+            select: {
+              id: true,
+              email: true,
+              role: true,
+            },
+          },
         },
-      },
+      });
     },
-  });
+    60 // TTL 60 секунд
+  );
 }
 
 /**
  * Update application status
+ * Invalidates cache after update
  */
 export async function updateApplicationStatus(
   id: string,
@@ -93,7 +115,7 @@ export async function updateApplicationStatus(
   internalNotes: string | undefined,
   reviewedById: string
 ) {
-  return prisma.driverApplication.update({
+  const result = await prisma.driverApplication.update({
     where: { id },
     data: {
       status,
@@ -102,6 +124,14 @@ export async function updateApplicationStatus(
       reviewedAt: new Date(),
     },
   });
+
+  // Инвалидируем кэш для этого приложения и списков
+  await Promise.all([
+    deleteCache(`application:${id}`),
+    invalidateCache('applications:*'),
+  ]);
+
+  return result;
 }
 
 /**
@@ -140,6 +170,7 @@ export async function decryptSSN(
 /**
  * Delete application by ID
  * This will cascade delete all related records (addresses, license, medical card, etc.)
+ * Invalidates cache after deletion
  */
 export async function deleteApplication(id: string) {
   const application = await prisma.driverApplication.findUnique({
@@ -154,6 +185,12 @@ export async function deleteApplication(id: string) {
   await prisma.driverApplication.delete({
     where: { id },
   });
+
+  // Инвалидируем кэш для этого приложения и списков
+  await Promise.all([
+    deleteCache(`application:${id}`),
+    invalidateCache('applications:*'),
+  ]);
 
   return { success: true };
 }
