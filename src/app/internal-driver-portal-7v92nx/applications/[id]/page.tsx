@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 // Lazy load heavy PDF libraries - only load when user clicks "Download PDF"
@@ -142,7 +142,13 @@ interface Application {
 export default function ApplicationDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const id = params.id as string;
+  const id = params?.id as string | undefined;
+  const routerRef = useRef(router);
+  
+  // Обновляем ref при изменении router
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
@@ -516,6 +522,11 @@ export default function ApplicationDetailPage() {
   }, [application, decryptedSSN]);
 
   const fetchApplication = useCallback(async () => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const response = await fetch(`${apiUrl}/api/admin/applications/${id}`, {
@@ -523,7 +534,7 @@ export default function ApplicationDetailPage() {
       });
 
       if (response.status === 401) {
-        router.push("/internal-driver-portal-7v92nx/login");
+        routerRef.current.push("/internal-driver-portal-7v92nx/login");
         return;
       }
 
@@ -536,13 +547,17 @@ export default function ApplicationDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [id, router]);
+  }, [id]); // Убрали router из зависимостей, используем ref
 
   useEffect(() => {
-    fetchApplication();
-  }, [fetchApplication]);
+    if (id) {
+      fetchApplication();
+    }
+  }, [id, fetchApplication]);
 
   const handleDecryptSSN = async () => {
+    if (!id) return;
+    
     setDecryptError("");
     setDecrypting(true);
 
@@ -576,6 +591,8 @@ export default function ApplicationDetailPage() {
   };
 
   const handleSaveStatus = async () => {
+    if (!id) return;
+    
     setSaving(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -602,6 +619,14 @@ export default function ApplicationDetailPage() {
     }
   };
 
+  if (!id) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center text-red-600">Invalid application ID</div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -620,8 +645,7 @@ export default function ApplicationDetailPage() {
 
   // Calculate age correctly, accounting for whether birthday has passed this year
   // Uses the same date parsing logic as formatDateUS to avoid timezone shifts
-  // Мемоизируем вычисление возраста
-  const calculateAge = useCallback((dateOfBirth: string): number => {
+  const calculateAge = (dateOfBirth: string): number => {
     // Parse date components directly to avoid UTC timezone conversion
     const isoMatch = dateOfBirth.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (!isoMatch) {
@@ -651,11 +675,11 @@ export default function ApplicationDetailPage() {
     }
     
     return age;
-  }, []);
+  };
   
   const age = useMemo(() => {
     return application ? calculateAge(application.dateOfBirth) : 0;
-  }, [application, calculateAge]);
+  }, [application]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
