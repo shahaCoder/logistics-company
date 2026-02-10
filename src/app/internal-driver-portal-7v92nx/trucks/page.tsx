@@ -296,6 +296,9 @@ export default function TrucksPage() {
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50">
                   <tr>
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      TRUCK #
+                    </th>
                     <th
                       className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
                       onClick={() => handleSort("make")}
@@ -352,6 +355,9 @@ export default function TrucksPage() {
                 <tbody className="bg-white divide-y divide-slate-200">
                   {sortedTrucks.map((truck) => (
                     <tr key={truck.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-xs font-medium text-slate-900">{truck.name}</div>
+                      </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="text-xs font-medium text-slate-900">{truck.make}</div>
                       </td>
