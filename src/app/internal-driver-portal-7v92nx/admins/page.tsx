@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import PasswordInput from "@/components/PasswordInput";
 
 interface AdminUser {
   id: string;
@@ -20,11 +21,13 @@ const ROLE_LABELS: Record<string, string> = {
 export default function AdminsPage() {
   const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState<AdminUser | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -58,6 +61,57 @@ export default function AdminsPage() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const res = await fetch(`${apiUrl}/api/auth/me`, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentUserId(data.user?.id ?? null);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchMe();
+  }, []);
+
+  const handleDelete = async (u: AdminUser) => {
+    if (u.id === currentUserId) {
+      setError("You cannot delete your own account.");
+      return;
+    }
+    if (!confirm(`Delete admin "${u.email}"? This cannot be undone.`)) return;
+    setError("");
+    setDeletingId(u.id);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const response = await fetch(`${apiUrl}/api/admin/users/${u.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (response.status === 401) {
+        router.push("/internal-driver-portal-7v92nx/login");
+        return;
+      }
+      if (response.status === 403) {
+        setError("You do not have permission to delete admins.");
+        return;
+      }
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Failed to delete admin.");
+        return;
+      }
+      fetchUsers();
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -193,7 +247,7 @@ export default function AdminsPage() {
                   <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
                   <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Role</th>
                   <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Created</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
@@ -218,13 +272,25 @@ export default function AdminsPage() {
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right">
-                      <button
-                        type="button"
-                        onClick={() => { setEditOpen(u); setError(""); }}
-                        className="text-xs font-medium text-red-600 hover:text-red-800"
-                      >
-                        Edit
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setEditOpen(u); setError(""); }}
+                          className="text-xs font-medium text-red-600 hover:text-red-800"
+                        >
+                          Edit
+                        </button>
+                        {u.id !== currentUserId ? (
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(u)}
+                            disabled={deletingId === u.id}
+                            className="text-xs font-medium text-slate-500 hover:text-red-600 disabled:opacity-50"
+                          >
+                            {deletingId === u.id ? "…" : "Delete"}
+                          </button>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -254,24 +320,16 @@ export default function AdminsPage() {
                   placeholder="admin@example.com"
                 />
               </div>
-              <div>
-                <label htmlFor="add-password" className="block text-xs font-medium text-slate-700 mb-1">
-                  Password
-                </label>
-                <input
-                  id="add-password"
-                  name="password"
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                  minLength={12}
-                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
-                  placeholder="Min 12 chars, upper, lower, number, special"
-                />
-                <p className="mt-0.5 text-xs text-slate-500">
-                  At least 12 characters, one uppercase, one lowercase, one number, one special character.
-                </p>
-              </div>
+              <PasswordInput
+                id="add-password"
+                name="password"
+                label="Password"
+                required
+                autoComplete="new-password"
+                minLength={12}
+                placeholder="Min 12 chars, upper, lower, number, special"
+                hint="At least 12 characters, one uppercase, one lowercase, one number, one special character."
+              />
               <div>
                 <label htmlFor="add-role" className="block text-xs font-medium text-slate-700 mb-1">
                   Role
@@ -356,20 +414,14 @@ export default function AdminsPage() {
                   placeholder="Display name"
                 />
               </div>
-              <div>
-                <label htmlFor="edit-password" className="block text-xs font-medium text-slate-700 mb-1">
-                  New password (leave blank to keep)
-                </label>
-                <input
-                  id="edit-password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  minLength={12}
-                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
-                  placeholder="Min 12 chars, upper, lower, number, special"
-                />
-              </div>
+              <PasswordInput
+                id="edit-password"
+                name="password"
+                label="New password (leave blank to keep)"
+                autoComplete="new-password"
+                minLength={12}
+                placeholder="Min 12 chars, upper, lower, number, special"
+              />
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"

@@ -172,3 +172,25 @@ export async function updateMyProfile(
   });
   return admin;
 }
+
+/**
+ * Delete an admin. Only SUPER_ADMIN. Clears reviewedById on applications, then deletes user (refresh tokens cascade).
+ */
+export async function deleteAdmin(adminId: string): Promise<void> {
+  const existing = await prisma.adminUser.findUnique({
+    where: { id: adminId },
+  });
+  if (!existing) {
+    throw new Error('Admin not found');
+  }
+
+  await prisma.$transaction([
+    prisma.driverApplication.updateMany({
+      where: { reviewedById: adminId },
+      data: { reviewedById: null },
+    }),
+    prisma.adminUser.delete({
+      where: { id: adminId },
+    }),
+  ]);
+}

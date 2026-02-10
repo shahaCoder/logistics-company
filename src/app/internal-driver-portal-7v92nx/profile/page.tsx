@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import PasswordInput from "@/components/PasswordInput";
 
 interface User {
   id: string;
@@ -181,53 +182,35 @@ export default function ProfilePage() {
             <h2 className="text-sm font-semibold text-slate-900 mb-1">Change password</h2>
             <p className="text-xs text-slate-500 mb-4">Leave blank to keep your current password.</p>
             <div className="space-y-3">
-              <div>
-                <label htmlFor="profile-current-password" className="block text-xs font-medium text-slate-700 mb-1">
-                  Current password
-                </label>
-                <input
-                  id="profile-current-password"
-                  name="currentPassword"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  autoComplete="current-password"
-                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
-                  placeholder="Required only if changing password"
-                />
-              </div>
-              <div>
-                <label htmlFor="profile-new-password" className="block text-xs font-medium text-slate-700 mb-1">
-                  New password
-                </label>
-                <input
-                  id="profile-new-password"
-                  name="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  autoComplete="new-password"
-                  minLength={12}
-                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
-                  placeholder="Min 12 chars, upper, lower, number, special"
-                />
-              </div>
-              <div>
-                <label htmlFor="profile-confirm-password" className="block text-xs font-medium text-slate-700 mb-1">
-                  Confirm new password
-                </label>
-                <input
-                  id="profile-confirm-password"
-                  name="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  autoComplete="new-password"
-                  minLength={12}
-                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
-                  placeholder="Repeat new password"
-                />
-              </div>
+              <PasswordInput
+                id="profile-current-password"
+                name="currentPassword"
+                label="Current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                autoComplete="current-password"
+                placeholder="Required only if changing password"
+              />
+              <PasswordInput
+                id="profile-new-password"
+                name="newPassword"
+                label="New password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                autoComplete="new-password"
+                minLength={12}
+                placeholder="Min 12 chars, upper, lower, number, special"
+              />
+              <PasswordInput
+                id="profile-confirm-password"
+                name="confirmPassword"
+                label="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                minLength={12}
+                placeholder="Repeat new password"
+              />
             </div>
           </div>
         </div>

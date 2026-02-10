@@ -6,6 +6,7 @@ import {
   createAdmin,
   updateAdmin,
   updateMyProfile,
+  deleteAdmin,
 } from './admin-users.service.js';
 import { createAuditLog } from '../../services/audit.service.js';
 import { AuditAction } from '@prisma/client';
@@ -182,6 +183,40 @@ router.patch('/me', authRequired('ANY'), async (req: AuthRequest, res: Response)
       return res.status(400).json({ error: message });
     }
     console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * DELETE /api/admin/users/:id
+ * Delete an admin. SUPER_ADMIN only. Cannot delete yourself.
+ */
+router.delete('/users/:id', authRequired('SUPER_ADMIN'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (req.user?.id === id) {
+      return res.status(400).json({ error: 'You cannot delete your own account' });
+    }
+
+    await deleteAdmin(id);
+
+    await createAuditLog({
+      adminId: req.user?.id,
+      adminEmail: req.user?.email,
+      action: AuditAction.DELETE_ADMIN,
+      resourceId: id,
+      resourceType: 'AdminUser',
+      ipAddress: req.ip ?? undefined,
+      userAgent: req.get('user-agent') ?? undefined,
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    if (message.includes('not found')) {
+      return res.status(404).json({ error: message });
+    }
+    console.error('Delete admin error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
