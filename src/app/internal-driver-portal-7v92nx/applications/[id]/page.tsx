@@ -694,64 +694,68 @@ export default function ApplicationDetailPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+      {/* Header */}
+      <div className="mb-5">
         <button
           onClick={() => router.push("/internal-driver-portal-7v92nx/applications")}
-          className="text-gray-600 hover:text-gray-900 mb-4"
+          className="text-xs text-slate-600 hover:text-slate-900 mb-3 inline-flex items-center gap-1"
         >
-          ← Back to Applications
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Applications
         </button>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-xl font-semibold text-slate-900">
           {application.firstName} {application.lastName}
         </h1>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-xs text-slate-500 mt-1">
           Submitted: {new Date(application.createdAt).toLocaleString()}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Applicant Info */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 mb-3">
               Applicant Information
             </h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium text-gray-500">First Name</label>
-                <p className="text-gray-900">{application.firstName}</p>
+                <label className="text-xs font-medium text-slate-500">First Name</label>
+                <p className="text-xs text-slate-900 mt-0.5">{application.firstName}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Last Name</label>
-                <p className="text-gray-900">{application.lastName}</p>
+                <label className="text-xs font-medium text-slate-500">Last Name</label>
+                <p className="text-xs text-slate-900 mt-0.5">{application.lastName}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Date of Birth</label>
-                <p className="text-gray-900">
+                <label className="text-xs font-medium text-slate-500">Date of Birth</label>
+                <p className="text-xs text-slate-900 mt-0.5">
                   {formatDateUS(application.dateOfBirth)} (Age: {age})
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Phone</label>
-                <p className="text-gray-900">{application.phone}</p>
+                <label className="text-xs font-medium text-slate-500">Phone</label>
+                <p className="text-xs text-slate-900 mt-0.5">{application.phone}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Email</label>
-                <p className="text-gray-900">{application.email}</p>
+                <label className="text-xs font-medium text-slate-500">Email</label>
+                <p className="text-xs text-slate-900 mt-0.5">{application.email}</p>
               </div>
             <div>
-              <label className="text-sm font-medium text-gray-500">SSN</label>
+              <label className="text-xs font-medium text-slate-500">SSN</label>
               {application.ssnLast4 && application.ssnLast4.trim() !== "" ? (
-                <div className="flex items-center gap-2">
-                  <p className="text-gray-900">
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-xs text-slate-900 font-mono">
                     {decryptedSSN || `***-**-${application.ssnLast4}`}
                   </p>
                   {!decryptedSSN && (
                     <button
                       onClick={() => setShowDecryptModal(true)}
-                      className="text-xs text-red-600 hover:text-red-700"
+                      className="text-xs text-red-600 hover:text-red-700 font-medium"
                     >
                       Decrypt
                     </button>
@@ -759,42 +763,42 @@ export default function ApplicationDetailPage() {
                   {decryptedSSN && (
                     <button
                       onClick={() => setDecryptedSSN(null)}
-                      className="text-xs text-gray-600 hover:text-gray-700"
+                      className="text-xs text-slate-600 hover:text-slate-700"
                     >
                       Hide
                     </button>
                   )}
                 </div>
               ) : (
-                <p className="text-gray-500 italic text-sm">
+                <p className="text-xs text-slate-500 italic mt-0.5">
                   SSN was not provided by the applicant
                 </p>
               )}
             </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t">
-              <label className="text-sm font-medium text-gray-500">Current Address</label>
-              <p className="text-gray-900">
+            <div className="mt-4 pt-4 border-t border-slate-200">
+              <label className="text-xs font-medium text-slate-500">Current Address</label>
+              <p className="text-xs text-slate-900 mt-0.5">
                 {application.currentAddressLine1}, {application.currentCity},{" "}
                 {application.currentState} {application.currentZip}
               </p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Lived at current address more than 3 years:{" "}
                 {application.livedAtCurrentMoreThan3Years ? "Yes" : "No"}
               </p>
             </div>
 
             {application.previousAddresses.length > 0 && (
-              <div className="mt-4 pt-4 border-t">
-                <label className="text-sm font-medium text-gray-500">
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <label className="text-xs font-medium text-slate-500">
                   Previous Addresses
                 </label>
                 {application.previousAddresses.map((addr, idx) => (
-                  <div key={idx} className="mt-2 text-sm text-gray-900">
+                  <div key={idx} className="mt-2 text-xs text-slate-900">
                     {addr.addressLine1}, {addr.city}, {addr.state} {addr.zip}
                     {addr.fromDate && addr.toDate && (
-                      <span className="text-gray-600 ml-2">
+                      <span className="text-slate-500 ml-2">
                         ({formatDateUS(addr.fromDate)} -{" "}
                         {formatDateUS(addr.toDate)})
                       </span>
@@ -807,37 +811,37 @@ export default function ApplicationDetailPage() {
 
           {/* License Info */}
           {application.license && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+              <h2 className="text-sm font-semibold text-slate-900 mb-3">
                 Driver's License
               </h2>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-xs font-medium text-slate-500">
                     License Number
                   </label>
-                  <p className="text-gray-900">{application.license.licenseNumber}</p>
+                  <p className="text-xs text-slate-900 mt-0.5">{application.license.licenseNumber}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">State</label>
-                  <p className="text-gray-900">{application.license.state}</p>
+                  <label className="text-xs font-medium text-slate-500">State</label>
+                  <p className="text-xs text-slate-900 mt-0.5">{application.license.state}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Class</label>
-                  <p className="text-gray-900">{application.license.class}</p>
+                  <label className="text-xs font-medium text-slate-500">Class</label>
+                  <p className="text-xs text-slate-900 mt-0.5">{application.license.class}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Expires</label>
-                  <p className="text-gray-900">
+                  <label className="text-xs font-medium text-slate-500">Expires</label>
+                  <p className="text-xs text-slate-900 mt-0.5">
                     {formatDateUS(application.license.expiresAt)}
                   </p>
                 </div>
                 {application.license.endorsements && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">
+                    <label className="text-xs font-medium text-slate-500">
                       Endorsements
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-xs text-slate-900 mt-0.5">
                       {application.license.endorsements.split(",").join(", ")}
                     </p>
                   </div>
@@ -846,7 +850,7 @@ export default function ApplicationDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 {application.license.frontImageUrl && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500 mb-2 block">
+                    <label className="text-xs font-medium text-slate-500 mb-1.5 block">
                       Front
                     </label>
                     {(() => {
@@ -918,7 +922,7 @@ export default function ApplicationDetailPage() {
                 )}
                 {application.license.backImageUrl && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500 mb-2 block">
+                    <label className="text-xs font-medium text-slate-500 mb-1.5 block">
                       Back
                     </label>
                     {(() => {
@@ -994,23 +998,23 @@ export default function ApplicationDetailPage() {
 
           {/* Medical Card */}
           {application.medicalCard && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+              <h2 className="text-sm font-semibold text-slate-900 mb-3">
                 Medical Card
               </h2>
               {application.medicalCard.expiresAt && (
-                <div className="mb-4">
-                  <label className="text-sm font-medium text-gray-500">
+                <div className="mb-3">
+                  <label className="text-xs font-medium text-slate-500">
                     Expiration Date
                   </label>
-                  <p className="text-gray-900">
+                  <p className="text-xs text-slate-900 mt-0.5">
                     {formatDateUS(application.medicalCard.expiresAt)}
                   </p>
                 </div>
               )}
               {application.medicalCard.documentUrl && (
                 <div>
-                  <label className="text-sm font-medium text-gray-500 mb-2 block">
+                  <label className="text-xs font-medium text-slate-500 mb-1.5 block">
                     Document
                   </label>
                   {(() => {
@@ -1049,9 +1053,9 @@ export default function ApplicationDetailPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           download={fileName}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                           <span>{fileName}</span>
@@ -1070,7 +1074,7 @@ export default function ApplicationDetailPage() {
                             alt="Medical Card"
                             width={400}
                             height={300}
-                            className="rounded border"
+                            className="rounded border border-slate-200"
                             loading="lazy"
                             quality={85}
                           />
@@ -1084,52 +1088,52 @@ export default function ApplicationDetailPage() {
           )}
 
           {/* Employment History */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 mb-3">
               Employment History
             </h2>
             {application.employmentRecords.map((record, idx) => (
-              <div key={idx} className="mb-6 pb-6 border-b last:border-0">
-                <h3 className="font-medium text-gray-900 mb-3">
+              <div key={idx} className="mb-4 pb-4 border-b border-slate-200 last:border-0 last:mb-0 last:pb-0">
+                <h3 className="text-xs font-semibold text-slate-900 mb-2">
                   {idx + 1}. {record.employerName}
                 </h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-gray-500">Address: </span>
-                    <span className="text-gray-900">
+                    <span className="text-slate-500">Address: </span>
+                    <span className="text-slate-900">
                       {record.addressLine1}, {record.city}, {record.state} {record.zip}
                     </span>
                   </div>
                   {record.employerPhone && (
                     <div>
-                      <span className="text-gray-500">Phone: </span>
-                      <span className="text-gray-900">{record.employerPhone}</span>
+                      <span className="text-slate-500">Phone: </span>
+                      <span className="text-slate-900">{record.employerPhone}</span>
                     </div>
                   )}
                   {record.positionHeld && (
                     <div>
-                      <span className="text-gray-500">Position: </span>
-                      <span className="text-gray-900">{record.positionHeld}</span>
+                      <span className="text-slate-500">Position: </span>
+                      <span className="text-slate-900">{record.positionHeld}</span>
                     </div>
                   )}
                   {record.dateFrom && record.dateTo && (
                     <div>
-                      <span className="text-gray-500">Dates: </span>
-                      <span className="text-gray-900">
+                      <span className="text-slate-500">Dates: </span>
+                      <span className="text-slate-900">
                         {formatDateUS(record.dateFrom)} -{" "}
                         {formatDateUS(record.dateTo)}
                       </span>
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-500">Subject to FMCSR: </span>
-                    <span className="text-gray-900">
+                    <span className="text-slate-500">Subject to FMCSR: </span>
+                    <span className="text-slate-900">
                       {record.wasSubjectToFMCSR ? "Yes" : "No"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Safety Sensitive: </span>
-                    <span className="text-gray-900">
+                    <span className="text-slate-500">Safety Sensitive: </span>
+                    <span className="text-slate-900">
                       {record.wasSafetySensitive ? "Yes" : "No"}
                     </span>
                   </div>
@@ -1139,33 +1143,33 @@ export default function ApplicationDetailPage() {
           </div>
 
           {/* Legal Consents */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Legal Consents</h2>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 mb-3">Legal Consents</h2>
             {application.legalConsents.map((consent, idx) => (
-              <div key={idx} className="mb-3 pb-3 border-b last:border-0">
+              <div key={idx} className="mb-3 pb-3 border-b border-slate-200 last:border-0 last:mb-0 last:pb-0">
                 <div className="flex items-center justify-between">
-              <span className="font-medium text-gray-900">
+              <span className="text-xs font-semibold text-slate-900">
                 {CONSENT_LABELS[consent.type] || consent.type}
               </span>
                   <span
-                    className={`px-2 py-1 text-xs rounded ${
+                    className={`px-2 py-0.5 text-xs font-medium rounded ${
                       consent.accepted
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-red-100 text-red-700"
                     }`}
                   >
                     {consent.accepted ? "Accepted" : "Not Accepted"}
                   </span>
                 </div>
                 {consent.signedAt && (
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Signed: {formatDateUS(consent.signedAt)}
                   </p>
                 )}
               {consent.signatureUrl ? (
                 <div className="mt-2">
-                  <p className="text-xs text-gray-500 mb-1">Signature:</p>
-                  <div className="border border-gray-200 rounded p-2 bg-gray-50">
+                  <p className="text-xs text-slate-500 mb-1">Signature:</p>
+                  <div className="border border-slate-200 rounded p-2 bg-slate-50">
                     <Image
                       src={consent.signatureUrl}
                       alt={`${CONSENT_LABELS[consent.type] || consent.type} signature`}
@@ -1180,13 +1184,13 @@ export default function ApplicationDetailPage() {
                     href={consent.signatureUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-red-600 hover:text-red-700 mt-1 inline-block"
+                    className="text-xs text-red-600 hover:text-red-700 mt-1 inline-block font-medium"
                   >
                     Open in new tab
                   </a>
                 </div>
               ) : (
-                <p className="text-xs text-gray-500 mt-1 italic">
+                <p className="text-xs text-slate-500 mt-1 italic">
                   Signature file is not available (applicant may have typed their name or this is an older record).
                 </p>
               )}
@@ -1196,32 +1200,32 @@ export default function ApplicationDetailPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Actions */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Actions</h2>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+            <h2 className="text-sm font-semibold text-slate-900 mb-3">Actions</h2>
             
             {/* Download PDF Button */}
             <button
               onClick={handleDownloadPDF}
               disabled={generatingPDF || !application}
-              className={`w-full mb-4 px-4 py-2 rounded-md text-sm font-medium ${
+              className={`w-full mb-3 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                 generatingPDF || !application
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ? "bg-slate-200 text-slate-500 cursor-not-allowed"
                   : "bg-red-600 text-white hover:bg-red-700"
               }`}
             >
               {generatingPDF ? "Generating PDF..." : "Download PDF"}
             </button>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="mb-3">
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">
                 Status
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-red-600"
               >
                 <option value="NEW">New</option>
                 <option value="IN_REVIEW">In Review</option>
@@ -1230,15 +1234,15 @@ export default function ApplicationDetailPage() {
               </select>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="mb-3">
+              <label className="block text-xs font-medium text-slate-700 mb-1.5">
                 Internal Notes
               </label>
               <textarea
                 value={internalNotes}
                 onChange={(e) => setInternalNotes(e.target.value)}
-                rows={6}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                rows={5}
+                className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-red-600 resize-none"
                 placeholder="Add internal notes..."
               />
             </div>
@@ -1246,7 +1250,7 @@ export default function ApplicationDetailPage() {
             <button
               onClick={handleSaveStatus}
               disabled={saving}
-              className={`w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium ${
+              className={`w-full bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                 saving ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
@@ -1254,13 +1258,13 @@ export default function ApplicationDetailPage() {
             </button>
 
             {application.reviewedBy && (
-              <div className="mt-4 pt-4 border-t text-sm text-gray-600">
+              <div className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-600">
                 <p>
                   Last reviewed by: {application.reviewedBy.email} (
                   {application.reviewedBy.role})
                 </p>
                 {application.reviewedAt && (
-                  <p>
+                  <p className="mt-1">
                     Reviewed at: {new Date(application.reviewedAt).toLocaleString()}
                   </p>
                 )}
@@ -1272,30 +1276,30 @@ export default function ApplicationDetailPage() {
 
       {/* Decrypt SSN Modal */}
       {showDecryptModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl p-5 max-w-md w-full mx-4">
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">
               Decrypt SSN
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-xs text-slate-600 mb-3">
               Type your admin password to decrypt SSN:
             </p>
             <input
               type="password"
               value={decryptPassword}
               onChange={(e) => setDecryptPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4"
+              className="w-full border border-slate-300 rounded-md px-3 py-2 text-xs mb-3 focus:outline-none focus:ring-2 focus:ring-red-600"
               placeholder="Admin password"
               autoFocus
             />
             {decryptError && (
-              <p className="text-sm text-red-600 mb-4">{decryptError}</p>
+              <p className="text-xs text-red-600 mb-3">{decryptError}</p>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={handleDecryptSSN}
                 disabled={decrypting || !decryptPassword}
-                className={`flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium ${
+                className={`flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                   decrypting || !decryptPassword
                     ? "opacity-50 cursor-not-allowed"
                     : ""
@@ -1309,7 +1313,7 @@ export default function ApplicationDetailPage() {
                   setDecryptPassword("");
                   setDecryptError("");
                 }}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
+                className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 py-2 rounded-md text-xs font-medium transition-colors"
               >
                 Cancel
               </button>

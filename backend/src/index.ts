@@ -66,9 +66,18 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
-  : ['http://localhost:3000', process.env.FRONTEND_URL].filter(Boolean);
+const baseAllowedOrigins =
+  process.env.NODE_ENV === 'production'
+    ? (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
+    : ['http://localhost:3000', process.env.FRONTEND_URL].filter(Boolean);
+
+// Always allow api.glco.us in production for admin/API tools
+const extraOrigins: string[] = [];
+if (process.env.NODE_ENV === 'production') {
+  extraOrigins.push('https://api.glco.us');
+}
+
+const allowedOrigins = Array.from(new Set([...baseAllowedOrigins, ...extraOrigins]));
 
 // Логируем конфигурацию CORS при старте
 console.log('CORS configuration:', {
