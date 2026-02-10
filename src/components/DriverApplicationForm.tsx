@@ -296,6 +296,29 @@ export type DriverApplicationFormData = z.infer<typeof fullFormSchema>;
 
 const TOTAL_STEPS = 9;
 
+const FORM_STORAGE_KEY = "driverApplicationFormData.v1";
+const STEP_STORAGE_KEY = "driverApplicationCurrentStep.v1";
+
+const sanitizeFormDataForStorage = (
+  data: DriverApplicationFormData
+): Partial<DriverApplicationFormData> => {
+  const {
+    licenseFrontFile,
+    licenseBackFile,
+    medicalCardFile,
+    authorizationSignatureFile,
+    alcoholDrugSignatureFile,
+    pspSignatureFile,
+    clearinghouseSignatureFile,
+    mvrSignatureFile,
+    ...rest
+  } = data as any;
+
+  // We intentionally do NOT store File objects or signature image files in localStorage,
+  // only text/boolean fields. Users will need to re-upload documents after a full reload.
+  return rest;
+};
+
 export default function DriverApplicationForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -351,6 +374,7 @@ export default function DriverApplicationForm() {
     watch,
     setValue,
     getValues,
+    reset,
   } = useForm<DriverApplicationFormData>({
     resolver: zodResolver(fullFormSchema),
     mode: "onBlur",
@@ -379,6 +403,48 @@ export default function DriverApplicationForm() {
   });
 
   const watchedValues = watch();
+
+  // Restore saved form data and step from localStorage on first mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const storedData = window.localStorage.getItem(FORM_STORAGE_KEY);
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        reset(parsed);
+      }
+
+      const storedStep = window.localStorage.getItem(STEP_STORAGE_KEY);
+      if (storedStep) {
+        const stepNum = parseInt(storedStep, 10);
+        if (!Number.isNaN(stepNum) && stepNum >= 1 && stepNum <= TOTAL_STEPS) {
+          setCurrentStep(stepNum);
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to restore saved driver application data:", err);
+    }
+  }, [reset]);
+
+  // Auto-save form data and current step to localStorage with debounce
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const timeout = window.setTimeout(() => {
+      try {
+        const sanitized = sanitizeFormDataForStorage(watchedValues as DriverApplicationFormData);
+        window.localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(sanitized));
+        window.localStorage.setItem(STEP_STORAGE_KEY, String(currentStep));
+      } catch (err) {
+        console.warn("Failed to save driver application data to localStorage:", err);
+      }
+    }, 500);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [watchedValues, currentStep]);
 
   const validateCurrentStep = async () => {
     let fieldsToValidate: (keyof DriverApplicationFormData)[] = [];
@@ -1119,6 +1185,14 @@ export default function DriverApplicationForm() {
       }
 
       setSubmitSuccess(true);
+      if (typeof window !== "undefined") {
+        try {
+          window.localStorage.removeItem(FORM_STORAGE_KEY);
+          window.localStorage.removeItem(STEP_STORAGE_KEY);
+        } catch (err) {
+          console.warn("Failed to clear saved driver application data:", err);
+        }
+      }
     } catch (error) {
       // Don't log sensitive data - only log safe error message
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
