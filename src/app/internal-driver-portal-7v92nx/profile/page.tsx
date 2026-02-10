@@ -107,7 +107,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div
-        className="max-w-2xl mx-auto px-4 py-6 flex items-center justify-center min-h-[200px]"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-center min-h-[200px]"
         style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
       >
         <span className="text-slate-500 text-sm">Loading...</span>
@@ -121,7 +121,7 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
       style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
     >
       <div className="mb-5">
@@ -129,51 +129,57 @@ export default function ProfilePage() {
         <p className="mt-1 text-xs text-slate-500">Your account settings</p>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-        {message && (
-          <div
-            className={`mb-4 p-3 rounded-md text-xs ${
-              message.type === "success" ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-700"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
+      {message && (
+        <div
+          className={`mb-4 p-3 rounded-md text-xs ${
+            message.type === "success" ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-700"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="profile-email" className="block text-xs font-medium text-slate-700 mb-1">
-              Email
-            </label>
-            <input
-              id="profile-email"
-              type="email"
-              value={user.email}
-              disabled
-              className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-500 bg-slate-50 cursor-not-allowed"
-            />
-            <p className="mt-0.5 text-xs text-slate-500">Email cannot be changed here.</p>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Account block */}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Account</h2>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="profile-email" className="block text-xs font-medium text-slate-700 mb-1">
+                  Email
+                </label>
+                <input
+                  id="profile-email"
+                  type="email"
+                  value={user.email}
+                  disabled
+                  className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-500 bg-slate-50 cursor-not-allowed"
+                />
+                <p className="mt-0.5 text-xs text-slate-500">Email cannot be changed here.</p>
+              </div>
+              <div>
+                <label htmlFor="profile-name" className="block text-xs font-medium text-slate-700 mb-1">
+                  Display name
+                </label>
+                <input
+                  id="profile-name"
+                  name="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={200}
+                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  placeholder="Your name"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="profile-name" className="block text-xs font-medium text-slate-700 mb-1">
-              Display name
-            </label>
-            <input
-              id="profile-name"
-              name="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={200}
-              className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
-              placeholder="Your name"
-            />
-          </div>
-
-          <div className="border-t border-slate-200 pt-4">
-            <h2 className="text-sm font-semibold text-slate-900 mb-2">Change password</h2>
-            <p className="text-xs text-slate-500 mb-3">Leave blank to keep your current password.</p>
+          {/* Password block */}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 mb-1">Change password</h2>
+            <p className="text-xs text-slate-500 mb-4">Leave blank to keep your current password.</p>
             <div className="space-y-3">
               <div>
                 <label htmlFor="profile-current-password" className="block text-xs font-medium text-slate-700 mb-1">
@@ -224,18 +230,18 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-md transition-colors"
-            >
-              {saving ? "Saving…" : "Save changes"}
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className="flex justify-start">
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-md transition-colors"
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
