@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import { DriverApplicationFormData } from "../DriverApplicationForm";
 import SignatureCanvas from "../SignatureCanvas";
@@ -20,6 +20,7 @@ export default function Step5Authorization({
 }: Step5Props) {
   const signatureFile = watch("authorizationSignatureFile");
   const signatureText = watch("authorizationSignature");
+  const textSignatureTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Determine signature mode based on saved data
   const getInitialSignatureMode = (): "text" | "draw" => {
@@ -68,6 +69,15 @@ export default function Step5Authorization({
       console.error("Failed to generate text signature image:", error);
     }
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (textSignatureTimeoutRef.current) {
+        clearTimeout(textSignatureTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Restore signature from saved file when component mounts or file changes
   useEffect(() => {
@@ -232,7 +242,14 @@ export default function Step5Authorization({
                       onChange: (e) => {
                         const value = e.target.value.toUpperCase();
                         setValue("authorizationSignature", value, { shouldValidate: true });
-                        generateTextSignatureFile(value);
+                        // Clear existing timeout
+                        if (textSignatureTimeoutRef.current) {
+                          clearTimeout(textSignatureTimeoutRef.current);
+                        }
+                        // Wait 5.5 seconds before generating and saving signature file
+                        textSignatureTimeoutRef.current = setTimeout(() => {
+                          generateTextSignatureFile(value);
+                        }, 5500);
                       }
                     })}
                     onKeyDown={(e) => {

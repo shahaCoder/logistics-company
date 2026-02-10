@@ -36,6 +36,7 @@ export default function Step5AlcoholDrug({
   const [signatureMode, setSignatureMode] = useState<"text" | "draw">(getInitialSignatureMode());
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | undefined>(undefined);
   const signatureRef = useRef<SignatureCanvasComponent | null>(null);
+  const textSignatureTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const generateTextSignatureFile = (text: string) => {
     if (typeof window === "undefined") return;
@@ -98,6 +99,15 @@ export default function Step5AlcoholDrug({
       setValue("alcoholDrugDateSigned", today);
     }
   }, [setValue, watch]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (textSignatureTimeoutRef.current) {
+        clearTimeout(textSignatureTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div>
@@ -408,7 +418,14 @@ export default function Step5AlcoholDrug({
                       onChange: (e) => {
                         const value = e.target.value.toUpperCase();
                         setValue("alcoholDrugSignature", value, { shouldValidate: true });
-                        generateTextSignatureFile(value);
+                        // Clear existing timeout
+                        if (textSignatureTimeoutRef.current) {
+                          clearTimeout(textSignatureTimeoutRef.current);
+                        }
+                        // Wait 5.5 seconds before generating and saving signature file
+                        textSignatureTimeoutRef.current = setTimeout(() => {
+                          generateTextSignatureFile(value);
+                        }, 5500);
                       }
                     })}
                     placeholder="Type your full name as signature"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import { DriverApplicationFormData } from "../DriverApplicationForm";
 import SignatureCanvas from "../SignatureCanvas";
@@ -20,6 +20,7 @@ export default function Step8MVR({
 }: Step8Props) {
   const signatureFile = watch("mvrSignatureFile");
   const signatureText = watch("mvrSignature");
+  const textSignatureTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Determine signature mode based on saved data
   const getInitialSignatureMode = (): "text" | "draw" => {
@@ -80,6 +81,15 @@ export default function Step8MVR({
       setSignatureDataUrl(undefined);
     }
   }, [signatureFile, signatureMode]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (textSignatureTimeoutRef.current) {
+        clearTimeout(textSignatureTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Set default date signed to today (using local date, not UTC)
   useEffect(() => {
@@ -220,7 +230,14 @@ export default function Step8MVR({
                       onChange: (e) => {
                         const value = e.target.value.toUpperCase();
                         setValue("mvrSignature", value, { shouldValidate: true });
-                        generateTextSignatureFile(value);
+                        // Clear existing timeout
+                        if (textSignatureTimeoutRef.current) {
+                          clearTimeout(textSignatureTimeoutRef.current);
+                        }
+                        // Wait 5.5 seconds before generating and saving signature file
+                        textSignatureTimeoutRef.current = setTimeout(() => {
+                          generateTextSignatureFile(value);
+                        }, 5500);
                       }
                     })}
                     onKeyDown={(e) => {

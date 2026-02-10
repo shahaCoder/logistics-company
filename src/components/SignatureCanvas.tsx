@@ -100,7 +100,7 @@ export default function SignatureCanvasComponent({
     };
   }, [width, height]);
 
-  // Auto-save on canvas change
+  // Auto-save on canvas change with 5-6 second delay
   useEffect(() => {
     if (!autoSave || !sigPadRef.current) return;
 
@@ -109,11 +109,12 @@ export default function SignatureCanvasComponent({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
+      // Wait 5.5 seconds (5500ms) before saving signature
       saveTimeoutRef.current = setTimeout(() => {
         if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
           saveSignature();
         }
-      }, 200); // Debounce 200ms (reduced for faster save)
+      }, 5500); // 5.5 second delay before saving
     };
 
     // Listen to canvas drawing events
