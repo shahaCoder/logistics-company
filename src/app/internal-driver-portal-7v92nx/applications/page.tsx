@@ -142,10 +142,12 @@ export default function ApplicationsPage() {
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1.5">
+            <label htmlFor="applications-search" className="block text-xs font-medium text-slate-700 mb-1.5">
               Search by Name
             </label>
             <input
+              id="applications-search"
+              name="applications-search"
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -154,10 +156,12 @@ export default function ApplicationsPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1.5">
+            <label htmlFor="applications-status" className="block text-xs font-medium text-slate-700 mb-1.5">
               Status
             </label>
             <select
+              id="applications-status"
+              name="applications-status"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);

@@ -144,10 +144,12 @@ export default function FreightRequestsPage() {
       {/* Search */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-4">
         <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1.5">
+          <label htmlFor="freight-search" className="block text-xs font-medium text-slate-700 mb-1.5">
             Search
           </label>
           <input
+            id="freight-search"
+            name="freight-search"
             type="text"
             value={search}
             onChange={(e) => {

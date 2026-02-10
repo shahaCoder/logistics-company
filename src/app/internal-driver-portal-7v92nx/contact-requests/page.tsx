@@ -115,10 +115,12 @@ export default function ContactRequestsPage() {
       {/* Search */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-4">
         <div>
-          <label className="block text-xs font-medium text-slate-700 mb-1.5">
+          <label htmlFor="contact-search" className="block text-xs font-medium text-slate-700 mb-1.5">
             Search
           </label>
           <input
+            id="contact-search"
+            name="contact-search"
             type="text"
             value={search}
             onChange={(e) => {

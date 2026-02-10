@@ -175,8 +175,10 @@ export default function OilChangePage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 text-xs text-slate-700">
+          <label htmlFor="oil-change-auto-refresh" className="flex items-center gap-1.5 text-xs text-slate-700">
             <input
+              id="oil-change-auto-refresh"
+              name="oil-change-auto-refresh"
               type="checkbox"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
@@ -283,8 +285,10 @@ export default function OilChangePage() {
           </button>
         </div>
         <div className="flex items-center gap-1.5">
-          <label className="text-xs text-slate-700">Sort by:</label>
+          <label htmlFor="oil-change-sort" className="text-xs text-slate-700">Sort by:</label>
           <select
+            id="oil-change-sort"
+            name="oil-change-sort"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as "name" | "remaining" | "status")}
             className="px-2.5 py-1.5 border border-slate-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-red-600"
@@ -427,10 +431,12 @@ export default function OilChangePage() {
 
               <form onSubmit={handleResetSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
+                  <label htmlFor="oil-change-reset-mileage" className="block text-xs font-medium text-slate-700 mb-1">
                     Mileage (optional)
                   </label>
                   <input
+                    id="oil-change-reset-mileage"
+                    name="oil-change-reset-mileage"
                     type="number"
                     min="0"
                     value={resetMileage}

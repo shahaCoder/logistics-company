@@ -1219,10 +1219,12 @@ export default function ApplicationDetailPage() {
             </button>
 
             <div className="mb-3">
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">
+              <label htmlFor="application-status" className="block text-xs font-medium text-slate-700 mb-1.5">
                 Status
               </label>
               <select
+                id="application-status"
+                name="application-status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-red-600"
@@ -1235,10 +1237,12 @@ export default function ApplicationDetailPage() {
             </div>
 
             <div className="mb-3">
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">
+              <label htmlFor="application-notes" className="block text-xs font-medium text-slate-700 mb-1.5">
                 Internal Notes
               </label>
               <textarea
+                id="application-notes"
+                name="application-notes"
                 value={internalNotes}
                 onChange={(e) => setInternalNotes(e.target.value)}
                 rows={5}
@@ -1281,10 +1285,12 @@ export default function ApplicationDetailPage() {
             <h3 className="text-sm font-semibold text-slate-900 mb-3">
               Decrypt SSN
             </h3>
-            <p className="text-xs text-slate-600 mb-3">
+            <label htmlFor="decrypt-password" className="block text-xs text-slate-600 mb-1.5">
               Type your admin password to decrypt SSN:
-            </p>
+            </label>
             <input
+              id="decrypt-password"
+              name="decrypt-password"
               type="password"
               value={decryptPassword}
               onChange={(e) => setDecryptPassword(e.target.value)}
