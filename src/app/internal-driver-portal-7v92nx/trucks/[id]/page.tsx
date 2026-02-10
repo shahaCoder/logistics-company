@@ -23,6 +23,12 @@ interface SafetyMetric {
 interface TruckDetails {
   id: string;
   name: string;
+  make: string;
+  model: string;
+  vin: string;
+  plate: string;
+  plateState: string;
+  driver: string | null;
   samsaraVehicleId: string | null;
   currentMiles: number;
   currentMilesUpdatedAt: string | null;
@@ -63,6 +69,12 @@ export default function TruckDetailPage() {
       const staticData: TruckDetails = {
         id: id,
         name: `Truck-${id.padStart(3, "0")}`,
+        make: "Volvo",
+        model: "VNL 760",
+        vin: "4V4NC9EH5KN123456",
+        plate: "ABC-1234",
+        plateState: "NY",
+        driver: "John Smith",
         samsaraVehicleId: "123456789",
         currentMiles: 125000,
         currentMilesUpdatedAt: new Date().toISOString(),
@@ -228,226 +240,349 @@ export default function TruckDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
       {/* Header */}
-      <div className="mb-5">
+      <div className="mb-6">
         <Link
           href="/internal-driver-portal-7v92nx/trucks"
-          className="text-xs text-slate-600 hover:text-slate-900 mb-3 inline-flex items-center gap-1"
+          className="text-xs text-slate-600 hover:text-slate-900 mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Trucks
         </Link>
-        <h1 className="text-xl font-semibold text-slate-900">{truck.name}</h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Samsara ID: {truck.samsaraVehicleId || "N/A"} • {formatMiles(truck.currentMiles)} miles
-        </p>
+        
+        {/* Truck Header Card */}
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl shadow-lg p-6 mb-6 text-white">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">{truck.make} {truck.model}</h1>
+              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300">
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{truck.name}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="font-mono">{truck.vin}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                  <span>{truck.plate} ({truck.plateState})</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-slate-400 mb-1">Current Miles</div>
+              <div className="text-3xl font-bold">{formatMiles(truck.currentMiles)}</div>
+              {truck.driver && (
+                <div className="mt-3 pt-3 border-t border-slate-700">
+                  <div className="text-xs text-slate-400 mb-1">Assigned Driver</div>
+                  <div className="text-sm font-semibold">{truck.driver}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Tire Pressure */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-3">Tire Pressure</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {truck.tirePressures.map((tire, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3 rounded-md border ${
-                    tire.status === "critical"
-                      ? "border-red-300 bg-red-50"
-                      : tire.status === "warning"
-                      ? "border-amber-300 bg-amber-50"
-                      : "border-slate-200 bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-slate-900">{tire.position}</span>
-                    <span
-                      className={`px-2 py-0.5 text-xs font-medium rounded ${getStatusColor(
-                        tire.status
-                      )}`}
-                    >
-                      {tire.status}
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-600">Pressure:</span>
-                      <span className="text-xs font-semibold text-slate-900">{tire.pressure} PSI</span>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${
-                          tire.pressure < 95
-                            ? "bg-red-500"
-                            : tire.pressure < 100
-                            ? "bg-amber-500"
-                            : "bg-emerald-500"
-                        }`}
-                        style={{ width: `${(tire.pressure / 110) * 100}%` }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-slate-600">Temperature:</span>
-                      <span className="text-xs font-semibold text-slate-900">{tire.temperature}°C</span>
-                    </div>
-                  </div>
+        <div className="lg:col-span-2 space-y-5">
+          {/* Tire Pressure - Enhanced Design */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-50 to-white px-6 py-4 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-              ))}
+                <h2 className="text-base font-semibold text-slate-900">Tire Pressure & Temperature</h2>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {truck.tirePressures.map((tire, idx) => (
+                  <div
+                    key={idx}
+                    className={`relative p-4 rounded-lg border-2 transition-all hover:shadow-md ${
+                      tire.status === "critical"
+                        ? "border-red-300 bg-gradient-to-br from-red-50 to-red-100/50"
+                        : tire.status === "warning"
+                        ? "border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50"
+                        : "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <span className="text-sm font-semibold text-slate-900 block">{tire.position}</span>
+                        <span className="text-xs text-slate-500 mt-0.5">
+                          Updated {new Date(tire.lastUpdated).toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <span
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          tire.status
+                        )}`}
+                      >
+                        {tire.status.toUpperCase()}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {/* Pressure */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs font-medium text-slate-600">Pressure</span>
+                          <span className="text-base font-bold text-slate-900">{tire.pressure} <span className="text-xs font-normal text-slate-500">PSI</span></span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              tire.pressure < 95
+                                ? "bg-gradient-to-r from-red-500 to-red-600"
+                                : tire.pressure < 100
+                                ? "bg-gradient-to-r from-amber-500 to-amber-600"
+                                : "bg-gradient-to-r from-emerald-500 to-emerald-600"
+                            }`}
+                            style={{ width: `${Math.min((tire.pressure / 110) * 100, 100)}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <span className="text-xs text-slate-400">80</span>
+                          <span className="text-xs text-slate-400">110 PSI</span>
+                        </div>
+                      </div>
+                      
+                      {/* Temperature */}
+                      <div className="pt-2 border-t border-slate-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-slate-600">Temperature</span>
+                          <span className="text-sm font-semibold text-slate-900">{tire.temperature}°C</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Safety Metrics */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-3">Safety Metrics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {truck.safetyMetrics.map((metric, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-md border border-slate-200 bg-slate-50"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-slate-900">{metric.name}</span>
-                    <div className="flex items-center gap-1">
-                      {getTrendIcon(metric.trend)}
-                      <span
-                        className={`px-2 py-0.5 text-xs font-medium rounded ${getStatusColor(
-                          metric.status
-                        )}`}
-                      >
-                        {metric.status}
-                      </span>
+          {/* Safety Metrics - Enhanced Design */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-50 to-white px-6 py-4 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h2 className="text-base font-semibold text-slate-900">Safety Performance Metrics</h2>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {truck.safetyMetrics.map((metric, idx) => (
+                  <div
+                    key={idx}
+                    className="group relative p-4 rounded-lg border border-slate-200 bg-gradient-to-br from-white to-slate-50 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <span className="text-sm font-semibold text-slate-900 pr-2">{metric.name}</span>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {getTrendIcon(metric.trend)}
+                        <span
+                          className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                            metric.status
+                          )}`}
+                        >
+                          {metric.status.toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="text-2xl font-bold text-slate-900">
+                        {metric.value}
+                        <span className="text-sm font-normal text-slate-500 ml-1">{metric.unit}</span>
+                      </div>
+                    </div>
+                    {/* Enhanced bar chart */}
+                    <div className="relative">
+                      <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            metric.status === "critical"
+                              ? "bg-gradient-to-r from-red-500 to-red-600"
+                              : metric.status === "warning"
+                              ? "bg-gradient-to-r from-amber-500 to-amber-600"
+                              : "bg-gradient-to-r from-emerald-500 to-emerald-600"
+                          }`}
+                          style={{
+                            width: `${Math.min((metric.value / 10) * 100, 100)}%`,
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div className="text-lg font-bold text-slate-900">
-                    {metric.value} <span className="text-xs font-normal text-slate-600">{metric.unit}</span>
-                  </div>
-                  {/* Simple bar chart */}
-                  <div className="mt-2 w-full bg-slate-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full ${
-                        metric.status === "critical"
-                          ? "bg-red-500"
-                          : metric.status === "warning"
-                          ? "bg-amber-500"
-                          : "bg-emerald-500"
-                      }`}
-                      style={{
-                        width: `${Math.min((metric.value / 10) * 100, 100)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-4">
-          {/* Vehicle Info */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-            <h2 className="text-sm font-semibold text-slate-900 mb-3">Vehicle Information</h2>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-slate-600">Current Miles:</span>
-                <span className="font-medium text-slate-900">{formatMiles(truck.currentMiles)}</span>
+        <div className="space-y-5">
+          {/* Vehicle Info - Enhanced */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-50 to-white px-5 py-3.5 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-sm font-semibold text-slate-900">Vehicle Information</h2>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600">Engine Hours:</span>
-                <span className="font-medium text-slate-900">{truck.engineHours.toLocaleString()}</span>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-600">Current Miles</span>
+                  <span className="text-sm font-bold text-slate-900">{formatMiles(truck.currentMiles)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-600">Engine Hours</span>
+                  <span className="text-sm font-bold text-slate-900">{truck.engineHours.toLocaleString()}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600">Fuel Level:</span>
-                <span className="font-medium text-slate-900">{truck.fuelLevel}%</span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2 mt-1">
-                <div
-                  className={`h-2 rounded-full ${
-                    truck.fuelLevel < 20
-                      ? "bg-red-500"
-                      : truck.fuelLevel < 40
-                      ? "bg-amber-500"
-                      : "bg-emerald-500"
-                  }`}
-                  style={{ width: `${truck.fuelLevel}%` }}
-                />
+              
+              {/* Fuel Level - Enhanced */}
+              <div className="pt-3 border-t border-slate-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-medium text-slate-600">Fuel Level</span>
+                  <span className="text-lg font-bold text-slate-900">{truck.fuelLevel}%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      truck.fuelLevel < 20
+                        ? "bg-gradient-to-r from-red-500 to-red-600"
+                        : truck.fuelLevel < 40
+                        ? "bg-gradient-to-r from-amber-500 to-amber-600"
+                        : "bg-gradient-to-r from-emerald-500 to-emerald-600"
+                    }`}
+                    style={{ width: `${truck.fuelLevel}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Engine Status */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-            <h2 className="text-sm font-semibold text-slate-900 mb-3">Engine Status</h2>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-xs text-slate-600">Battery Voltage</span>
-                  <span className="text-xs font-medium text-slate-900">{truck.batteryVoltage}V</span>
+          {/* Engine Status - Enhanced */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-50 to-white px-5 py-3.5 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-2">
+                <h2 className="text-sm font-semibold text-slate-900">Engine Status</h2>
+              </div>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-medium text-slate-600">Battery Voltage</span>
+                  <span className="text-base font-bold text-slate-900">{truck.batteryVoltage}V</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
                   <div
-                    className={`h-2 rounded-full ${
+                    className={`h-full rounded-full transition-all duration-300 ${
                       truck.batteryVoltage < 12.0
-                        ? "bg-red-500"
+                        ? "bg-gradient-to-r from-red-500 to-red-600"
                         : truck.batteryVoltage < 12.4
-                        ? "bg-amber-500"
-                        : "bg-emerald-500"
+                        ? "bg-gradient-to-r from-amber-500 to-amber-600"
+                        : "bg-gradient-to-r from-emerald-500 to-emerald-600"
                     }`}
-                    style={{ width: `${(truck.batteryVoltage / 14) * 100}%` }}
+                    style={{ width: `${Math.min((truck.batteryVoltage / 14) * 100, 100)}%` }}
                   />
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-xs text-slate-400">10V</span>
+                  <span className="text-xs text-slate-400">14V</span>
                 </div>
               </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-xs text-slate-600">Coolant Temperature</span>
-                  <span className="text-xs font-medium text-slate-900">{truck.coolantTemperature}°F</span>
+              
+              <div className="pt-3 border-t border-slate-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-medium text-slate-600">Coolant Temperature</span>
+                  <span className="text-base font-bold text-slate-900">{truck.coolantTemperature}°F</span>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-2">
+                <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
                   <div
-                    className={`h-2 rounded-full ${
+                    className={`h-full rounded-full transition-all duration-300 ${
                       truck.coolantTemperature > 220
-                        ? "bg-red-500"
+                        ? "bg-gradient-to-r from-red-500 to-red-600"
                         : truck.coolantTemperature > 210
-                        ? "bg-amber-500"
-                        : "bg-emerald-500"
+                        ? "bg-gradient-to-r from-amber-500 to-amber-600"
+                        : "bg-gradient-to-r from-emerald-500 to-emerald-600"
                     }`}
-                    style={{ width: `${((truck.coolantTemperature - 160) / 80) * 100}%` }}
+                    style={{ width: `${Math.min(((truck.coolantTemperature - 160) / 80) * 100, 100)}%` }}
                   />
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-xs text-slate-400">160°F</span>
+                  <span className="text-xs text-slate-400">240°F</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Oil Change Info */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-            <h2 className="text-sm font-semibold text-slate-900 mb-3">Oil Change</h2>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-slate-600">Last Change:</span>
-                <span className="font-medium text-slate-900">
-                  {truck.lastOilChangeMiles
-                    ? formatMiles(truck.lastOilChangeMiles)
-                    : "N/A"}{" "}
-                  miles
-                </span>
+          {/* Oil Change Info - Enhanced */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-50 to-white px-5 py-3.5 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-cyan-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-sm font-semibold text-slate-900">Oil Change</h2>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600">Next Due:</span>
-                <span className="font-medium text-slate-900">
-                  {truck.lastOilChangeMiles
-                    ? formatMiles(truck.lastOilChangeMiles + truck.oilChangeIntervalMiles)
-                    : "N/A"}{" "}
-                  miles
-                </span>
+            </div>
+            <div className="p-5 space-y-3">
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Last Change</span>
+                  <span className="font-semibold text-slate-900">
+                    {truck.lastOilChangeMiles
+                      ? formatMiles(truck.lastOilChangeMiles)
+                      : "N/A"}{" "}
+                    miles
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Next Due</span>
+                  <span className="font-semibold text-slate-900">
+                    {truck.lastOilChangeMiles
+                      ? formatMiles(truck.lastOilChangeMiles + truck.oilChangeIntervalMiles)
+                      : "N/A"}{" "}
+                    miles
+                  </span>
+                </div>
               </div>
               {truck.lastOilChangeMiles && (
-                <div className="mt-2">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-slate-600">Remaining:</span>
-                    <span className="font-medium text-slate-900">
+                <div className="pt-3 border-t border-slate-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-medium text-slate-600">Remaining</span>
+                    <span className="text-base font-bold text-slate-900">
                       {formatMiles(
                         Math.max(
                           0,
@@ -456,19 +591,19 @@ export default function TruckDetailPage() {
                             truck.currentMiles
                         )
                       )}{" "}
-                      miles
+                      <span className="text-xs font-normal text-slate-500">miles</span>
                     </span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
                     <div
-                      className={`h-2 rounded-full ${
+                      className={`h-full rounded-full transition-all duration-300 ${
                         truck.currentMiles - truck.lastOilChangeMiles >
                         truck.oilChangeIntervalMiles * 0.9
-                          ? "bg-red-500"
+                          ? "bg-gradient-to-r from-red-500 to-red-600"
                           : truck.currentMiles - truck.lastOilChangeMiles >
                             truck.oilChangeIntervalMiles * 0.75
-                          ? "bg-amber-500"
-                          : "bg-emerald-500"
+                          ? "bg-gradient-to-r from-amber-500 to-amber-600"
+                          : "bg-gradient-to-r from-emerald-500 to-emerald-600"
                       }`}
                       style={{
                         width: `${Math.min(
