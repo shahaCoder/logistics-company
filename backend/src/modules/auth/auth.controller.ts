@@ -160,6 +160,7 @@ router.get('/me', authRequired('ANY'), async (req: AuthRequest, res: Response) =
       user: {
         id: admin.id,
         email: admin.email,
+        name: admin.name ?? undefined,
         role: admin.role,
       },
     });

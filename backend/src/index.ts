@@ -10,6 +10,7 @@ import adminApplicationsRouter from './modules/admin-applications/admin-applicat
 import { publicRouter as requestsPublicRouter, adminRouter as requestsAdminRouter } from './modules/requests/requests.controller.js';
 import trucksRouter from './modules/trucks/trucks.controller.js';
 import oilChangeRouter from './modules/oil-change/oil-change.controller.js';
+import adminUsersRouter from './modules/admin-users/admin-users.controller.js';
 import { startSamsaraSyncJob } from './services/samsara-sync.service.js';
 
 // Load environment variables
@@ -133,6 +134,8 @@ app.use('/api/admin/requests', requestsAdminRouter);
 app.use('/api/admin', trucksRouter);
 // Admin oil-change routes
 app.use('/api/admin', oilChangeRouter);
+// Admin users (list/create/update admins, profile)
+app.use('/api/admin', adminUsersRouter);
 
 // 404 handler
 app.use((req, res) => {

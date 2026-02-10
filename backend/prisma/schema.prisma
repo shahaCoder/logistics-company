@@ -176,12 +176,13 @@ model LegalConsent {
 }
 
 model AdminUser {
-  id          String   @id @default(cuid())
-  email       String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   passwordHash String
-  role        AdminRole @default(MANAGER)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  name         String?   // Display name for profile
+  role         AdminRole @default(MANAGER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   reviewedApplications DriverApplication[]
   refreshTokens        RefreshToken[]
@@ -248,6 +249,9 @@ enum AuditAction {
   CREATE_APPLICATION
   VIEW_APPLICATION
   APPLICATION_EMAIL_SENT
+  CREATE_ADMIN
+  UPDATE_ADMIN
+  UPDATE_PROFILE
 }
 
 model AuditLog {

@@ -167,6 +167,7 @@ export async function getAdminById(id: string) {
     select: {
       id: true,
       email: true,
+      name: true,
       role: true,
       createdAt: true,
     },

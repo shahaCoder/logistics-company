@@ -13,14 +13,16 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<{ id: string; email: string; name?: string; role: string } | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Skip auth check for root page and login page
     if (pathname === "/internal-driver-portal-7v92nx" || pathname === "/internal-driver-portal-7v92nx/login") {
       setIsChecking(false);
+      setUser(null);
       if (pathname === "/internal-driver-portal-7v92nx") {
-        setIsAuthenticated(false); // Will be handled by page.tsx redirect
+        setIsAuthenticated(false);
       } else {
         setIsAuthenticated(false);
       }
@@ -35,13 +37,17 @@ export default function AdminLayout({
         });
 
         if (response.ok) {
+          const data = await response.json();
           setIsAuthenticated(true);
+          setUser(data.user ?? null);
         } else {
           setIsAuthenticated(false);
+          setUser(null);
           router.push("/internal-driver-portal-7v92nx/login");
         }
       } catch (error) {
         setIsAuthenticated(false);
+        setUser(null);
         router.push("/internal-driver-portal-7v92nx/login");
       } finally {
         setIsChecking(false);
@@ -70,7 +76,7 @@ export default function AdminLayout({
                       pathname !== "/internal-driver-portal-7v92nx" && 
                       isAuthenticated;
 
-  const menuItems = [
+  const baseMenuItems = [
     {
       href: "/internal-driver-portal-7v92nx/applications",
       label: "Applications",
@@ -123,6 +129,36 @@ export default function AdminLayout({
       isActive: pathname?.includes("/trucks"),
     },
   ];
+
+  const superAdminItems =
+    user?.role === "SUPER_ADMIN"
+      ? [
+          {
+            href: "/internal-driver-portal-7v92nx/admins",
+            label: "Admins",
+            icon: (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ),
+            isActive: pathname?.includes("/admins"),
+          },
+        ]
+      : [];
+
+  const profileItem = {
+    href: "/internal-driver-portal-7v92nx/profile",
+    label: "Profile",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    isActive: pathname?.includes("/profile"),
+  };
+
+  const menuItems = [...baseMenuItems, ...superAdminItems, profileItem];
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
