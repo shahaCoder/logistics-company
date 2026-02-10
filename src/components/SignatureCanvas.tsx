@@ -109,12 +109,12 @@ export default function SignatureCanvasComponent({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
-      // Wait 5.5 seconds (5500ms) before saving signature
+      // Wait 2.5 seconds (2500ms) before saving signature
       saveTimeoutRef.current = setTimeout(() => {
         if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
           saveSignature();
         }
-      }, 5500); // 5.5 second delay before saving
+      }, 2500); // 2.5 second delay before saving
     };
 
     // Listen to canvas drawing events

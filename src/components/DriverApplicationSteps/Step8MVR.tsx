@@ -234,10 +234,10 @@ export default function Step8MVR({
                         if (textSignatureTimeoutRef.current) {
                           clearTimeout(textSignatureTimeoutRef.current);
                         }
-                        // Wait 5.5 seconds before generating and saving signature file
+                        // Wait 2.5 seconds before generating and saving signature file
                         textSignatureTimeoutRef.current = setTimeout(() => {
                           generateTextSignatureFile(value);
-                        }, 5500);
+                        }, 2500);
                       }
                     })}
                     onKeyDown={(e) => {
