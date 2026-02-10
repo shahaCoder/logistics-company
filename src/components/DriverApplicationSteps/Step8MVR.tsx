@@ -31,6 +31,42 @@ export default function Step8MVR({
   const [signatureMode, setSignatureMode] = useState<"text" | "draw">(getInitialSignatureMode());
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | undefined>(undefined);
 
+  const generateTextSignatureFile = (text: string) => {
+    if (typeof window === "undefined") return;
+    const trimmed = text.trim();
+    if (!trimmed) {
+      setValue("mvrSignatureFile", undefined, { shouldValidate: false });
+      return;
+    }
+
+    try {
+      const canvas = document.createElement("canvas");
+      const width = 600;
+      const height = 200;
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = "#000000";
+      ctx.font = "48px Dancing Script, cursive";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(trimmed.toUpperCase(), width / 2, height / 2);
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const file = new File([blob], "signature-text.png", { type: "image/png" });
+        setValue("mvrSignatureFile", file, { shouldValidate: false });
+      }, "image/png");
+    } catch (error) {
+      console.error("Failed to generate text signature image:", error);
+    }
+  };
+
   // Restore signature from saved file when component mounts or file changes
   useEffect(() => {
     if (signatureFile && signatureMode === "draw") {
@@ -182,7 +218,9 @@ export default function Step8MVR({
                   <input
                     {...register("mvrSignature", {
                       onChange: (e) => {
-                        setValue("mvrSignature", e.target.value.toUpperCase(), { shouldValidate: true });
+                        const value = e.target.value.toUpperCase();
+                        setValue("mvrSignature", value, { shouldValidate: true });
+                        generateTextSignatureFile(value);
                       }
                     })}
                     onKeyDown={(e) => {

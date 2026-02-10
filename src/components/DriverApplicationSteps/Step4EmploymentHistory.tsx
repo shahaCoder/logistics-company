@@ -81,7 +81,9 @@ export default function Step4EmploymentHistory({
       </h2>
 
       <div className="space-y-6">
-        {employmentRecords.map((record, index) => (
+        {employmentRecords.map((record, index) => {
+          const recordErrors = (errors.employmentRecords?.[index] as any) || {};
+          return (
           <div
             key={index}
             className="bg-gray-50 rounded-lg p-6 border border-gray-200"
@@ -114,8 +116,15 @@ export default function Step4EmploymentHistory({
                     blockNonEnglishInput(e);
                     updateEmploymentRecord(index, "employerName", e.target.value.toUpperCase());
                   }}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 ${
+                    recordErrors.employerName ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {recordErrors.employerName?.message && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {String(recordErrors.employerName.message)}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -179,8 +188,15 @@ export default function Step4EmploymentHistory({
                     blockNonEnglishInput(e);
                     updateEmploymentRecord(index, "addressLine1", e.target.value.toUpperCase());
                   }}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 ${
+                    recordErrors.addressLine1 ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {recordErrors.addressLine1?.message && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {String(recordErrors.addressLine1.message)}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -259,8 +275,15 @@ export default function Step4EmploymentHistory({
                       blockNonEnglishInput(e);
                       updateEmploymentRecord(index, "city", e.target.value.toUpperCase());
                     }}
-                    className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 ${
+                      recordErrors.city ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {recordErrors.city?.message && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {String(recordErrors.city.message)}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -276,7 +299,9 @@ export default function Step4EmploymentHistory({
                         onChange={(e) =>
                           updateEmploymentRecord(index, "state", e.target.value)
                         }
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 ${
+                      recordErrors.state ? "border-red-500" : "border-gray-300"
+                    }`}
                       >
                         <option value="">Select State</option>
                         {[
@@ -304,8 +329,15 @@ export default function Step4EmploymentHistory({
                           blockNonEnglishInput(e);
                           updateEmploymentRecord(index, "zip", e.target.value.toUpperCase());
                         }}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                      className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 ${
+                        recordErrors.zip ? "border-red-500" : "border-gray-300"
+                      }`}
                       />
+                    {recordErrors.zip?.message && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {String(recordErrors.zip.message)}
+                      </p>
+                    )}
                     </div>
                   </>
                 ) : (
@@ -321,8 +353,15 @@ export default function Step4EmploymentHistory({
                         blockNonEnglishInput(e);
                         updateEmploymentRecord(index, "state", e.target.value.toUpperCase());
                       }}
-                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600"
+                      className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 ${
+                        recordErrors.state ? "border-red-500" : "border-gray-300"
+                      }`}
                     />
+                    {recordErrors.state?.message && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {String(recordErrors.state.message)}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -438,7 +477,7 @@ export default function Step4EmploymentHistory({
               </div>
             </div>
           </div>
-        ))}
+        )})}
 
         <button
           type="button"

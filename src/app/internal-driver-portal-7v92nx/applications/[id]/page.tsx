@@ -139,6 +139,15 @@ interface Application {
   } | null;
 }
 
+const CONSENT_LABELS: Record<string, string> = {
+  AUTHORIZATION: "Authorization & Certification",
+  ALCOHOL_DRUG: "Alcohol & Drug Test Statement",
+  SAFETY_PERFORMANCE: "Safety Performance Statement",
+  PSP: "PSP Driver Disclosure & Authorization",
+  CLEARINGHOUSE: "FMCSA Clearinghouse Consent",
+  MVR: "MVR Release Consent",
+};
+
 export default function ApplicationDetailPage() {
   // ВСЕ хуки должны быть вызваны ПЕРВЫМИ, до любых условных возвратов
   const router = useRouter();
@@ -348,8 +357,10 @@ export default function ApplicationDetailPage() {
         const cleanSSN = fullSSN.replace(/-/g, '');
         const formattedSSN = cleanSSN.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3');
         addText(`SSN: ${formattedSSN}`, 11);
-      } else {
+      } else if (application.ssnLast4 && application.ssnLast4.trim() !== "") {
         addText(`SSN: ***-**-${application.ssnLast4}`, 11);
+      } else {
+        addText("SSN: Not provided by applicant", 11);
       }
       addText(`Current Address: ${application.currentAddressLine1}, ${application.currentCity}, ${application.currentState} ${application.currentZip}`, 11);
       
@@ -435,7 +446,7 @@ export default function ApplicationDetailPage() {
 
       for (const consent of application.legalConsents) {
         checkPageBreak(lineHeight * 15);
-        const consentName = consentTypeNames[consent.type] || consent.type;
+        const consentName = consentTypeNames[consent.type] || CONSENT_LABELS[consent.type] || consent.type;
         const consentText = consentTexts[consent.type] || '';
         const signatureImg = signatureImages[consent.type];
 
@@ -730,8 +741,9 @@ export default function ApplicationDetailPage() {
                 <label className="text-sm font-medium text-gray-500">Email</label>
                 <p className="text-gray-900">{application.email}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">SSN</label>
+            <div>
+              <label className="text-sm font-medium text-gray-500">SSN</label>
+              {application.ssnLast4 && application.ssnLast4.trim() !== "" ? (
                 <div className="flex items-center gap-2">
                   <p className="text-gray-900">
                     {decryptedSSN || `***-**-${application.ssnLast4}`}
@@ -753,7 +765,12 @@ export default function ApplicationDetailPage() {
                     </button>
                   )}
                 </div>
-              </div>
+              ) : (
+                <p className="text-gray-500 italic text-sm">
+                  SSN was not provided by the applicant
+                </p>
+              )}
+            </div>
             </div>
 
             <div className="mt-4 pt-4 border-t">
@@ -1127,7 +1144,9 @@ export default function ApplicationDetailPage() {
             {application.legalConsents.map((consent, idx) => (
               <div key={idx} className="mb-3 pb-3 border-b last:border-0">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-900">{consent.type}</span>
+              <span className="font-medium text-gray-900">
+                {CONSENT_LABELS[consent.type] || consent.type}
+              </span>
                   <span
                     className={`px-2 py-1 text-xs rounded ${
                       consent.accepted
@@ -1143,30 +1162,34 @@ export default function ApplicationDetailPage() {
                     Signed: {formatDateUS(consent.signedAt)}
                   </p>
                 )}
-                {consent.signatureUrl && (
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-500 mb-1">Signature:</p>
-                    <div className="border border-gray-200 rounded p-2 bg-gray-50">
-                      <Image
-                        src={consent.signatureUrl}
-                        alt={`${consent.type} signature`}
-                        width={300}
-                        height={150}
-                        className="max-w-full h-auto"
-                        loading="lazy"
-                        quality={85}
-                      />
-                    </div>
-                    <a
-                      href={consent.signatureUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-red-600 hover:text-red-700 mt-1 inline-block"
-                    >
-                      Open in new tab
-                    </a>
+              {consent.signatureUrl ? (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500 mb-1">Signature:</p>
+                  <div className="border border-gray-200 rounded p-2 bg-gray-50">
+                    <Image
+                      src={consent.signatureUrl}
+                      alt={`${CONSENT_LABELS[consent.type] || consent.type} signature`}
+                      width={300}
+                      height={150}
+                      className="max-w-full h-auto"
+                      loading="lazy"
+                      quality={85}
+                    />
                   </div>
-                )}
+                  <a
+                    href={consent.signatureUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-red-600 hover:text-red-700 mt-1 inline-block"
+                  >
+                    Open in new tab
+                  </a>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500 mt-1 italic">
+                  Signature file is not available (applicant may have typed their name or this is an older record).
+                </p>
+              )}
               </div>
             ))}
           </div>

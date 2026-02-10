@@ -31,6 +31,44 @@ export default function Step5Authorization({
   const [signatureMode, setSignatureMode] = useState<"text" | "draw">(getInitialSignatureMode());
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | undefined>(undefined);
 
+  const generateTextSignatureFile = (text: string) => {
+    if (typeof window === "undefined") return;
+    const trimmed = text.trim();
+    if (!trimmed) {
+      setValue("authorizationSignatureFile", undefined, { shouldValidate: false });
+      return;
+    }
+
+    try {
+      const canvas = document.createElement("canvas");
+      const width = 600;
+      const height = 200;
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      // White background
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, width, height);
+
+      // Signature text
+      ctx.fillStyle = "#000000";
+      ctx.font = "48px Dancing Script, cursive";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(trimmed.toUpperCase(), width / 2, height / 2);
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const file = new File([blob], "signature-text.png", { type: "image/png" });
+        setValue("authorizationSignatureFile", file, { shouldValidate: false });
+      }, "image/png");
+    } catch (error) {
+      console.error("Failed to generate text signature image:", error);
+    }
+  };
+
   // Restore signature from saved file when component mounts or file changes
   useEffect(() => {
     if (signatureFile && signatureMode === "draw") {
@@ -192,7 +230,9 @@ export default function Step5Authorization({
                   <input
                     {...register("authorizationSignature", {
                       onChange: (e) => {
-                        setValue("authorizationSignature", e.target.value.toUpperCase(), { shouldValidate: true });
+                        const value = e.target.value.toUpperCase();
+                        setValue("authorizationSignature", value, { shouldValidate: true });
+                        generateTextSignatureFile(value);
                       }
                     })}
                     onKeyDown={(e) => {

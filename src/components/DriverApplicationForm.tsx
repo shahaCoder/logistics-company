@@ -891,11 +891,8 @@ export default function DriverApplicationForm() {
       } else {
         setSubmitError(`Please fill in all required fields on Step ${currentStep} before continuing.`);
       }
-      
-      // Scroll to top to show errors
-      setTimeout(() => {
-        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+      // Scroll directly to the first field with an error
+      scrollToFirstError();
       
       return;
     }
