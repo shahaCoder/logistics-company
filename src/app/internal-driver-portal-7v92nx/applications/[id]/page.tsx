@@ -134,7 +134,9 @@ interface Application {
     signatureUrl: string | null;
   }>;
   reviewedBy: {
+    id: string;
     email: string;
+    name: string | null;
     role: string;
   } | null;
 }
@@ -1262,16 +1264,13 @@ export default function ApplicationDetailPage() {
             </button>
 
             {application.reviewedBy && (
-              <div className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-600">
+              <div className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-600 dark:border-slate-600 dark:text-slate-400">
                 <p>
-                  Last reviewed by: {application.reviewedBy.email} (
-                  {application.reviewedBy.role})
+                  Was edited by {application.reviewedBy.name || application.reviewedBy.email}
+                  {application.reviewedAt && (
+                    <> · {new Date(application.reviewedAt).toLocaleString()}</>
+                  )}
                 </p>
-                {application.reviewedAt && (
-                  <p className="mt-1">
-                    Reviewed at: {new Date(application.reviewedAt).toLocaleString()}
-                  </p>
-                )}
               </div>
             )}
           </div>

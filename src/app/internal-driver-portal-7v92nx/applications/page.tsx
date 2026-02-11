@@ -12,7 +12,13 @@ interface Application {
   phone: string;
   status: string;
   createdAt: string;
+  reviewedAt: string | null;
   ssnLast4: string;
+  reviewedBy: {
+    id: string;
+    name: string | null;
+    email: string;
+  } | null;
 }
 
 interface Pagination {
@@ -132,14 +138,14 @@ export default function ApplicationsPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
       {/* Header */}
       <div className="mb-5">
-        <h1 className="text-xl font-semibold text-slate-900">Driver Applications</h1>
-        <p className="mt-1 text-xs text-slate-500">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Driver Applications</h1>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Review and manage driver applications
         </p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-4">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label htmlFor="applications-search" className="block text-xs font-medium text-slate-700 mb-1.5">
@@ -180,7 +186,7 @@ export default function ApplicationsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden min-h-[400px]">
         {loading ? (
           <div className="p-8 text-center text-slate-500 min-h-[400px] flex items-center justify-center text-xs">Loading...</div>
         ) : applications.length === 0 ? (
@@ -189,9 +195,9 @@ export default function ApplicationsPage() {
           <>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+              <thead className="bg-slate-50 dark:bg-slate-800/50">
                 <tr>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                     Name
                   </th>
                   <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
@@ -211,11 +217,11 @@ export default function ApplicationsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
+              <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-700">
                 {applications.map((app) => (
-                  <tr key={app.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={app.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-xs font-medium text-slate-900">
+                      <div className="text-xs font-medium text-slate-900 dark:text-slate-100">
                         {app.firstName} {app.lastName}
                       </div>
                     </td>
@@ -227,7 +233,13 @@ export default function ApplicationsPage() {
                       {new Date(app.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      {getStatusBadge(app.status)}
+                      <div>{getStatusBadge(app.status)}</div>
+                      {app.reviewedBy && (
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          Was edited by {app.reviewedBy.name || app.reviewedBy.email}
+                          {app.reviewedAt && ` · ${new Date(app.reviewedAt).toLocaleDateString()}`}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500 font-mono">
                       ***-**-{app.ssnLast4}
@@ -276,8 +288,8 @@ export default function ApplicationsPage() {
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-              <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between border-t border-slate-200">
-                <div className="text-xs text-slate-600">
+              <div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-2.5 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
+                <div className="text-xs text-slate-600 dark:text-slate-400">
                   Showing {((pagination.page - 1) * pagination.limit) + 1} to{" "}
                   {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
                   {pagination.total} results

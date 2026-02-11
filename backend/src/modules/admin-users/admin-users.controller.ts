@@ -79,7 +79,12 @@ router.post('/users', authRequired('SUPER_ADMIN'), async (req: AuthRequest, res:
     if (message.includes('already exists')) {
       return res.status(409).json({ error: message });
     }
-    if (message.includes('Invalid password') || message.includes('Cannot create')) {
+    // Password validation and other business rules: return 400 with actual message
+    if (
+      message.includes('Password') ||
+      message.includes('Invalid password') ||
+      message.includes('Cannot create')
+    ) {
       return res.status(400).json({ error: message });
     }
     console.error('Create admin error:', error);

@@ -53,7 +53,15 @@ export async function getApplications(filters: {
             phone: true,
             status: true,
             createdAt: true,
+            reviewedAt: true,
             ssnLast4: true,
+            reviewedBy: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         }),
         prisma.driverApplication.count({ where }),
@@ -95,6 +103,7 @@ export async function getApplicationById(id: string) {
             select: {
               id: true,
               email: true,
+              name: true,
               role: true,
             },
           },
@@ -115,7 +124,7 @@ export async function updateApplicationStatus(
   internalNotes: string | undefined,
   reviewedById: string
 ) {
-  const result = await prisma.driverApplication.update({
+  await prisma.driverApplication.update({
     where: { id },
     data: {
       status,
@@ -131,7 +140,18 @@ export async function updateApplicationStatus(
     invalidateCache('applications:*'),
   ]);
 
-  return result;
+  return prisma.driverApplication.findUnique({
+    where: { id },
+    include: {
+      reviewedBy: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      },
+    },
+  });
 }
 
 /**
