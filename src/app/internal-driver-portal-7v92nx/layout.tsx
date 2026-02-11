@@ -195,13 +195,13 @@ export default function AdminLayout({
         <aside className="hidden md:block w-56 flex-shrink-0 bg-slate-900 border-r border-slate-800 min-h-screen sticky top-0 overflow-y-auto">
           <div className="p-4">
             {/* Logo/Brand */}
-            <div className="mb-6 pt-2">
+            <div className="mb-6 pt-2 flex items-center">
               <Image
                 src="/images/logo.png"
                 alt="Logo"
-                width={140}
-                height={40}
-                className="object-contain"
+                width={100}
+                height={28}
+                className="object-contain max-w-full h-auto"
                 priority
               />
             </div>
