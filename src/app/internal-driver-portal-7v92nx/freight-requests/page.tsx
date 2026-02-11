@@ -135,16 +135,16 @@ export default function FreightRequestsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
       <div className="mb-5">
-        <h1 className="text-xl font-semibold text-slate-900">Freight Quote Requests</h1>
-        <p className="mt-1 text-xs text-slate-500">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Freight Quote Requests</h1>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           View and manage freight quote requests from brokers and shippers
         </p>
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 mb-4">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-4 mb-4">
         <div>
-          <label htmlFor="freight-search" className="block text-xs font-medium text-slate-700 mb-1.5">
+          <label htmlFor="freight-search" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
             Search
           </label>
           <input
@@ -157,61 +157,61 @@ export default function FreightRequestsPage() {
               setCurrentPage(1);
             }}
             placeholder="Company name, contact name, email, phone..."
-            className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+            className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-slate-500 text-xs">Loading...</div>
+          <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-xs">Loading...</div>
         ) : requests.length === 0 ? (
-          <div className="p-8 text-center text-slate-500 text-xs">No requests found</div>
+          <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-xs">No requests found</div>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                <thead className="bg-slate-50 dark:bg-slate-800/50">
                   <tr>
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                       Contact
                     </th>
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                       Company
                     </th>
-                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                       Submitted
                     </th>
-                    <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                       Action
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-200">
+                <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-700">
                   {requests.map((request) => (
                     <tr 
                       key={request.id} 
-                      className="hover:bg-slate-50 cursor-pointer transition-colors"
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
                       onClick={() => handleView(request)}
                     >
                       <td className="px-4 py-3">
                         <div className="text-xs">
-                          <div className="font-medium text-slate-900">{request.contactName}</div>
-                          <div className="text-slate-500">{request.email}</div>
+                          <div className="font-medium text-slate-900 dark:text-slate-100">{request.contactName}</div>
+                          <div className="text-slate-500 dark:text-slate-400">{request.email}</div>
                           {request.isBroker && (
-                            <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded font-medium">
+                            <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded font-medium">
                               Broker
                             </span>
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="text-xs text-slate-900">
+                        <div className="text-xs text-slate-900 dark:text-slate-100">
                           {request.companyName || "-"}
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500">
+                      <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                         {new Date(request.createdAt).toLocaleDateString()}
                         <br />
                         <span className="text-xs">
@@ -241,8 +241,8 @@ export default function FreightRequestsPage() {
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-              <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between border-t border-slate-200">
-                <div className="text-xs text-slate-600">
+              <div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-2.5 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
+                <div className="text-xs text-slate-600 dark:text-slate-400">
                   Showing {((pagination.page - 1) * pagination.limit) + 1} to{" "}
                   {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
                   {pagination.total} results
@@ -251,14 +251,14 @@ export default function FreightRequestsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="px-2.5 py-1 border border-slate-300 rounded-md text-xs disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+                    className="px-2.5 py-1 border border-slate-300 dark:border-slate-600 rounded-md text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => setCurrentPage((p) => p + 1)}
                     disabled={currentPage >= pagination.totalPages}
-                    className="px-2.5 py-1 border border-slate-300 rounded-md text-xs disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+                    className="px-2.5 py-1 border border-slate-300 dark:border-slate-600 rounded-md text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                   >
                     Next
                   </button>
@@ -273,11 +273,11 @@ export default function FreightRequestsPage() {
       {isModalOpen && selectedRequest && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black/60 transition-opacity"
             onClick={() => setIsModalOpen(false)}
           />
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="relative w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+            <div className="relative w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 shadow-xl transition-all border border-slate-200 dark:border-slate-700">
               <div className="bg-red-600 px-6 py-4">
                 <h2 className="text-2xl font-bold text-white">
                   Freight Quote Request Details
@@ -288,29 +288,29 @@ export default function FreightRequestsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Contact Information */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Contact Information</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">Contact Information</h3>
                     <div className="space-y-2 text-sm">
                       <div>
-                        <span className="font-medium text-gray-700">Name:</span>
-                        <span className="ml-2 text-gray-900">{selectedRequest.contactName}</span>
+                        <span className="font-medium text-gray-700 dark:text-slate-300">Name:</span>
+                        <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.contactName}</span>
                       </div>
                       {selectedRequest.companyName && (
                         <div>
-                          <span className="font-medium text-gray-700">Company:</span>
-                          <span className="ml-2 text-gray-900">{selectedRequest.companyName}</span>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Company:</span>
+                          <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.companyName}</span>
                         </div>
                       )}
                       <div>
-                        <span className="font-medium text-gray-700">Email:</span>
-                        <span className="ml-2 text-gray-900">{selectedRequest.email}</span>
+                        <span className="font-medium text-gray-700 dark:text-slate-300">Email:</span>
+                        <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.email}</span>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">Phone:</span>
-                        <span className="ml-2 text-gray-900">{selectedRequest.phone}</span>
+                        <span className="font-medium text-gray-700 dark:text-slate-300">Phone:</span>
+                        <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.phone}</span>
                       </div>
                       {selectedRequest.isBroker && (
                         <div>
-                          <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                          <span className="inline-block px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded">
                             Broker
                           </span>
                         </div>
@@ -320,36 +320,36 @@ export default function FreightRequestsPage() {
 
                   {/* Freight Details */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Freight Details</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">Freight Details</h3>
                     <div className="space-y-2 text-sm">
                       {selectedRequest.equipment && (
                         <div>
-                          <span className="font-medium text-gray-700">Equipment:</span>
-                          <span className="ml-2 text-gray-900">{selectedRequest.equipment}</span>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Equipment:</span>
+                          <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.equipment}</span>
                         </div>
                       )}
                       {selectedRequest.cargo && (
                         <div>
-                          <span className="font-medium text-gray-700">Cargo:</span>
-                          <span className="ml-2 text-gray-900">{selectedRequest.cargo}</span>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Cargo:</span>
+                          <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.cargo}</span>
                         </div>
                       )}
                       {selectedRequest.weight && (
                         <div>
-                          <span className="font-medium text-gray-700">Weight:</span>
-                          <span className="ml-2 text-gray-900">{selectedRequest.weight} lbs</span>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Weight:</span>
+                          <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.weight} lbs</span>
                         </div>
                       )}
                       {selectedRequest.pallets && (
                         <div>
-                          <span className="font-medium text-gray-700">Pallets:</span>
-                          <span className="ml-2 text-gray-900">{selectedRequest.pallets}</span>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Pallets:</span>
+                          <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.pallets}</span>
                         </div>
                       )}
                       {selectedRequest.referenceId && (
                         <div>
-                          <span className="font-medium text-gray-700">Ref/PO:</span>
-                          <span className="ml-2 text-gray-900">{selectedRequest.referenceId}</span>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Ref/PO:</span>
+                          <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.referenceId}</span>
                         </div>
                       )}
                     </div>
@@ -357,22 +357,22 @@ export default function FreightRequestsPage() {
 
                   {/* Pickup Information */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Pickup Information</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">Pickup Information</h3>
                     <div className="space-y-2 text-sm">
                       <div>
-                        <span className="font-medium text-gray-700">Address:</span>
-                        <div className="mt-1 text-gray-900">{selectedRequest.pickupAddress}</div>
+                        <span className="font-medium text-gray-700 dark:text-slate-300">Address:</span>
+                        <div className="mt-1 text-gray-900 dark:text-slate-100">{selectedRequest.pickupAddress}</div>
                       </div>
                       {selectedRequest.pickupDate && (
                         <div>
-                          <span className="font-medium text-gray-700">Date:</span>
-                          <span className="ml-2 text-gray-900">{selectedRequest.pickupDate}</span>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Date:</span>
+                          <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.pickupDate}</span>
                         </div>
                       )}
                       {selectedRequest.pickupTime && (
                         <div>
-                          <span className="font-medium text-gray-700">Time:</span>
-                          <span className="ml-2 text-gray-900">{selectedRequest.pickupTime}</span>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Time:</span>
+                          <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.pickupTime}</span>
                         </div>
                       )}
                     </div>
@@ -380,44 +380,44 @@ export default function FreightRequestsPage() {
 
                   {/* Delivery Information */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Delivery Information</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">Delivery Information</h3>
                     {selectedRequest.deliveryAddress ? (
                       <div className="space-y-2 text-sm">
                         <div>
-                          <span className="font-medium text-gray-700">Address:</span>
-                          <div className="mt-1 text-gray-900">{selectedRequest.deliveryAddress}</div>
+                          <span className="font-medium text-gray-700 dark:text-slate-300">Address:</span>
+                          <div className="mt-1 text-gray-900 dark:text-slate-100">{selectedRequest.deliveryAddress}</div>
                         </div>
                         {selectedRequest.deliveryDate && (
                           <div>
-                            <span className="font-medium text-gray-700">Date:</span>
-                            <span className="ml-2 text-gray-900">{selectedRequest.deliveryDate}</span>
+                            <span className="font-medium text-gray-700 dark:text-slate-300">Date:</span>
+                            <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.deliveryDate}</span>
                           </div>
                         )}
                         {selectedRequest.deliveryTime && (
                           <div>
-                            <span className="font-medium text-gray-700">Time:</span>
-                            <span className="ml-2 text-gray-900">{selectedRequest.deliveryTime}</span>
+                            <span className="font-medium text-gray-700 dark:text-slate-300">Time:</span>
+                            <span className="ml-2 text-gray-900 dark:text-slate-100">{selectedRequest.deliveryTime}</span>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="text-sm text-gray-500">Not specified</div>
+                      <div className="text-sm text-gray-500 dark:text-slate-400">Not specified</div>
                     )}
                   </div>
 
                   {/* Notes */}
                   {selectedRequest.notes && (
                     <div className="md:col-span-2 space-y-4">
-                      <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Additional Notes</h3>
-                      <div className="text-sm text-gray-900 bg-gray-50 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2">Additional Notes</h3>
+                      <div className="text-sm text-gray-900 dark:text-slate-100 bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
                         {selectedRequest.notes}
                       </div>
                     </div>
                   )}
 
                   {/* Submitted Date */}
-                  <div className="md:col-span-2 pt-4 border-t">
-                    <div className="text-sm text-gray-500">
+                  <div className="md:col-span-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div className="text-sm text-gray-500 dark:text-slate-400">
                       <span className="font-medium">Submitted:</span>{" "}
                       {new Date(selectedRequest.createdAt).toLocaleString()}
                     </div>
@@ -425,10 +425,10 @@ export default function FreightRequestsPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 px-6 py-4 flex justify-end">
+              <div className="bg-gray-50 dark:bg-slate-800 px-6 py-4 flex justify-end">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                 >
                   Close
                 </button>

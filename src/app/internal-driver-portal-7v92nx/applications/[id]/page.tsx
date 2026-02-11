@@ -682,7 +682,7 @@ export default function ApplicationDetailPage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-gray-500">Loading...</div>
+        <div className="text-center text-gray-500 dark:text-slate-400">Loading...</div>
       </div>
     );
   }
@@ -690,7 +690,7 @@ export default function ApplicationDetailPage() {
   if (!application) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center text-red-600">Application not found</div>
+        <div className="text-center text-red-600 dark:text-red-400">Application not found</div>
       </div>
     );
   }
@@ -701,17 +701,17 @@ export default function ApplicationDetailPage() {
       <div className="mb-5">
         <button
           onClick={() => router.push("/internal-driver-portal-7v92nx/applications")}
-          className="text-xs text-slate-600 hover:text-slate-900 mb-3 inline-flex items-center gap-1"
+          className="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-3 inline-flex items-center gap-1"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Applications
         </button>
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
           {application.firstName} {application.lastName}
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Submitted: {new Date(application.createdAt).toLocaleString()}
         </p>
       </div>
@@ -720,32 +720,32 @@ export default function ApplicationDetailPage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-4">
           {/* Applicant Info */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-3">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">
               Applicant Information
             </h2>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-slate-500">First Name</label>
-                <p className="text-xs text-slate-900 mt-0.5">{application.firstName}</p>
+                <label className="text-xs font-medium text-slate-500 dark:text-slate-400">First Name</label>
+                <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">{application.firstName}</p>
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-500">Last Name</label>
-                <p className="text-xs text-slate-900 mt-0.5">{application.lastName}</p>
+                <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Last Name</label>
+                <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">{application.lastName}</p>
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-500">Date of Birth</label>
-                <p className="text-xs text-slate-900 mt-0.5">
+                <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Date of Birth</label>
+                <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">
                   {formatDateUS(application.dateOfBirth)} (Age: {age})
                 </p>
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-500">Phone</label>
-                <p className="text-xs text-slate-900 mt-0.5">{application.phone}</p>
+                <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Phone</label>
+                <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">{application.phone}</p>
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-500">Email</label>
-                <p className="text-xs text-slate-900 mt-0.5">{application.email}</p>
+                <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Email</label>
+                <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">{application.email}</p>
               </div>
             <div>
               <label className="text-xs font-medium text-slate-500">SSN</label>
@@ -779,7 +779,7 @@ export default function ApplicationDetailPage() {
             </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-slate-200">
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               <label className="text-xs font-medium text-slate-500">Current Address</label>
               <p className="text-xs text-slate-900 mt-0.5">
                 {application.currentAddressLine1}, {application.currentCity},{" "}
@@ -792,8 +792,8 @@ export default function ApplicationDetailPage() {
             </div>
 
             {application.previousAddresses.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <label className="text-xs font-medium text-slate-500">
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
                   Previous Addresses
                 </label>
                 {application.previousAddresses.map((addr, idx) => (
@@ -819,31 +819,31 @@ export default function ApplicationDetailPage() {
               </h2>
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
-                  <label className="text-xs font-medium text-slate-500">
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     License Number
                   </label>
-                  <p className="text-xs text-slate-900 mt-0.5">{application.license.licenseNumber}</p>
+                  <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">{application.license.licenseNumber}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-500">State</label>
-                  <p className="text-xs text-slate-900 mt-0.5">{application.license.state}</p>
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400">State</label>
+                  <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">{application.license.state}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-500">Class</label>
-                  <p className="text-xs text-slate-900 mt-0.5">{application.license.class}</p>
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Class</label>
+                  <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">{application.license.class}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-500">Expires</label>
-                  <p className="text-xs text-slate-900 mt-0.5">
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Expires</label>
+                  <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">
                     {formatDateUS(application.license.expiresAt)}
                   </p>
                 </div>
                 {application.license.endorsements && (
                   <div>
-                    <label className="text-xs font-medium text-slate-500">
+                    <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       Endorsements
                     </label>
-                    <p className="text-xs text-slate-900 mt-0.5">
+                    <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">
                       {application.license.endorsements.split(",").join(", ")}
                     </p>
                   </div>
@@ -1006,10 +1006,10 @@ export default function ApplicationDetailPage() {
               </h2>
               {application.medicalCard.expiresAt && (
                 <div className="mb-3">
-                  <label className="text-xs font-medium text-slate-500">
+                  <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     Expiration Date
                   </label>
-                  <p className="text-xs text-slate-900 mt-0.5">
+                  <p className="text-xs text-slate-900 dark:text-slate-100 mt-0.5">
                     {formatDateUS(application.medicalCard.expiresAt)}
                   </p>
                 </div>
@@ -1090,19 +1090,19 @@ export default function ApplicationDetailPage() {
           )}
 
           {/* Employment History */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-3">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">
               Employment History
             </h2>
             {application.employmentRecords.map((record, idx) => (
-              <div key={idx} className="mb-4 pb-4 border-b border-slate-200 last:border-0 last:mb-0 last:pb-0">
-                <h3 className="text-xs font-semibold text-slate-900 mb-2">
+              <div key={idx} className="mb-4 pb-4 border-b border-slate-200 dark:border-slate-700 last:border-0 last:mb-0 last:pb-0">
+                <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-100 mb-2">
                   {idx + 1}. {record.employerName}
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-slate-500">Address: </span>
-                    <span className="text-slate-900">
+                    <span className="text-slate-500 dark:text-slate-400">Address: </span>
+                    <span className="text-slate-900 dark:text-slate-100">
                       {record.addressLine1}, {record.city}, {record.state} {record.zip}
                     </span>
                   </div>
@@ -1145,8 +1145,8 @@ export default function ApplicationDetailPage() {
           </div>
 
           {/* Legal Consents */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-3">Legal Consents</h2>
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Legal Consents</h2>
             {application.legalConsents.map((consent, idx) => (
               <div key={idx} className="mb-3 pb-3 border-b border-slate-200 last:border-0 last:mb-0 last:pb-0">
                 <div className="flex items-center justify-between">

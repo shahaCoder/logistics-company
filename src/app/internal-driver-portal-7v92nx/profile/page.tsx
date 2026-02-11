@@ -111,7 +111,7 @@ export default function ProfilePage() {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-center min-h-[200px]"
         style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
       >
-        <span className="text-slate-500 text-sm">Loading...</span>
+        <span className="text-slate-500 dark:text-slate-400 text-sm">Loading...</span>
       </div>
     );
   }
@@ -126,14 +126,16 @@ export default function ProfilePage() {
       style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
     >
       <div className="mb-5">
-        <h1 className="text-xl font-semibold text-slate-900">Profile</h1>
-        <p className="mt-1 text-xs text-slate-500">Your account settings</p>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Profile</h1>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Your account settings</p>
       </div>
 
       {message && (
         <div
           className={`mb-4 p-3 rounded-md text-xs ${
-            message.type === "success" ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-700"
+            message.type === "success"
+              ? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
+              : "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300"
           }`}
         >
           {message.text}
@@ -143,11 +145,11 @@ export default function ProfilePage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Account block */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Account</h2>
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4 pb-2 border-b border-slate-100 dark:border-slate-700">Account</h2>
             <div className="space-y-4">
               <div>
-                <label htmlFor="profile-email" className="block text-xs font-medium text-slate-700 mb-1">
+                <label htmlFor="profile-email" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Email
                 </label>
                 <input
@@ -155,12 +157,12 @@ export default function ProfilePage() {
                   type="email"
                   value={user.email}
                   disabled
-                  className="w-full border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-500 bg-slate-50 cursor-not-allowed"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-md px-3 py-1.5 text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 cursor-not-allowed"
                 />
-                <p className="mt-0.5 text-xs text-slate-500">Email cannot be changed here.</p>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Email cannot be changed here.</p>
               </div>
               <div>
-                <label htmlFor="profile-name" className="block text-xs font-medium text-slate-700 mb-1">
+                <label htmlFor="profile-name" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Display name
                 </label>
                 <input
@@ -170,7 +172,7 @@ export default function ProfilePage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={200}
-                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                   placeholder="Your name"
                 />
               </div>
@@ -178,9 +180,9 @@ export default function ProfilePage() {
           </div>
 
           {/* Password block */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-slate-900 mb-1">Change password</h2>
-            <p className="text-xs text-slate-500 mb-4">Leave blank to keep your current password.</p>
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">Change password</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Leave blank to keep your current password.</p>
             <div className="space-y-3">
               <PasswordInput
                 id="profile-current-password"
