@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* Class-based dark mode for admin panel (parent with .dark) */
-@custom-variant dark (&:where(.dark, .dark *));
-
 @import "swiper/css";
 @import "swiper/css/pagination";
 @import "swiper/css/navigation";

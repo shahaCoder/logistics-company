@@ -207,19 +207,19 @@ export default function AdminsPage() {
       style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
     >
       <div className="mb-5">
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Admins</h1>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Manage admin users. Only super admins can add or edit.</p>
+        <h1 className="text-xl font-semibold text-slate-900">Admins</h1>
+        <p className="mt-1 text-xs text-slate-500">Manage admin users. Only super admins can add or edit.</p>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs">
+        <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs">
           {error}
         </div>
       )}
 
-      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">All admins</span>
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+          <span className="text-xs font-medium text-slate-600">All admins</span>
           <button
             type="button"
             onClick={() => { setAddOpen(true); setError(""); }}
@@ -233,42 +233,42 @@ export default function AdminsPage() {
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-xs">Loading...</div>
+          <div className="p-8 text-center text-slate-500 text-xs">Loading...</div>
         ) : users.length === 0 ? (
-          <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+          <div className="p-8 text-center text-slate-500 text-xs">
             {error ? null : "No admins found."}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-              <thead className="bg-slate-50 dark:bg-slate-800/50">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Email</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Name</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Role</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Created</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider w-28">Actions</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Role</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Created</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-28">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-700">
+              <tbody className="bg-white divide-y divide-slate-200">
                 {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-900 dark:text-slate-100">{u.email}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-700 dark:text-slate-300">{u.name ?? "—"}</td>
+                  <tr key={u.id} className="hover:bg-slate-50:bg-slate-800/50 transition-colors">
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-900">{u.email}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-700">{u.name ?? "—"}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span
                         className={`px-2 py-0.5 text-xs font-medium rounded ${
                           u.role === "SUPER_ADMIN"
-                            ? "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300"
+                            ? "bg-amber-100 text-amber-800"
                             : u.role === "MANAGER"
-                            ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                            ? "bg-slate-100 text-slate-700"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                       >
                         {ROLE_LABELS[u.role] ?? u.role}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right">
@@ -276,7 +276,7 @@ export default function AdminsPage() {
                         <button
                           type="button"
                           onClick={() => { setEditOpen(u); setError(""); }}
-                          className="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                          className="text-xs font-medium text-red-600 hover:text-red-800:text-red-300"
                         >
                           Edit
                         </button>
@@ -285,7 +285,7 @@ export default function AdminsPage() {
                             type="button"
                             onClick={() => handleDelete(u)}
                             disabled={deletingId === u.id}
-                            className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
+                            className="text-xs font-medium text-slate-500 hover:text-red-600:text-red-400 disabled:opacity-50"
                           >
                             {deletingId === u.id ? "…" : "Delete"}
                           </button>
@@ -302,12 +302,12 @@ export default function AdminsPage() {
 
       {/* Add modal */}
       {addOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 dark:bg-black/60">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg max-w-md w-full p-5 border border-slate-200 dark:border-slate-700">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-4">Add admin</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-5 border border-slate-200">
+            <h2 className="text-base font-semibold text-slate-900 mb-4">Add admin</h2>
             <form onSubmit={handleAdd} className="space-y-3">
               <div>
-                <label htmlFor="add-email" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="add-email" className="block text-xs font-medium text-slate-700 mb-1">
                   Email
                 </label>
                 <input
@@ -316,7 +316,7 @@ export default function AdminsPage() {
                   type="email"
                   required
                   autoComplete="email"
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                   placeholder="admin@example.com"
                 />
               </div>
@@ -331,21 +331,21 @@ export default function AdminsPage() {
                 hint="At least 12 characters, one uppercase, one lowercase, one number, one special character."
               />
               <div>
-                <label htmlFor="add-role" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="add-role" className="block text-xs font-medium text-slate-700 mb-1">
                   Role
                 </label>
                 <select
                   id="add-role"
                   name="role"
                   required
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                 >
                   <option value="MANAGER">Manager</option>
                   <option value="VIEWER">Viewer</option>
                 </select>
               </div>
               <div>
-                <label htmlFor="add-name" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="add-name" className="block text-xs font-medium text-slate-700 mb-1">
                   Name (optional)
                 </label>
                 <input
@@ -353,7 +353,7 @@ export default function AdminsPage() {
                   name="name"
                   type="text"
                   maxLength={200}
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                   placeholder="Display name"
                 />
               </div>
@@ -368,7 +368,7 @@ export default function AdminsPage() {
                 <button
                   type="button"
                   onClick={() => { setAddOpen(false); setError(""); }}
-                  className="px-3 py-1.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 text-xs font-medium rounded-md hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="px-3 py-1.5 border border-slate-300 text-slate-700 bg-white text-xs font-medium rounded-md hover:bg-slate-50:bg-slate-700"
                 >
                   Cancel
                 </button>
@@ -380,20 +380,20 @@ export default function AdminsPage() {
 
       {/* Edit modal */}
       {editOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 dark:bg-black/60">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg max-w-md w-full p-5 border border-slate-200 dark:border-slate-700">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">Edit admin</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">{editOpen.email}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-5 border border-slate-200">
+            <h2 className="text-base font-semibold text-slate-900 mb-1">Edit admin</h2>
+            <p className="text-xs text-slate-500 mb-4">{editOpen.email}</p>
             <form onSubmit={handleEdit} className="space-y-3">
               <div>
-                <label htmlFor="edit-role" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="edit-role" className="block text-xs font-medium text-slate-700 mb-1">
                   Role
                 </label>
                 <select
                   id="edit-role"
                   name="role"
                   defaultValue={editOpen.role}
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                 >
                   <option value="SUPER_ADMIN">Super Admin</option>
                   <option value="MANAGER">Manager</option>
@@ -401,7 +401,7 @@ export default function AdminsPage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="edit-name" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="edit-name" className="block text-xs font-medium text-slate-700 mb-1">
                   Name (optional)
                 </label>
                 <input
@@ -410,7 +410,7 @@ export default function AdminsPage() {
                   type="text"
                   defaultValue={editOpen.name ?? ""}
                   maxLength={200}
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                   placeholder="Display name"
                 />
               </div>
@@ -433,7 +433,7 @@ export default function AdminsPage() {
                 <button
                   type="button"
                   onClick={() => { setEditOpen(null); setError(""); }}
-                  className="px-3 py-1.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 text-xs font-medium rounded-md hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="px-3 py-1.5 border border-slate-300 text-slate-700 bg-white text-xs font-medium rounded-md hover:bg-slate-50:bg-slate-700"
                 >
                   Cancel
                 </button>

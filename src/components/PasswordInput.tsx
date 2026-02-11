@@ -21,7 +21,7 @@ export default function PasswordInput({
 
   return (
     <div>
-      <label htmlFor={id} className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+      <label htmlFor={id} className="block text-xs font-medium text-slate-700 mb-1">
         {label}
       </label>
       <div className="relative">
@@ -29,12 +29,12 @@ export default function PasswordInput({
           {...props}
           id={id}
           type={visible ? "text" : "password"}
-          className={`w-full border border-slate-300 dark:border-slate-600 rounded-md px-3 py-1.5 pr-9 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${className}`}
+          className={`w-full border border-slate-300 rounded-md px-3 py-1.5 pr-9 text-sm bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${className}`}
         />
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-0"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-slate-500 hover:text-slate-700:text-slate-300 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-0"
           aria-label={visible ? "Hide password" : "Show password"}
           tabIndex={-1}
         >
@@ -50,8 +50,8 @@ export default function PasswordInput({
           )}
         </button>
       </div>
-      {hint && <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{hint}</p>}
-      {error && <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {hint && <p className="mt-0.5 text-xs text-slate-500">{hint}</p>}
+      {error && <p className="mt-0.5 text-xs text-red-600">{error}</p>}
     </div>
   );
 }

@@ -160,7 +160,7 @@ export default function OilChangePage() {
   if (loading && trucks.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
-        <div className="text-center text-slate-500 dark:text-slate-400 text-xs">Loading oil change data...</div>
+        <div className="text-center text-slate-500 text-xs">Loading oil change data...</div>
       </div>
     );
   }
@@ -169,27 +169,27 @@ export default function OilChangePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
       <div className="mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Oil Change Management</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <h1 className="text-xl font-semibold text-slate-900">Oil Change Management</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Track and manage oil change status for all trucks
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <label htmlFor="oil-change-auto-refresh" className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300">
+          <label htmlFor="oil-change-auto-refresh" className="flex items-center gap-1.5 text-xs text-slate-700">
             <input
               id="oil-change-auto-refresh"
               name="oil-change-auto-refresh"
               type="checkbox"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="rounded border-slate-300 dark:border-slate-600 text-red-600 focus:ring-red-600"
+              className="rounded border-slate-300 text-red-600 focus:ring-red-600"
             />
             Auto-refresh (5 min)
           </label>
           <button
             onClick={loadData}
             disabled={loading}
-            className="px-3 py-1.5 bg-slate-600 dark:bg-slate-700 text-white rounded-md hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center gap-1.5 text-xs font-medium"
+            className="px-3 py-1.5 bg-slate-600 text-white rounded-md hover:bg-slate-700:bg-slate-600 transition-colors disabled:bg-slate-400:bg-slate-600 disabled:cursor-not-allowed flex items-center gap-1.5 text-xs font-medium"
           >
             <svg
               className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
@@ -210,9 +210,9 @@ export default function OilChangePage() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 dark:border-red-600 rounded-lg">
+        <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-lg">
           <div className="flex items-start gap-2">
-            <svg className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -221,8 +221,8 @@ export default function OilChangePage() {
               />
             </svg>
             <div className="flex-1">
-              <h3 className="text-red-800 dark:text-red-300 font-semibold mb-0.5 text-xs">Error loading data</h3>
-              <p className="text-red-700 dark:text-red-400 text-xs">{error}</p>
+              <h3 className="text-red-800 font-semibold mb-0.5 text-xs">Error loading data</h3>
+              <p className="text-red-700 text-xs">{error}</p>
             </div>
           </div>
         </div>
@@ -231,21 +231,21 @@ export default function OilChangePage() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-3 border-l-4 border-blue-500 dark:border-blue-600">
-            <div className="text-xs text-slate-600 dark:text-slate-400">Total Trucks</div>
-            <div className="text-lg font-bold text-slate-900 dark:text-slate-100">{summary.total}</div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 border-l-4 border-blue-500">
+            <div className="text-xs text-slate-600">Total Trucks</div>
+            <div className="text-lg font-bold text-slate-900">{summary.total}</div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-3 border-l-4 border-emerald-500 dark:border-emerald-600">
-            <div className="text-xs text-slate-600 dark:text-slate-400">OK</div>
-            <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{summary.ok}</div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 border-l-4 border-emerald-500">
+            <div className="text-xs text-slate-600">OK</div>
+            <div className="text-lg font-bold text-emerald-600">{summary.ok}</div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-3 border-l-4 border-amber-500 dark:border-amber-600">
-            <div className="text-xs text-slate-600 dark:text-slate-400">Warning</div>
-            <div className="text-lg font-bold text-amber-600 dark:text-amber-400">{summary.warning}</div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 border-l-4 border-amber-500">
+            <div className="text-xs text-slate-600">Warning</div>
+            <div className="text-lg font-bold text-amber-600">{summary.warning}</div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-3 border-l-4 border-red-500 dark:border-red-600">
-            <div className="text-xs text-slate-600 dark:text-slate-400">Overdue</div>
-            <div className="text-lg font-bold text-red-600 dark:text-red-400">{summary.overdue}</div>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-3 border-l-4 border-red-500">
+            <div className="text-xs text-slate-600">Overdue</div>
+            <div className="text-lg font-bold text-red-600">{summary.overdue}</div>
           </div>
         </div>
       )}
@@ -285,13 +285,13 @@ export default function OilChangePage() {
           </button>
         </div>
         <div className="flex items-center gap-1.5">
-          <label htmlFor="oil-change-sort" className="text-xs text-slate-700 dark:text-slate-300">Sort by:</label>
+          <label htmlFor="oil-change-sort" className="text-xs text-slate-700">Sort by:</label>
           <select
             id="oil-change-sort"
             name="oil-change-sort"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as "name" | "remaining" | "status")}
-            className="px-2.5 py-1.5 border border-slate-300 dark:border-slate-600 rounded-md text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-600"
+            className="px-2.5 py-1.5 border border-slate-300 rounded-md text-xs bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-600"
           >
             <option value="remaining">Remaining Miles</option>
             <option value="status">Status</option>
@@ -302,61 +302,61 @@ export default function OilChangePage() {
 
       {/* Table */}
       {filteredAndSortedTrucks.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-6 text-center">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 text-center">
+          <p className="text-xs text-slate-500">
             {filter === "all" ? "No trucks found." : `No trucks with ${filter} status.`}
           </p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-              <thead className="bg-slate-50 dark:bg-slate-800/50">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Truck Name
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Current Mileage
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Last Oil Change
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Next Due
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Remaining Miles
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-700">
+              <tbody className="bg-white divide-y divide-slate-200">
                 {filteredAndSortedTrucks.map((truck) => (
-                  <tr key={truck.vehicleName} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <tr key={truck.vehicleName} className="hover:bg-slate-50:bg-slate-800/50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-xs font-medium text-slate-900 dark:text-slate-100">{truck.vehicleName}</div>
+                      <div className="text-xs font-medium text-slate-900">{truck.vehicleName}</div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-xs text-slate-900 dark:text-slate-100">{formatMiles(truck.currentMileage)}</div>
+                      <div className="text-xs text-slate-900">{formatMiles(truck.currentMileage)}</div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-xs text-slate-900 dark:text-slate-100">
+                      <div className="text-xs text-slate-900">
                         {formatMiles(truck.lastOilChangeMileage)} miles
                         <br />
-                        <span className="text-xs text-slate-500 dark:text-slate-400">{formatDate(truck.lastOilChangeDate)}</span>
+                        <span className="text-xs text-slate-500">{formatDate(truck.lastOilChangeDate)}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-xs text-slate-900 dark:text-slate-100">{formatMiles(truck.nextDueMileage)} miles</div>
+                      <div className="text-xs text-slate-900">{formatMiles(truck.nextDueMileage)} miles</div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-xs font-medium text-slate-900 dark:text-slate-100">
+                      <div className="text-xs font-medium text-slate-900">
                         {truck.remainingMiles !== null
                           ? `${formatMiles(truck.remainingMiles)} miles`
                           : "N/A"}
@@ -377,7 +377,7 @@ export default function OilChangePage() {
                         disabled={resettingTruck === truck.vehicleName}
                         className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                           resettingTruck === truck.vehicleName
-                            ? "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                            ? "bg-slate-200 text-slate-500 cursor-not-allowed"
                             : "bg-red-600 text-white hover:bg-red-700"
                         }`}
                       >
@@ -394,18 +394,18 @@ export default function OilChangePage() {
 
       {/* Reset Modal */}
       {showResetModal && selectedTruck && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black/60 flex items-center justify-center z-50 p-4" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-xl max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full">
             <div className="p-5">
               <div className="flex justify-between items-center mb-3">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Reset Oil Change</h2>
+                <h2 className="text-sm font-semibold text-slate-900">Reset Oil Change</h2>
                 <button
                   onClick={() => {
                     setShowResetModal(false);
                     setSelectedTruck(null);
                     setResetMileage("");
                   }}
-                  className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+                  className="text-slate-400 hover:text-slate-600:text-slate-300"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -419,10 +419,10 @@ export default function OilChangePage() {
               </div>
 
               <div className="mb-3">
-                <p className="text-xs text-slate-600 dark:text-slate-400 mb-1.5">
-                  Reset oil change for <strong className="text-slate-900 dark:text-slate-100">{selectedTruck.vehicleName}</strong>?
+                <p className="text-xs text-slate-600 mb-1.5">
+                  Reset oil change for <strong className="text-slate-900">{selectedTruck.vehicleName}</strong>?
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-500">
                   Current mileage: {formatMiles(selectedTruck.currentMileage)}
                   <br />
                   Last oil change: {formatMiles(selectedTruck.lastOilChangeMileage)} miles
@@ -431,7 +431,7 @@ export default function OilChangePage() {
 
               <form onSubmit={handleResetSubmit} className="space-y-3">
                 <div>
-                  <label htmlFor="oil-change-reset-mileage" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="oil-change-reset-mileage" className="block text-xs font-medium text-slate-700 mb-1">
                     Mileage (optional)
                   </label>
                   <input
@@ -441,10 +441,10 @@ export default function OilChangePage() {
                     min="0"
                     value={resetMileage}
                     onChange={(e) => setResetMileage(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-md text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-md text-xs bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600"
                     placeholder={selectedTruck.currentMileage?.toString() || "Enter mileage"}
                   />
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Leave empty to use current mileage ({formatMiles(selectedTruck.currentMileage)})
                   </p>
                 </div>
@@ -457,7 +457,7 @@ export default function OilChangePage() {
                       setSelectedTruck(null);
                       setResetMileage("");
                     }}
-                    className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-xs font-medium"
+                    className="flex-1 px-3 py-2 border border-slate-300 text-slate-700 bg-white rounded-md hover:bg-slate-50:bg-slate-700 transition-colors text-xs font-medium"
                     disabled={resettingTruck === selectedTruck.vehicleName}
                   >
                     Cancel
@@ -465,7 +465,7 @@ export default function OilChangePage() {
                   <button
                     type="submit"
                     disabled={resettingTruck === selectedTruck.vehicleName}
-                    className="flex-1 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-xs font-medium"
+                    className="flex-1 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:bg-slate-400:bg-slate-600 disabled:cursor-not-allowed text-xs font-medium"
                   >
                     {resettingTruck === selectedTruck.vehicleName ? "Resetting..." : "Reset Oil Change"}
                   </button>
