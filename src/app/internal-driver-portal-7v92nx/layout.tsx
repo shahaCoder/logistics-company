@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AdminLayout({
   children,
@@ -195,8 +196,14 @@ export default function AdminLayout({
           <div className="p-4">
             {/* Logo/Brand */}
             <div className="mb-6 pt-2">
-              <h2 className="text-sm font-semibold text-slate-100 tracking-wide uppercase">Admin</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Control Panel</p>
+              <Image
+                src="/images/logo.png"
+                alt="Logo"
+                width={140}
+                height={40}
+                className="object-contain"
+                priority
+              />
             </div>
             
             {/* Navigation */}
