@@ -38,24 +38,13 @@ try {
     enableReadyCheck: false, // Отключаем проверку готовности для быстрого отказа
   });
 
-  redis.on('error', (err) => {
+  redis.on('error', () => {
     const now = Date.now();
-    // Логируем ошибки не чаще раза в минуту
     if (now - lastErrorLogTime > ERROR_LOG_INTERVAL) {
-      console.warn('⚠️ Redis unavailable, continuing without cache');
+      console.warn('⚠️ Redis error, continuing without cache');
       lastErrorLogTime = now;
     }
     redisEnabled = false;
-    redisConnectionAttempts++;
-    
-    // Если слишком много ошибок, отключаем Redis полностью
-    if (redisConnectionAttempts >= MAX_CONNECTION_ATTEMPTS && redis) {
-      try {
-        redis.disconnect();
-      } catch (e) {
-        // Игнорируем ошибки при отключении
-      }
-    }
   });
 
   redis.on('connect', () => {
@@ -75,24 +64,25 @@ try {
     // Не логируем close - это нормально при отключении
   });
 
-  // Попытка подключения (не блокирующая)
-  redis.connect().catch((err) => {
-    redisConnectionAttempts++;
-    if (redisConnectionAttempts === 1) {
-      // Логируем только при первой попытке
-      console.warn('⚠️ Redis connection failed, continuing without cache');
-    }
-    redisEnabled = false;
-    
-    // Если не удалось подключиться, отключаем клиент
-    if (redisConnectionAttempts >= MAX_CONNECTION_ATTEMPTS && redis) {
-      try {
-        redis.disconnect();
-      } catch (e) {
-        // Игнорируем ошибки
+  // Первая попытка сразу, при неудаче — ещё две с задержкой (Redis может стартовать после бэкенда)
+  const tryConnect = (attempt = 1) => {
+    if (!redis) return;
+    redis.connect().catch(() => {
+      redisEnabled = false;
+      if (attempt < MAX_CONNECTION_ATTEMPTS) {
+        const delayMs = attempt * 2000;
+        setTimeout(() => tryConnect(attempt + 1), delayMs);
+      } else {
+        console.warn('⚠️ Redis unavailable after retries, continuing without cache');
+        try {
+          redis?.disconnect();
+        } catch (e) {
+          /* ignore */
+        }
       }
-    }
-  });
+    });
+  };
+  tryConnect(1);
 } catch (error) {
   console.warn('⚠️ Redis initialization failed, continuing without cache');
   redisEnabled = false;

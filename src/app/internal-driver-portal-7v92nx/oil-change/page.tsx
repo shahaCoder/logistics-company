@@ -8,6 +8,7 @@ import {
   type OilChangeListResponse,
 } from "@/utils/oilChangeApi";
 
+const PAGE_SIZE = 10;
 type FilterType = "all" | "warning" | "overdue";
 
 export default function OilChangePage() {
@@ -22,6 +23,7 @@ export default function OilChangePage() {
   const [resetMileage, setResetMileage] = useState<string>("");
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [sortBy, setSortBy] = useState<"name" | "remaining" | "status">("remaining");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const loadData = useCallback(async () => {
     try {
@@ -110,7 +112,7 @@ export default function OilChangePage() {
     }
 
     // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       if (sortBy === "name") {
         return a.vehicleName.localeCompare(b.vehicleName);
       } else if (sortBy === "remaining") {
@@ -123,9 +125,18 @@ export default function OilChangePage() {
       }
       return 0;
     });
-
-    return sorted;
   }, [trucks, filter, sortBy]);
+
+  const totalFiltered = filteredAndSortedTrucks.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+  const paginatedTrucks = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredAndSortedTrucks.slice(start, start + PAGE_SIZE);
+  }, [filteredAndSortedTrucks, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, sortBy]);
 
   const getStatusColor = useCallback((status: string): string => {
     switch (status) {
@@ -337,8 +348,8 @@ export default function OilChangePage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {filteredAndSortedTrucks.map((truck) => (
-                  <tr key={truck.vehicleName} className="hover:bg-slate-50:bg-slate-800/50 transition-colors">
+                {paginatedTrucks.map((truck) => (
+                  <tr key={truck.vehicleName} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-xs font-medium text-slate-900">{truck.vehicleName}</div>
                     </td>
@@ -389,6 +400,33 @@ export default function OilChangePage() {
               </tbody>
             </table>
           </div>
+          {/* Pagination */}
+          {totalFiltered > 0 && (
+            <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between border-t border-slate-200">
+              <div className="text-xs text-slate-600">
+                Showing {(currentPage - 1) * PAGE_SIZE + 1} to{" "}
+                {Math.min(currentPage * PAGE_SIZE, totalFiltered)} of {totalFiltered} trucks
+              </div>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-2.5 py-1 border border-slate-300 rounded-md text-xs bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  className="px-2.5 py-1 border border-slate-300 rounded-md text-xs bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

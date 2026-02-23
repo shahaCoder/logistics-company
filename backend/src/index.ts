@@ -12,6 +12,7 @@ import trucksRouter from './modules/trucks/trucks.controller.js';
 import oilChangeRouter from './modules/oil-change/oil-change.controller.js';
 import adminUsersRouter from './modules/admin-users/admin-users.controller.js';
 import { startSamsaraSyncJob } from './services/samsara-sync.service.js';
+import { isRedisEnabled } from './services/cache.service.js';
 
 // Load environment variables
 dotenv.config();
@@ -112,9 +113,13 @@ app.set('trust proxy', 1);
 // CSRF Protection (after CORS, before routes)
 app.use(csrfProtection);
 
-// Health check endpoint
+// Health check endpoint (includes Redis status)
 app.get('/health', (req, res) => {
-  res.json({ ok: true, timestamp: new Date().toISOString() });
+  res.json({
+    ok: true,
+    redis: isRedisEnabled(),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // API routes

@@ -45,7 +45,7 @@ export default function ApplicationsPage() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: "20",
+        limit: "10",
       });
 
       if (debouncedSearch.trim()) params.append("search", debouncedSearch.trim());
@@ -287,7 +287,7 @@ export default function ApplicationsPage() {
             </div>
 
             {/* Pagination */}
-            {pagination && pagination.totalPages > 1 && (
+            {pagination && pagination.total > 0 && (
               <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between border-t border-slate-200">
                 <div className="text-xs text-slate-600">
                   Showing {((pagination.page - 1) * pagination.limit) + 1} to{" "}
@@ -298,14 +298,14 @@ export default function ApplicationsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="px-2.5 py-1 border border-slate-300 rounded-md text-xs bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100:bg-slate-700 transition-colors"
+                    className="px-2.5 py-1 border border-slate-300 rounded-md text-xs bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => setCurrentPage((p) => p + 1)}
                     disabled={currentPage >= pagination.totalPages}
-                    className="px-2.5 py-1 border border-slate-300 rounded-md text-xs bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100:bg-slate-700 transition-colors"
+                    className="px-2.5 py-1 border border-slate-300 rounded-md text-xs bg-white text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
                   >
                     Next
                   </button>
