@@ -8,10 +8,9 @@ interface Truck {
   id: string;
   name: string;
   make: string;
-  model: string;
   vin: string;
   plate: string;
-  plateState: string;
+  year?: number;
   driver: string | null;
   samsaraVehicleId: string | null;
   currentMiles: number;
@@ -21,7 +20,14 @@ interface Truck {
   oilChangeIntervalMiles: number;
 }
 
-type SortField = "make" | "model" | "vin" | "plate" | "plateState" | null;
+function getTruckStatus(truck: Truck): "good" | "needs attention" {
+  const lastOil = truck.lastOilChangeMiles ?? 0;
+  const milesSinceOil = truck.currentMiles - lastOil;
+  if (milesSinceOil >= truck.oilChangeIntervalMiles) return "needs attention";
+  return "good";
+}
+
+type SortField = "make" | "vin" | "plate" | "year" | "status" | null;
 type SortDirection = "asc" | "desc";
 
 export default function TrucksPage() {
@@ -69,10 +75,9 @@ export default function TrucksPage() {
             id: "1",
             name: "Truck-001",
             make: "Volvo",
-            model: "VNL 760",
             vin: "4V4NC9EH5KN123456",
             plate: "ABC-1234",
-            plateState: "NY",
+            year: 2020,
             driver: "John Smith",
             samsaraVehicleId: "123456789",
             currentMiles: 125000,
@@ -85,10 +90,9 @@ export default function TrucksPage() {
             id: "2",
             name: "Truck-002",
             make: "Freightliner",
-            model: "Cascadia",
             vin: "1FUJGHDV5DSH98765",
             plate: "XYZ-5678",
-            plateState: "CA",
+            year: 2021,
             driver: "Mike Johnson",
             samsaraVehicleId: "987654321",
             currentMiles: 98000,
@@ -101,10 +105,9 @@ export default function TrucksPage() {
             id: "3",
             name: "Truck-003",
             make: "Peterbilt",
-            model: "579",
             vin: "1NP5DB0X9NN456789",
             plate: "DEF-9012",
-            plateState: "TX",
+            year: 2019,
             driver: "Robert Williams",
             samsaraVehicleId: "456789123",
             currentMiles: 156000,
@@ -123,10 +126,9 @@ export default function TrucksPage() {
           id: "1",
           name: "Truck-001",
           make: "Volvo",
-          model: "VNL 760",
           vin: "4V4NC9EH5KN123456",
           plate: "ABC-1234",
-          plateState: "NY",
+          year: 2020,
           driver: "John Smith",
           samsaraVehicleId: "123456789",
           currentMiles: 125000,
@@ -139,10 +141,9 @@ export default function TrucksPage() {
           id: "2",
           name: "Truck-002",
           make: "Freightliner",
-          model: "Cascadia",
           vin: "1FUJGHDV5DSH98765",
           plate: "XYZ-5678",
-          plateState: "CA",
+          year: 2021,
           driver: "Mike Johnson",
           samsaraVehicleId: "987654321",
           currentMiles: 98000,
@@ -155,10 +156,9 @@ export default function TrucksPage() {
           id: "3",
           name: "Truck-003",
           make: "Peterbilt",
-          model: "579",
           vin: "1NP5DB0X9NN456789",
           plate: "DEF-9012",
-          plateState: "TX",
+          year: 2019,
           driver: "Robert Williams",
           samsaraVehicleId: "456789123",
           currentMiles: 156000,
@@ -180,10 +180,10 @@ export default function TrucksPage() {
   const filteredTrucks = trucks.filter((truck) =>
     truck.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     truck.make.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-    truck.model.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     truck.vin.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     truck.plate.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-    (truck.driver && truck.driver.toLowerCase().includes(debouncedSearch.toLowerCase()))
+    (truck.driver && truck.driver.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
+    String(truck.year).includes(debouncedSearch)
   );
 
   const handleSort = (field: SortField) => {
@@ -206,10 +206,6 @@ export default function TrucksPage() {
         aValue = a.make;
         bValue = b.make;
         break;
-      case "model":
-        aValue = a.model;
-        bValue = b.model;
-        break;
       case "vin":
         aValue = a.vin;
         bValue = b.vin;
@@ -218,9 +214,13 @@ export default function TrucksPage() {
         aValue = a.plate;
         bValue = b.plate;
         break;
-      case "plateState":
-        aValue = a.plateState;
-        bValue = b.plateState;
+      case "year":
+        aValue = a.year ?? 0;
+        bValue = b.year ?? 0;
+        break;
+      case "status":
+        aValue = getTruckStatus(a);
+        bValue = getTruckStatus(b);
         break;
     }
     
@@ -278,7 +278,7 @@ export default function TrucksPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by make, model, VIN, plate, or driver..."
+            placeholder="Search by make, VIN, plate, year, or driver..."
             className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-xs bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
           />
         </div>
@@ -300,7 +300,7 @@ export default function TrucksPage() {
                       TRUCK #
                     </th>
                     <th
-                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100:bg-slate-700 transition-colors"
+                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
                       onClick={() => handleSort("make")}
                     >
                       <div className="flex items-center">
@@ -309,16 +309,7 @@ export default function TrucksPage() {
                       </div>
                     </th>
                     <th
-                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100:bg-slate-700 transition-colors"
-                      onClick={() => handleSort("model")}
-                    >
-                      <div className="flex items-center">
-                        MODEL
-                        <SortIcon field="model" />
-                      </div>
-                    </th>
-                    <th
-                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100:bg-slate-700 transition-colors"
+                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
                       onClick={() => handleSort("vin")}
                     >
                       <div className="flex items-center">
@@ -327,7 +318,7 @@ export default function TrucksPage() {
                       </div>
                     </th>
                     <th
-                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100:bg-slate-700 transition-colors"
+                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
                       onClick={() => handleSort("plate")}
                     >
                       <div className="flex items-center">
@@ -336,16 +327,25 @@ export default function TrucksPage() {
                       </div>
                     </th>
                     <th
-                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100:bg-slate-700 transition-colors"
-                      onClick={() => handleSort("plateState")}
+                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleSort("year")}
                     >
                       <div className="flex items-center">
-                        PLATE STATE
-                        <SortIcon field="plateState" />
+                        YEAR
+                        <SortIcon field="year" />
                       </div>
                     </th>
                     <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       DRIVER
+                    </th>
+                    <th
+                      className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleSort("status")}
+                    >
+                      <div className="flex items-center">
+                        STATUS
+                        <SortIcon field="status" />
+                      </div>
                     </th>
                     <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       Actions
@@ -354,15 +354,12 @@ export default function TrucksPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-200">
                   {sortedTrucks.map((truck) => (
-                    <tr key={truck.id} className="hover:bg-slate-50:bg-slate-800/50 transition-colors">
+                    <tr key={truck.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="text-xs font-medium text-slate-900">{truck.name}</div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="text-xs font-medium text-slate-900">{truck.make}</div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-xs text-slate-900">{truck.model}</div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="text-xs text-slate-900 font-mono">{truck.vin}</div>
@@ -371,10 +368,21 @@ export default function TrucksPage() {
                         <div className="text-xs text-slate-900 font-medium">{truck.plate}</div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-xs text-slate-900">{truck.plateState}</div>
+                        <div className="text-xs text-slate-900">{truck.year ?? "—"}</div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="text-xs text-slate-900">{truck.driver || "Unassigned"}</div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-0.5 text-xs font-medium rounded ${
+                            getTruckStatus(truck) === "needs attention"
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-emerald-100 text-emerald-800"
+                          }`}
+                        >
+                          {getTruckStatus(truck) === "needs attention" ? "needs attention" : "good"}
+                        </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-right">
                         <Link

@@ -947,6 +947,14 @@ export default function DriverApplicationForm() {
     setSubmitError(null);
 
     try {
+      // Flush any pending drawn signature so file is in form state before we read it
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('driver-app-signature-flush'));
+        await new Promise((r) => setTimeout(r, 600));
+      }
+      // Re-read form state after flush (signature file might have been set by canvas)
+      const latestData = getValues() as DriverApplicationFormData;
+
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       
       // Проверяем, что API URL установлен в production
@@ -955,39 +963,39 @@ export default function DriverApplicationForm() {
         throw new Error("Server configuration error. Please contact support.");
       }
 
-      // Prepare FormData
+      // Prepare FormData (use latestData so flushed signatures are included)
       const formData = new FormData();
 
-      // Prepare JSON payload
+      // Prepare JSON payload (use latestData after signature flush)
       const payload = {
-        applicantType: data.applicantType,
-        truckYear: data.truckYear || null,
-        truckMake: data.truckMake || null,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        dateOfBirth: data.dateOfBirth,
-        ssn: data.ssn ? data.ssn.replace(/-/g, "") : "", // Remove dashes, handle optional
-        phone: data.phone,
-        email: data.email,
-        currentAddressLine1: data.currentAddressLine1,
-        currentCity: data.currentCity,
-        currentState: data.currentState,
-        currentZip: data.currentZip,
-        livedAtCurrentMoreThan3Years: data.livedAtCurrentMoreThan3Years,
-        previousAddresses: data.previousAddresses || [],
+        applicantType: latestData.applicantType,
+        truckYear: latestData.truckYear || null,
+        truckMake: latestData.truckMake || null,
+        firstName: latestData.firstName,
+        lastName: latestData.lastName,
+        dateOfBirth: latestData.dateOfBirth,
+        ssn: latestData.ssn ? latestData.ssn.replace(/-/g, "") : "", // Remove dashes, handle optional
+        phone: latestData.phone,
+        email: latestData.email,
+        currentAddressLine1: latestData.currentAddressLine1,
+        currentCity: latestData.currentCity,
+        currentState: latestData.currentState,
+        currentZip: latestData.currentZip,
+        livedAtCurrentMoreThan3Years: latestData.livedAtCurrentMoreThan3Years,
+        previousAddresses: latestData.previousAddresses || [],
         license: {
-          licenseNumber: data.licenseNumber,
-          state: data.licenseState,
-          class: data.licenseClass,
-          expiresAt: data.licenseExpiresAt,
-          endorsements: data.endorsements?.join(",") || "",
-          hasOtherLicensesLast3Years: data.hasOtherLicensesLast3Years,
-          otherLicensesJson: data.hasOtherLicensesLast3Years
-            ? data.otherLicenses
+          licenseNumber: latestData.licenseNumber,
+          state: latestData.licenseState,
+          class: latestData.licenseClass,
+          expiresAt: latestData.licenseExpiresAt,
+          endorsements: latestData.endorsements?.join(",") || "",
+          hasOtherLicensesLast3Years: latestData.hasOtherLicensesLast3Years,
+          otherLicensesJson: latestData.hasOtherLicensesLast3Years
+            ? latestData.otherLicenses
             : null,
         },
-        medicalCardExpiresAt: data.medicalCardExpiresAt || null,
-        employmentRecords: data.employmentRecords.map((record) => ({
+        medicalCardExpiresAt: latestData.medicalCardExpiresAt || null,
+        employmentRecords: latestData.employmentRecords.map((record) => ({
           employerName: record.employerName,
           employerPhone: record.employerPhone || "",
           employerFax: record.employerFax || "",
@@ -1009,37 +1017,37 @@ export default function DriverApplicationForm() {
           {
             type: "AUTHORIZATION",
             accepted: true,
-            signedAt: data.authorizationDateSigned,
+            signedAt: latestData.authorizationDateSigned,
             formVersion: "1.0",
           },
           {
             type: "ALCOHOL_DRUG",
             accepted: true,
-            signedAt: data.alcoholDrugDateSigned,
+            signedAt: latestData.alcoholDrugDateSigned,
             formVersion: "1.0",
           },
           {
             type: "SAFETY_PERFORMANCE",
             accepted: true,
-            signedAt: data.pspDateSigned,
+            signedAt: latestData.pspDateSigned,
             formVersion: "1.0",
           },
           {
             type: "PSP",
             accepted: true,
-            signedAt: data.pspDateSigned,
+            signedAt: latestData.pspDateSigned,
             formVersion: "1.0",
           },
           {
             type: "CLEARINGHOUSE",
             accepted: true,
-            signedAt: data.clearinghouseDateSigned,
+            signedAt: latestData.clearinghouseDateSigned,
             formVersion: "1.0",
           },
           {
             type: "MVR",
             accepted: true,
-            signedAt: data.mvrDateSigned,
+            signedAt: latestData.mvrDateSigned,
             formVersion: "1.0",
           },
         ],
@@ -1057,32 +1065,32 @@ export default function DriverApplicationForm() {
       });
 
       // Append files
-      if (data.licenseFrontFile) {
-        formData.append("licenseFront", data.licenseFrontFile);
+      if (latestData.licenseFrontFile) {
+        formData.append("licenseFront", latestData.licenseFrontFile);
       }
-      if (data.licenseBackFile) {
-        formData.append("licenseBack", data.licenseBackFile);
+      if (latestData.licenseBackFile) {
+        formData.append("licenseBack", latestData.licenseBackFile);
       }
-      if (data.medicalCardFile) {
-        formData.append("medicalCard", data.medicalCardFile);
+      if (latestData.medicalCardFile) {
+        formData.append("medicalCard", latestData.medicalCardFile);
       }
       
-      // Append signature files
-      if (data.authorizationSignatureFile) {
-        formData.append("consentAuthorization", data.authorizationSignatureFile);
+      // Append signature files (use latestData so flushed signatures are included)
+      if (latestData.authorizationSignatureFile) {
+        formData.append("consentAuthorization", latestData.authorizationSignatureFile);
       }
-      if (data.alcoholDrugSignatureFile) {
-        formData.append("consentAlcoholDrug", data.alcoholDrugSignatureFile);
+      if (latestData.alcoholDrugSignatureFile) {
+        formData.append("consentAlcoholDrug", latestData.alcoholDrugSignatureFile);
       }
-      if (data.pspSignatureFile) {
-        formData.append("consentSafetyPerformance", data.pspSignatureFile);
-        formData.append("consentPSP", data.pspSignatureFile);
+      if (latestData.pspSignatureFile) {
+        formData.append("consentSafetyPerformance", latestData.pspSignatureFile);
+        formData.append("consentPSP", latestData.pspSignatureFile);
       }
-      if (data.clearinghouseSignatureFile) {
-        formData.append("consentClearinghouse", data.clearinghouseSignatureFile);
+      if (latestData.clearinghouseSignatureFile) {
+        formData.append("consentClearinghouse", latestData.clearinghouseSignatureFile);
       }
-      if (data.mvrSignatureFile) {
-        formData.append("consentMVR", data.mvrSignatureFile);
+      if (latestData.mvrSignatureFile) {
+        formData.append("consentMVR", latestData.mvrSignatureFile);
       }
 
       // Send to backend

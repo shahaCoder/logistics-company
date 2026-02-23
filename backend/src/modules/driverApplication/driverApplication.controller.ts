@@ -348,6 +348,15 @@ router.post(
       // Mask any SSN references in error messages
       const safeMessage = errorMessage.replace(/\d{3}-?\d{2}-?\d{4}/g, '***-**-****');
 
+      // Signature required = client validation (400)
+      if (errorMessage.includes('Signature is required')) {
+        return res.status(400).json({
+          success: false,
+          error: 'Validation failed',
+          message: safeMessage,
+        });
+      }
+
       // В production показываем общее сообщение, в development - детали
       const isDevelopment = process.env.NODE_ENV === 'development';
 

@@ -109,12 +109,12 @@ export default function SignatureCanvasComponent({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
-      // Wait 2.5 seconds (2500ms) before saving signature
+      // Wait 1 second before saving (reduced from 2.5s so submit doesn't happen before save)
       saveTimeoutRef.current = setTimeout(() => {
         if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
           saveSignature();
         }
-      }, 2500); // 2.5 second delay before saving
+      }, 1000);
     };
 
     // Listen to canvas drawing events
@@ -137,6 +137,21 @@ export default function SignatureCanvasComponent({
       }
     };
   }, [autoSave, saveSignature]);
+
+  // Flush signature immediately when form is about to submit (so file is in form state)
+  useEffect(() => {
+    const handleFlush = () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      if (sigPadRef.current && !sigPadRef.current.isEmpty()) {
+        saveSignature();
+      }
+    };
+    window.addEventListener('driver-app-signature-flush', handleFlush);
+    return () => window.removeEventListener('driver-app-signature-flush', handleFlush);
+  }, [saveSignature]);
 
   const handleClear = () => {
     if (sigPadRef.current) {

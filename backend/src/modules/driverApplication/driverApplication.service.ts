@@ -122,6 +122,25 @@ export async function createDriverApplication(
     }
   }
 
+  // Require signature file for every accepted consent (prevents "Accepted" with no image)
+  const consentTypeLabels: Record<string, string> = {
+    AUTHORIZATION: 'Authorization',
+    ALCOHOL_DRUG: 'Alcohol & Drug',
+    SAFETY_PERFORMANCE: 'Safety Performance',
+    PSP: 'PSP',
+    CLEARINGHOUSE: 'FMCSA Clearinghouse',
+    MVR: 'MVR Release',
+  };
+  for (const consent of dto.legalConsents) {
+    if (consent.accepted) {
+      const hasFile = !!(files.consentSignatures?.[consent.type]?.buffer);
+      if (!hasFile) {
+        const label = consentTypeLabels[consent.type] || consent.type;
+        throw new Error(`Signature is required for "${label}" consent. Please provide your signature before submitting.`);
+      }
+    }
+  }
+
   // Create application in transaction with increased timeout (30 seconds)
   // File uploads happen inside transaction but in parallel to minimize time
   const application = await prisma.$transaction(async (tx) => {

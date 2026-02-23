@@ -3,20 +3,15 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-// Lazy load heavy PDF libraries - only load when user clicks "Download PDF"
+// Lazy load jsPDF only when user clicks "Download PDF" (no html2canvas = smaller PDF)
 let jsPDF: any = null;
-let html2canvas: any = null;
 
 const loadPDFLibraries = async () => {
-  if (!jsPDF || !html2canvas) {
-    const [jsPDFModule, html2canvasModule] = await Promise.all([
-      import("jspdf"),
-      import("html2canvas"),
-    ]);
+  if (!jsPDF) {
+    const jsPDFModule = await import("jspdf");
     jsPDF = jsPDFModule.default;
-    html2canvas = html2canvasModule.default;
   }
-  return { jsPDF, html2canvas };
+  return { jsPDF };
 };
 
 /**
@@ -268,7 +263,7 @@ export default function ApplicationDetailPage() {
     setGeneratingPDF(true);
     try {
       // Lazy load PDF libraries only when needed
-      const { jsPDF: PDF, html2canvas: h2c } = await loadPDFLibraries();
+      const { jsPDF: PDF } = await loadPDFLibraries();
       // Get full SSN - use decrypted SSN if available, otherwise use last 4 digits
       // Note: For PDF generation, if SSN is not already decrypted, we'll use last 4 digits
       // User should decrypt SSN using the modal before generating PDF if full SSN is needed
@@ -310,10 +305,10 @@ export default function ApplicationDetailPage() {
       const pdf = new PDF("p", "mm", "a4");
       const pageWidth = 210;
       const pageHeight = 297;
-      const margin = 20;
+      const margin = 16;
       let yPos = margin;
-      const lineHeight = 7; // Increased from 6
-      const sectionSpacing = 10; // Increased from 8
+      const lineHeight = 5.5;
+      const sectionSpacing = 6;
 
       // Helper function to add new page if needed
       const checkPageBreak = (requiredHeight: number) => {
@@ -336,98 +331,97 @@ export default function ApplicationDetailPage() {
       };
 
       // Title
-      pdf.setFontSize(20);
+      pdf.setFontSize(14);
       pdf.setFont("helvetica", "bold");
       pdf.text("Driver Application", margin, yPos);
-      yPos += lineHeight * 1.5;
-      pdf.setFontSize(10);
+      yPos += lineHeight * 1.2;
+      pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
       pdf.text(`Global Cooperation LLC`, margin, yPos);
       yPos += lineHeight;
       pdf.text(`Generated: ${new Date().toLocaleString()}`, margin, yPos);
-      yPos += sectionSpacing * 2;
+      yPos += sectionSpacing * 1.5;
 
       // Applicant Information
-      addText("Applicant Information", 15, true);
+      addText("Applicant Information", 11, true);
       yPos += sectionSpacing;
-      addText(`Name: ${application.firstName} ${application.lastName}`, 11);
-      addText(`Date of Birth: ${formatDateUS(application.dateOfBirth)}`, 11);
-      addText(`Phone: ${application.phone}`, 11);
-      addText(`Email: ${application.email}`, 11);
+      addText(`Name: ${application.firstName} ${application.lastName}`, 9);
+      addText(`Date of Birth: ${formatDateUS(application.dateOfBirth)}`, 9);
+      addText(`Phone: ${application.phone}`, 9);
+      addText(`Email: ${application.email}`, 9);
       if (fullSSN) {
-        // Format SSN as XXX-XX-XXXX (remove any existing dashes first)
         const cleanSSN = fullSSN.replace(/-/g, '');
         const formattedSSN = cleanSSN.replace(/(\d{3})(\d{2})(\d{4})/, '$1-$2-$3');
-        addText(`SSN: ${formattedSSN}`, 11);
+        addText(`SSN: ${formattedSSN}`, 9);
       } else if (application.ssnLast4 && application.ssnLast4.trim() !== "") {
-        addText(`SSN: ***-**-${application.ssnLast4}`, 11);
+        addText(`SSN: ***-**-${application.ssnLast4}`, 9);
       } else {
-        addText("SSN: Not provided by applicant", 11);
+        addText("SSN: Not provided by applicant", 9);
       }
-      addText(`Current Address: ${application.currentAddressLine1}, ${application.currentCity}, ${application.currentState} ${application.currentZip}`, 11);
+      addText(`Current Address: ${application.currentAddressLine1}, ${application.currentCity}, ${application.currentState} ${application.currentZip}`, 8);
       
       if (!application.livedAtCurrentMoreThan3Years && application.previousAddresses.length > 0) {
         yPos += lineHeight;
-        addText("Previous Addresses:", 11, true);
+        addText("Previous Addresses:", 9, true);
         application.previousAddresses.forEach(addr => {
           const addrText = `${addr.addressLine1}, ${addr.city}, ${addr.state} ${addr.zip}${addr.fromDate && addr.toDate ? ` (${formatDateUS(addr.fromDate)} - ${formatDateUS(addr.toDate)})` : ''}`;
-          addText(addrText, 10);
+          addText(addrText, 8);
         });
       }
-      yPos += sectionSpacing * 2;
+      yPos += sectionSpacing * 1.5;
 
       // Driver's License
       if (application.license) {
-        addText("Driver's License Information", 15, true);
+        addText("Driver's License Information", 11, true);
         yPos += sectionSpacing;
-        addText(`License Number: ${application.license.licenseNumber}`, 11);
-        addText(`State: ${application.license.state}`, 11);
-        addText(`Class: ${application.license.class}`, 11);
-        addText(`Expires: ${application.license.expiresAt ? formatDateUS(application.license.expiresAt) : 'N/A'}`, 11);
+        addText(`License Number: ${application.license.licenseNumber}`, 9);
+        addText(`State: ${application.license.state}`, 9);
+        addText(`Class: ${application.license.class}`, 9);
+        addText(`Expires: ${application.license.expiresAt ? formatDateUS(application.license.expiresAt) : 'N/A'}`, 9);
         if (application.license.endorsements) {
-          addText(`Endorsements: ${application.license.endorsements}`, 11);
+          addText(`Endorsements: ${application.license.endorsements}`, 9);
         }
         if (application.license.hasOtherLicensesLast3Years) {
-          addText("Other Licenses (Last 3 Years): Yes", 11);
+          addText("Other Licenses (Last 3 Years): Yes", 9);
         }
-        yPos += sectionSpacing * 2;
+        yPos += sectionSpacing * 1.5;
       }
 
       // Medical Card
       if (application.medicalCard) {
-        addText("Medical Card", 15, true);
+        addText("Medical Card", 11, true);
         yPos += sectionSpacing;
         if (application.medicalCard.expiresAt) {
-          addText(`Expiration Date: ${formatDateUS(application.medicalCard.expiresAt)}`, 11);
+          addText(`Expiration Date: ${formatDateUS(application.medicalCard.expiresAt)}`, 9);
         }
-        yPos += sectionSpacing * 2;
+        yPos += sectionSpacing * 1.5;
       }
 
       // Employment History
       if (application.employmentRecords.length > 0) {
-        addText("Employment History (Last 3 Years)", 15, true);
+        addText("Employment History (Last 3 Years)", 11, true);
         yPos += sectionSpacing;
         application.employmentRecords.forEach((record, idx) => {
-          checkPageBreak(lineHeight * 10);
-          addText(`${idx + 1}. ${record.employerName}`, 11, true);
-          addText(`Address: ${record.addressLine1}, ${record.city}, ${record.state} ${record.zip}`, 10);
-          if (record.employerPhone) addText(`Phone: ${record.employerPhone}`, 10);
-          if (record.employerEmail) addText(`Email: ${record.employerEmail}`, 10);
-          if (record.positionHeld) addText(`Position: ${record.positionHeld}`, 10);
+          checkPageBreak(lineHeight * 9);
+          addText(`${idx + 1}. ${record.employerName}`, 9, true);
+          addText(`Address: ${record.addressLine1}, ${record.city}, ${record.state} ${record.zip}`, 8);
+          if (record.employerPhone) addText(`Phone: ${record.employerPhone}`, 8);
+          if (record.employerEmail) addText(`Email: ${record.employerEmail}`, 8);
+          if (record.positionHeld) addText(`Position: ${record.positionHeld}`, 8);
           if (record.dateFrom && record.dateTo) {
-            addText(`Employment Period: ${formatDateUS(record.dateFrom)} - ${formatDateUS(record.dateTo)}`, 10);
+            addText(`Employment Period: ${formatDateUS(record.dateFrom)} - ${formatDateUS(record.dateTo)}`, 8);
           }
-          if (record.reasonForLeaving) addText(`Reason for Leaving: ${record.reasonForLeaving}`, 10);
-          if (record.equipmentClass) addText(`Equipment Class: ${record.equipmentClass}`, 10);
-          addText(`Subject to FMCSR: ${record.wasSubjectToFMCSR ? 'Yes' : 'No'}`, 10);
-          addText(`Safety Sensitive: ${record.wasSafetySensitive ? 'Yes' : 'No'}`, 10);
+          if (record.reasonForLeaving) addText(`Reason for Leaving: ${record.reasonForLeaving}`, 8);
+          if (record.equipmentClass) addText(`Equipment Class: ${record.equipmentClass}`, 8);
+          addText(`Subject to FMCSR: ${record.wasSubjectToFMCSR ? 'Yes' : 'No'}`, 8);
+          addText(`Safety Sensitive: ${record.wasSafetySensitive ? 'Yes' : 'No'}`, 8);
           yPos += sectionSpacing;
         });
         yPos += sectionSpacing;
       }
 
       // Legal Consents
-      addText("Legal Consents & Signatures", 15, true);
+      addText("Legal Consents & Signatures", 11, true);
       yPos += sectionSpacing;
 
       const consentTexts: Record<string, string> = {
@@ -447,118 +441,55 @@ export default function ApplicationDetailPage() {
       };
 
       for (const consent of application.legalConsents) {
-        checkPageBreak(lineHeight * 15);
+        checkPageBreak(lineHeight * 12);
         const consentName = consentTypeNames[consent.type] || CONSENT_LABELS[consent.type] || consent.type;
         const consentText = consentTexts[consent.type] || '';
         const signatureImg = signatureImages[consent.type];
 
-        addText(consentName, 12, true);
-        addText(`Status: ${consent.accepted ? 'ACCEPTED' : 'NOT ACCEPTED'}`, 10);
+        addText(consentName, 10, true);
+        addText(`Status: ${consent.accepted ? 'ACCEPTED' : 'NOT ACCEPTED'}`, 8);
         yPos += lineHeight;
 
         if (consentText) {
-          addText(consentText, 9);
+          addText(consentText, 8);
           yPos += lineHeight;
         }
 
         if (consent.signedAt) {
-          addText(`Signed: ${formatDateUS(consent.signedAt)}`, 9);
+          addText(`Signed: ${formatDateUS(consent.signedAt)}`, 8);
         }
 
         if (signatureImg) {
           yPos += lineHeight;
           try {
-            console.log(`Processing signature for ${consent.type}`);
-            
-            // Create a temporary container with the signature image
-            const signatureContainer = document.createElement('div');
-            signatureContainer.style.position = 'absolute';
-            signatureContainer.style.left = '-9999px';
-            signatureContainer.style.width = '300px';
-            signatureContainer.style.height = '150px';
-            signatureContainer.style.backgroundColor = '#FFFFFF';
-            signatureContainer.style.display = 'flex';
-            signatureContainer.style.alignItems = 'center';
-            signatureContainer.style.justifyContent = 'center';
-            
-            const img = document.createElement('img');
-            img.src = signatureImg;
-            img.style.maxWidth = '100%';
-            img.style.maxHeight = '100%';
-            img.style.objectFit = 'contain';
-            
-            signatureContainer.appendChild(img);
-            document.body.appendChild(signatureContainer);
-            
-            // Wait for image to load
-            await new Promise<void>((resolve) => {
-              if (img.complete) {
-                resolve();
-              } else {
-                img.onload = () => resolve();
-                img.onerror = () => resolve();
-                setTimeout(() => resolve(), 2000);
-              }
-            });
-            
-            // Use html2canvas to render the signature container
-            const canvas = await h2c(signatureContainer, {
-              scale: 2,
-              useCORS: true,
-              backgroundColor: '#FFFFFF',
-              logging: false,
-            });
-            
-            // Remove temporary container
-            document.body.removeChild(signatureContainer);
-            
-            // Convert canvas to data URL
-            const canvasDataUrl = canvas.toDataURL('image/png');
-            
-            // Calculate dimensions for PDF
-            const mmPerPixel = 25.4 / 96; // Convert pixels to mm
-            let imgWidthMm = (canvas.width / 2) * mmPerPixel; // Divide by 2 because scale=2
-            let imgHeightMm = (canvas.height / 2) * mmPerPixel;
-            
-            // Scale to max 70mm width
-            const maxWidthMm = 70;
-            if (imgWidthMm > maxWidthMm) {
-              const scaleMm = maxWidthMm / imgWidthMm;
-              imgWidthMm = maxWidthMm;
-              imgHeightMm = imgHeightMm * scaleMm;
-            }
-            
-            checkPageBreak(imgHeightMm);
-            
-            console.log(`Adding signature to PDF: ${imgWidthMm.toFixed(1)}x${imgHeightMm.toFixed(1)}mm`);
-            
-            // Extract base64
-            const base64Data = canvasDataUrl.split(',')[1];
-            
-            // Add to PDF
-            pdf.addImage(base64Data, 'PNG', margin, yPos, imgWidthMm, imgHeightMm);
-            console.log(`✓ Signature added successfully for ${consent.type}`);
-            
-            yPos += imgHeightMm + lineHeight;
+            // Use data URL directly (no html2canvas) to keep PDF smaller
+            const m = signatureImg.match(/^data:image\/(\w+);base64,(.+)$/);
+            const format = (m && m[1]) ? (m[1].toLowerCase() === 'jpeg' ? 'JPEG' : 'PNG') : 'PNG';
+            const base64Data = signatureImg.includes(',') ? signatureImg.split(',')[1] : signatureImg;
+            if (!base64Data) throw new Error('Invalid data URL');
+
+            const imgW = 50;
+            const imgH = 22;
+            checkPageBreak(imgH);
+            pdf.addImage(base64Data, format, margin, yPos, imgW, imgH);
+            yPos += imgH + lineHeight;
           } catch (error) {
-            console.error(`✗ Error processing signature for ${consent.type}:`, error);
-            if (error instanceof Error) {
-              console.error('Error details:', error.message);
-            }
+            console.error(`Error adding signature for ${consent.type}:`, error);
           }
         } else {
-          console.log(`⚠ No signature image available for ${consent.type}`);
+          addText('(Signature not available)', 8);
+          yPos += lineHeight;
         }
-        yPos += sectionSpacing * 1.5;
+        yPos += sectionSpacing;
       }
 
       // Internal Notes
       if (application.internalNotes) {
         yPos += sectionSpacing;
-        addText("Internal Notes", 15, true);
+        addText("Internal Notes", 11, true);
         yPos += sectionSpacing;
-        addText(application.internalNotes, 10);
-        yPos += sectionSpacing * 2;
+        addText(application.internalNotes, 8);
+        yPos += sectionSpacing;
       }
 
       // Download
@@ -1192,8 +1123,8 @@ export default function ApplicationDetailPage() {
                   </a>
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 mt-1 italic">
-                  Signature file is not available (applicant may have typed their name or this is an older record).
+                <p className="text-xs text-amber-700 mt-1 font-medium">
+                  Signature missing — consent was accepted but no signature file was received.
                 </p>
               )}
               </div>
