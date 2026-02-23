@@ -2,6 +2,8 @@ import prisma from '../../utils/prisma.js';
 import {
   fetchVehicleList,
   fetchDriverAssignments,
+  fetchVehicleStatsSnapshot,
+  fetchLastTrips,
   getSamsaraApiToken,
   buildVehicleLookup,
 } from '../../services/samsara.service.js';
@@ -28,6 +30,14 @@ export interface TruckWithSamsaraStatus extends TruckWithStatus {
   year?: string | null;
   /** Good or Needs attention (oil overdue/soon or other issues) */
   displayStatus: 'Good' | 'Needs attention';
+  /** Engine: On / Off / Idle (from vehicle stats) */
+  engineState?: string | null;
+  /** Location string (from gps.reverseGeo.formattedLocation) */
+  location?: string | null;
+  /** When location was updated (gps.time) */
+  locationTime?: string | null;
+  /** Last trip end time in ms (for "X hours ago") */
+  lastTripEndMs?: number | null;
 }
 
 /**
@@ -106,14 +116,29 @@ export async function getAllTrucksWithSamsaraStatus(): Promise<TruckWithSamsaraS
   let vehicleMap = new Map<string, import('../../services/samsara.service.js').SamsaraVehicleInfo>();
   let driverMap = new Map<string, string>();
 
+  let statsMap = new Map<string, { engineState?: string; address?: string; gpsTime?: string }>();
+  let lastTripMap = new Map<string, number>();
+
   if (apiToken) {
     try {
-      const [vehicles, drivers] = await Promise.all([
-        fetchVehicleList(apiToken),
-        fetchDriverAssignments(apiToken),
-      ]);
+      const vehicles = await fetchVehicleList(apiToken);
       vehicleMap = buildVehicleLookup(vehicles);
+      const vehicleIds = vehicles.map((v) => v.id).filter(Boolean);
+
+      const [drivers, stats, lastTrips] = await Promise.all([
+        fetchDriverAssignments(apiToken, vehicleIds),
+        fetchVehicleStatsSnapshot(apiToken, 'engineStates,gps').catch(() => []),
+        fetchLastTrips(apiToken, vehicleIds).catch(() => new Map()),
+      ]);
       driverMap = drivers;
+      lastTripMap = lastTrips;
+      for (const s of stats) {
+        statsMap.set(s.id, {
+          engineState: s.engineState,
+          address: s.address,
+          gpsTime: s.gpsTime,
+        });
+      }
     } catch (err) {
       console.error('[Trucks] Samsara fetch failed:', err);
     }
@@ -125,12 +150,20 @@ export async function getAllTrucksWithSamsaraStatus(): Promise<TruckWithSamsaraS
     const displayStatus: 'Good' | 'Needs attention' =
       truck.status === 'Overdue' || truck.status === 'Soon' ? 'Needs attention' : 'Good';
 
+    const sid = info?.id ?? truck.samsaraVehicleId ?? '';
+    const statsRow = sid ? statsMap.get(sid) : undefined;
+    const lastTripEndMs = sid ? lastTripMap.get(sid) ?? null : null;
+
     return {
       ...truck,
       plate: info?.licensePlate ?? null,
       driver: driver ?? null,
       year: info?.year ?? null,
       displayStatus,
+      engineState: statsRow?.engineState ?? null,
+      location: statsRow?.address ?? null,
+      locationTime: statsRow?.gpsTime ?? null,
+      lastTripEndMs: lastTripEndMs ?? null,
     };
   });
 }
@@ -167,6 +200,10 @@ async function getTruckByIdInternal(
   make?: string | null;
   model?: string | null;
   vin?: string | null;
+  engineState?: string | null;
+  location?: string | null;
+  locationTime?: string | null;
+  lastTripEndMs?: number | null;
 } | null> {
   const truck = await prisma.truck.findUnique({
     where: { id },
@@ -190,13 +227,20 @@ async function getTruckByIdInternal(
   if (!apiToken) return base;
 
   try {
-    const [vehicles, drivers] = await Promise.all([
-      fetchVehicleList(apiToken),
-      fetchDriverAssignments(apiToken),
-    ]);
+    const vehicles = await fetchVehicleList(apiToken);
     const vehicleLookup = buildVehicleLookup(vehicles);
     const vehicle = vehicleLookup.get(truck.samsaraVehicleId!);
+    const vehicleIds = vehicle ? [vehicle.id] : [truck.samsaraVehicleId!];
+
+    const [drivers, stats, lastTrips] = await Promise.all([
+      fetchDriverAssignments(apiToken, vehicleIds),
+      fetchVehicleStatsSnapshot(apiToken, 'engineStates,gps').catch(() => []),
+      fetchLastTrips(apiToken, vehicleIds).catch(() => new Map()),
+    ]);
     const driver = vehicle ? drivers.get(vehicle.id) : drivers.get(truck.samsaraVehicleId!);
+    const sid = vehicle?.id ?? truck.samsaraVehicleId!;
+    const stat = stats.find((s) => s.id === sid);
+    const lastTripEndMs = lastTrips.get(sid) ?? null;
 
     return {
       ...base,
@@ -206,6 +250,10 @@ async function getTruckByIdInternal(
       make: vehicle?.make ?? null,
       model: vehicle?.model ?? null,
       vin: vehicle?.vin ?? null,
+      engineState: stat?.engineState ?? null,
+      location: stat?.address ?? null,
+      locationTime: stat?.gpsTime ?? null,
+      lastTripEndMs: lastTripEndMs ?? null,
     };
   } catch (err) {
     console.error('[Trucks] Samsara fetch for truck detail failed:', err);

@@ -12,9 +12,36 @@ interface Truck {
   driver: string | null;
   year: string | null;
   displayStatus: "Good" | "Needs attention";
+  engineState?: string | null;
+  location?: string | null;
+  locationTime?: string | null;
+  lastTripEndMs?: number | null;
 }
 
-type SortField = "name" | "plate" | "driver" | "year" | "status" | null;
+function formatLastTripAgo(ms: number | null | undefined): string {
+  if (ms == null) return "—";
+  const diff = Date.now() - ms;
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (days > 0) return `${days} day${days === 1 ? "" : "s"} ago`;
+  if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (mins > 0) return `${mins} min ago`;
+  return "Just now";
+}
+
+function formatLocationTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (days > 0) return `${days} day${days === 1 ? "" : "s"} ago`;
+  if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (mins > 0) return `${mins} min ago`;
+  return "Just now";
+}
+
+type SortField = "name" | "plate" | "driver" | "year" | "engine" | "status" | null;
 type SortDirection = "asc" | "desc";
 
 export default function TrucksPage() {
@@ -69,7 +96,8 @@ export default function TrucksPage() {
       truck.name.toLowerCase().includes(q) ||
       (truck.plate?.toLowerCase().includes(q) ?? false) ||
       (truck.driver?.toLowerCase().includes(q) ?? false) ||
-      (truck.year?.toLowerCase().includes(q) ?? false)
+      (truck.year?.toLowerCase().includes(q) ?? false) ||
+      (truck.location?.toLowerCase().includes(q) ?? false)
     );
   });
 
@@ -102,6 +130,10 @@ export default function TrucksPage() {
       case "year":
         aVal = a.year ?? "";
         bVal = b.year ?? "";
+        break;
+      case "engine":
+        aVal = a.engineState ?? "";
+        bVal = b.engineState ?? "";
         break;
       case "status":
         aVal = a.displayStatus;
@@ -149,7 +181,7 @@ export default function TrucksPage() {
       <div className="mb-5">
         <h1 className="text-xl font-semibold text-slate-900">Trucks</h1>
         <p className="mt-1 text-xs text-slate-500">
-          Fleet list with data from Samsara (plate, driver, year)
+          Fleet list with data from Samsara (plate, driver, year, status, location, last trip)
         </p>
       </div>
 
@@ -215,6 +247,21 @@ export default function TrucksPage() {
                   </th>
                   <th
                     className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort("engine")}
+                  >
+                    <div className="flex items-center">
+                      ENGINE
+                      <SortIcon field="engine" />
+                    </div>
+                  </th>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    LOCATION
+                  </th>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    LAST TRIP
+                  </th>
+                  <th
+                    className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
                     onClick={() => handleSort("status")}
                   >
                     <div className="flex items-center">
@@ -246,6 +293,36 @@ export default function TrucksPage() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-900">
                       {truck.year ?? "—"}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {truck.engineState ? (
+                        <span
+                          className={`inline-flex px-2 py-0.5 text-xs font-medium rounded ${
+                            truck.engineState === "On"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : truck.engineState === "Idle"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          {truck.engineState}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 max-w-[160px]">
+                      <div className="text-xs text-slate-900 truncate" title={truck.location ?? undefined}>
+                        {truck.location ?? "—"}
+                      </div>
+                      {truck.locationTime && (
+                        <div className="text-[10px] text-slate-400">
+                          {formatLocationTime(truck.locationTime)}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-900">
+                      {formatLastTripAgo(truck.lastTripEndMs)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span

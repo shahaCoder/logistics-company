@@ -22,6 +22,33 @@ interface TruckDetails {
   make?: string | null;
   model?: string | null;
   vin?: string | null;
+  engineState?: string | null;
+  location?: string | null;
+  locationTime?: string | null;
+  lastTripEndMs?: number | null;
+}
+
+function formatAgo(ms: number | null | undefined): string {
+  if (ms == null) return "—";
+  const diff = Date.now() - ms;
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (days > 0) return `${days} day${days === 1 ? "" : "s"} ago`;
+  if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (mins > 0) return `${mins} min ago`;
+  return "Just now";
+}
+
+function formatLocationTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (days > 0) return `${days} day${days === 1 ? "" : "s"} ago`;
+  if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (mins > 0) return `${mins} min ago`;
+  return "Just now";
 }
 
 export default function TruckDetailPage() {
@@ -224,6 +251,45 @@ export default function TruckDetailPage() {
               <div className="flex justify-between">
                 <span className="text-slate-500">VIN</span>
                 <span className="text-slate-900 font-mono text-xs">{truck.vin ?? "—"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-slate-200 bg-slate-50">
+              <h2 className="text-sm font-semibold text-slate-900">Live status (Samsara)</h2>
+            </div>
+            <div className="p-5 space-y-3 text-sm">
+              <div>
+                <span className="text-slate-500 block text-xs">Engine</span>
+                <span className="text-slate-900">
+                  {truck.engineState ? (
+                    <span
+                      className={`inline-flex px-2 py-0.5 text-xs font-medium rounded ${
+                        truck.engineState === "On"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : truck.engineState === "Idle"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {truck.engineState}
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-xs">Location</span>
+                <span className="text-slate-900">{truck.location ?? "—"}</span>
+                {truck.locationTime && (
+                  <div className="text-[10px] text-slate-400 mt-0.5">{formatLocationTime(truck.locationTime)}</div>
+                )}
+              </div>
+              <div>
+                <span className="text-slate-500 block text-xs">Last trip</span>
+                <span className="text-slate-900">{formatAgo(truck.lastTripEndMs)}</span>
               </div>
             </div>
           </div>

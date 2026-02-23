@@ -40,8 +40,10 @@ export interface SamsaraVehicleInfo {
 export function buildVehicleLookup(vehicles: SamsaraVehicleInfo[]): Map<string, SamsaraVehicleInfo> {
   const map = new Map<string, SamsaraVehicleInfo>();
   for (const v of vehicles) {
-    map.set(v.id, v);
-    if (v.serial) map.set(v.serial, v);
+    const idKey = String(v.id ?? '').trim();
+    if (idKey) map.set(idKey, v);
+    const serialKey = v.serial ? String(v.serial).trim() : '';
+    if (serialKey) map.set(serialKey, v);
   }
   return map;
 }
@@ -59,10 +61,14 @@ export interface SamsaraVehicleLiveStatus {
   longitude?: number;
   speedMph?: number;
   address?: string;
+  gpsTime?: string;
   fuelPercent?: number;
   odometerMeters?: number;
   odometerMiles?: number;
 }
+
+/** vehicleId -> last trip end time (ms). Used for "Last trip X ago". */
+export type LastTripMap = Map<string, number>;
 
 interface SamsaraStatsSnapshotResponse {
   data?: Array<{
@@ -70,7 +76,7 @@ interface SamsaraStatsSnapshotResponse {
     name?: string;
     engineStates?: { time: string; value: string };
     gps?: {
-      time: string;
+      time?: string;
       latitude?: number;
       longitude?: number;
       speedMilesPerHour?: number;
@@ -109,31 +115,27 @@ export async function fetchVehicleList(apiToken: string): Promise<SamsaraVehicle
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('[Samsara] GET /fleet/vehicles failed:', response.status, errorText);
       throw new Error(`Samsara API error (${response.status}): ${errorText}`);
     }
 
-    const data = (await response.json()) as {
-      data?: Array<{
-        id: string;
-        serial?: string;
-        name?: string;
-        licensePlate?: string;
-        license_plate?: string;
-        year?: string | number;
-        make?: string;
-        model?: string;
-        vin?: string;
-      }>;
-      pagination?: { endCursor?: string; hasNextPage?: boolean };
-    };
-    if (!data.data) break;
+    const raw = (await response.json()) as Record<string, unknown>;
+    const data = raw?.data ?? raw?.vehicles ?? raw;
+    const list = Array.isArray(data) ? data : [];
 
-    for (const v of data.data) {
-      const plate = v.licensePlate ?? v.license_plate;
+    if (list.length === 0 && !cursor) {
+      console.warn('[Samsara] GET /fleet/vehicles returned no vehicles. Keys:', Object.keys(raw || {}));
+    }
+
+    for (const v of list) {
+      const plate = v.licensePlate ?? v.license_plate ?? v.licensePlateNumber;
       const year = v.year != null ? String(v.year) : undefined;
+      const id = v.id != null ? String(v.id) : '';
+      const serial = v.serial != null ? String(v.serial) : undefined;
+      if (!id && !serial) continue;
       all.push({
-        id: v.id,
-        serial: v.serial,
+        id,
+        serial: serial || undefined,
         name: v.name,
         licensePlate: plate,
         year,
@@ -143,7 +145,8 @@ export async function fetchVehicleList(apiToken: string): Promise<SamsaraVehicle
       });
     }
 
-    cursor = data.pagination?.hasNextPage ? data.pagination.endCursor : undefined;
+    const pagination = (raw?.pagination ?? raw?.nextPageToken) as { hasNextPage?: boolean; endCursor?: string } | undefined;
+    cursor = pagination?.hasNextPage ? pagination.endCursor : undefined;
   } while (cursor);
 
   return all;
@@ -151,16 +154,21 @@ export async function fetchVehicleList(apiToken: string): Promise<SamsaraVehicle
 
 /**
  * Fetch current driver assignments (vehicleId -> driver name)
- * GET /fleet/driver-vehicle-assignments with startTime/endTime
+ * GET /fleet/vehicles/driver-assignments with vehicleIds (comma-separated); optional startTime/endTime
+ * Response: data[] with vehicleId and driver: { id, name }
  */
-export async function fetchDriverAssignments(apiToken: string): Promise<VehicleDriverMap> {
+export async function fetchDriverAssignments(
+  apiToken: string,
+  vehicleIds?: string[]
+): Promise<VehicleDriverMap> {
   const map: VehicleDriverMap = new Map();
-  const now = new Date();
-  const startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const endTime = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
 
   try {
-    const url = `${SAMSARA_API_BASE}/fleet/driver-vehicle-assignments?startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`;
+    const params = new URLSearchParams();
+    if (vehicleIds?.length) params.set('vehicleIds', vehicleIds.join(','));
+    const qs = params.toString();
+    const url = `${SAMSARA_API_BASE}/fleet/vehicles/driver-assignments${qs ? '?' + qs : ''}`;
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -173,20 +181,77 @@ export async function fetchDriverAssignments(apiToken: string): Promise<VehicleD
 
     const data = (await response.json()) as {
       data?: Array<{
+        vehicleId?: string;
         driver?: { id: string; name?: string };
-        vehicleAssignments?: Array<{ vehicle?: { id: string }; endTime?: string | null }>;
       }>;
     };
 
     if (!data.data) return map;
 
-    for (const driver of data.data) {
-      const driverName = driver.driver?.name ?? driver.driver?.id ?? 'Unknown';
-      for (const a of driver.vehicleAssignments ?? []) {
-        const vid = a.vehicle?.id;
-        if (vid && (!a.endTime || new Date(a.endTime) > now)) {
-          map.set(vid, driverName);
-        }
+    for (const row of data.data) {
+      const vehicleId = row.vehicleId;
+      const driverName = row.driver?.name ?? row.driver?.id ?? null;
+      if (vehicleId && driverName) {
+        map.set(String(vehicleId), driverName);
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return map;
+}
+
+/**
+ * Fetch last trip end time per vehicle (for "Last trip X ago").
+ * GET /fleet/trips with vehicleIds, startMs, endMs. Response: data[] with vehicleId, endMs.
+ * Returns map vehicleId -> endMs of the most recent trip.
+ */
+export async function fetchLastTrips(
+  apiToken: string,
+  vehicleIds: string[]
+): Promise<LastTripMap> {
+  const map: LastTripMap = new Map();
+  if (!vehicleIds.length) return map;
+
+  try {
+    const endMs = Date.now();
+    const startMs = endMs - 30 * 24 * 60 * 60 * 1000; // last 30 days
+    const params = new URLSearchParams({
+      vehicleIds: vehicleIds.join(','),
+      startMs: String(startMs),
+      endMs: String(endMs),
+    });
+    const url = `${SAMSARA_API_BASE}/fleet/trips?${params}`;
+    const v1Url = `${SAMSARA_API_BASE}/v1/fleet/trips?${params}`;
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    const response = res.ok ? res : await fetch(v1Url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) return map;
+
+    const raw = (await response.json()) as Record<string, unknown>;
+    const data = (raw?.data ?? raw?.trips ?? []) as Array<{ vehicleId?: string; id?: string; endMs?: number }>;
+    const list = Array.isArray(data) ? data : [];
+
+    for (const trip of list) {
+      const vid = trip.vehicleId ?? trip.id;
+      const end = trip.endMs;
+      if (vid && typeof end === 'number') {
+        const key = String(vid);
+        const current = map.get(key);
+        if (current == null || end > current) map.set(key, end);
       }
     }
   } catch {
@@ -238,6 +303,7 @@ export async function fetchVehicleStatsSnapshot(
         longitude: v.gps?.longitude,
         speedMph: v.gps?.speedMilesPerHour,
         address: v.gps?.reverseGeo?.formattedLocation,
+        gpsTime: v.gps?.time,
         fuelPercent: v.fuelPercents?.value,
         odometerMeters,
         odometerMiles: odometerMeters != null ? Math.round(odometerMeters / 1609.344) : undefined,
