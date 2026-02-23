@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authRequired, AuthRequest } from '../auth/auth.middleware.js';
 import {
   getAllTrucks,
+  getAllTrucksWithSamsaraStatus,
   getTruckById,
   createTruck,
   resetOilChange,
@@ -33,12 +34,13 @@ const updateTruckSchema = z.object({
 
 /**
  * GET /api/admin/trucks
- * Get all trucks
+ * Get all trucks. Query: ?live=1 to include Samsara live status (engine, GPS, fuel)
  */
 router.get('/trucks', async (req: AuthRequest, res: Response) => {
   try {
-    const trucks = await getAllTrucks();
-    res.json(trucks);
+    const live = req.query.live === '1' || req.query.live === 'true';
+    const trucks = live ? await getAllTrucksWithSamsaraStatus() : await getAllTrucks();
+    res.json({ trucks });
   } catch (error) {
     console.error('Get trucks error:', error);
     res.status(500).json({ error: 'Internal server error' });
