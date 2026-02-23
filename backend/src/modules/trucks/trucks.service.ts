@@ -3,6 +3,7 @@ import {
   fetchVehicleList,
   fetchDriverAssignments,
   getSamsaraApiToken,
+  buildVehicleLookup,
 } from '../../services/samsara.service.js';
 
 export interface TruckWithStatus {
@@ -102,7 +103,7 @@ export async function getAllTrucksWithSamsaraStatus(): Promise<TruckWithSamsaraS
   const trucks = await getAllTrucks();
   const apiToken = getSamsaraApiToken();
 
-  let vehicleMap = new Map<string, { plate?: string; year?: string }>();
+  let vehicleMap = new Map<string, import('../../services/samsara.service.js').SamsaraVehicleInfo>();
   let driverMap = new Map<string, string>();
 
   if (apiToken) {
@@ -111,12 +112,7 @@ export async function getAllTrucksWithSamsaraStatus(): Promise<TruckWithSamsaraS
         fetchVehicleList(apiToken),
         fetchDriverAssignments(apiToken),
       ]);
-      for (const v of vehicles) {
-        vehicleMap.set(v.id, {
-          plate: v.licensePlate ?? undefined,
-          year: v.year ?? undefined,
-        });
-      }
+      vehicleMap = buildVehicleLookup(vehicles);
       driverMap = drivers;
     } catch (err) {
       console.error('[Trucks] Samsara fetch failed:', err);
@@ -125,13 +121,13 @@ export async function getAllTrucksWithSamsaraStatus(): Promise<TruckWithSamsaraS
 
   return trucks.map(truck => {
     const info = truck.samsaraVehicleId ? vehicleMap.get(truck.samsaraVehicleId) : undefined;
-    const driver = truck.samsaraVehicleId ? driverMap.get(truck.samsaraVehicleId) : undefined;
+    const driver = info ? driverMap.get(info.id) : (truck.samsaraVehicleId ? driverMap.get(truck.samsaraVehicleId) : undefined);
     const displayStatus: 'Good' | 'Needs attention' =
       truck.status === 'Overdue' || truck.status === 'Soon' ? 'Needs attention' : 'Good';
 
     return {
       ...truck,
-      plate: info?.plate ?? null,
+      plate: info?.licensePlate ?? null,
       driver: driver ?? null,
       year: info?.year ?? null,
       displayStatus,
@@ -198,8 +194,9 @@ async function getTruckByIdInternal(
       fetchVehicleList(apiToken),
       fetchDriverAssignments(apiToken),
     ]);
-    const vehicle = vehicles.find((v) => v.id === truck.samsaraVehicleId);
-    const driver = drivers.get(truck.samsaraVehicleId!);
+    const vehicleLookup = buildVehicleLookup(vehicles);
+    const vehicle = vehicleLookup.get(truck.samsaraVehicleId!);
+    const driver = vehicle ? drivers.get(vehicle.id) : drivers.get(truck.samsaraVehicleId!);
 
     return {
       ...base,

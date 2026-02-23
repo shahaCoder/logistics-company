@@ -24,15 +24,26 @@ export interface SamsaraStatsFeedResponse {
   };
 }
 
-/** Vehicle metadata from GET /fleet/vehicles (plate, year, make, model) */
+/** Vehicle metadata from GET /fleet/vehicles (plate, year, make, model, serial) */
 export interface SamsaraVehicleInfo {
   id: string;
+  serial?: string;
   name?: string;
   licensePlate?: string;
   year?: string;
   make?: string;
   model?: string;
   vin?: string;
+}
+
+/** Map: look up by vehicle id OR by serial (e.g. G6RK-8YA-RYW from Assets page) */
+export function buildVehicleLookup(vehicles: SamsaraVehicleInfo[]): Map<string, SamsaraVehicleInfo> {
+  const map = new Map<string, SamsaraVehicleInfo>();
+  for (const v of vehicles) {
+    map.set(v.id, v);
+    if (v.serial) map.set(v.serial, v);
+  }
+  return map;
 }
 
 /** Driver assignment: vehicleId -> driver name */
@@ -76,7 +87,8 @@ interface SamsaraStatsSnapshotResponse {
 
 /**
  * Fetch vehicle list from Samsara API
- * GET /fleet/vehicles - returns id, name, licensePlate, year, make, model, vin
+ * GET /fleet/vehicles - returns id, serial, name, licensePlate, year, make, model, vin
+ * (Same data as on Samsara Assets page; supports both id and serial for lookup)
  */
 export async function fetchVehicleList(apiToken: string): Promise<SamsaraVehicleInfo[]> {
   const all: SamsaraVehicleInfo[] = [];
@@ -101,17 +113,30 @@ export async function fetchVehicleList(apiToken: string): Promise<SamsaraVehicle
     }
 
     const data = (await response.json()) as {
-      data?: Array<{ id: string; name?: string; licensePlate?: string; year?: string; make?: string; model?: string; vin?: string }>;
+      data?: Array<{
+        id: string;
+        serial?: string;
+        name?: string;
+        licensePlate?: string;
+        license_plate?: string;
+        year?: string | number;
+        make?: string;
+        model?: string;
+        vin?: string;
+      }>;
       pagination?: { endCursor?: string; hasNextPage?: boolean };
     };
     if (!data.data) break;
 
     for (const v of data.data) {
+      const plate = v.licensePlate ?? v.license_plate;
+      const year = v.year != null ? String(v.year) : undefined;
       all.push({
         id: v.id,
+        serial: v.serial,
         name: v.name,
-        licensePlate: v.licensePlate,
-        year: v.year,
+        licensePlate: plate,
+        year,
         make: v.make,
         model: v.model,
         vin: v.vin,
