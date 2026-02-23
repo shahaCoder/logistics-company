@@ -1,8 +1,8 @@
 import prisma from '../../utils/prisma.js';
 import {
-  fetchVehicleStatsSnapshot,
+  fetchVehicleList,
+  fetchDriverAssignments,
   getSamsaraApiToken,
-  type SamsaraVehicleLiveStatus,
 } from '../../services/samsara.service.js';
 
 export interface TruckWithStatus {
@@ -22,14 +22,11 @@ export interface TruckWithStatus {
 }
 
 export interface TruckWithSamsaraStatus extends TruckWithStatus {
-  samsaraStatus?: {
-    engineState: 'On' | 'Off' | 'Idle';
-    engineStateTime?: string;
-    address?: string;
-    speedMph?: number;
-    fuelPercent?: number;
-    odometerMiles?: number;
-  } | null;
+  plate?: string | null;
+  driver?: string | null;
+  year?: string | null;
+  /** Good or Needs attention (oil overdue/soon or other issues) */
+  displayStatus: 'Good' | 'Needs attention';
 }
 
 /**
@@ -98,85 +95,48 @@ export async function getAllTrucks(): Promise<TruckWithStatus[]> {
 }
 
 /**
- * Get all trucks with Samsara live status (engine, GPS, fuel).
- * Includes DB trucks (enriched with Samsara) + Samsara-only vehicles not yet in DB.
+ * Get all trucks (DB only) enriched with Samsara: plate, driver, year.
+ * Status: Good or Needs attention (oil overdue/soon).
  */
 export async function getAllTrucksWithSamsaraStatus(): Promise<TruckWithSamsaraStatus[]> {
   const trucks = await getAllTrucks();
   const apiToken = getSamsaraApiToken();
 
-  if (!apiToken) {
-    return trucks.map(t => ({ ...t, samsaraStatus: null }));
+  let vehicleMap = new Map<string, { plate?: string; year?: string }>();
+  let driverMap = new Map<string, string>();
+
+  if (apiToken) {
+    try {
+      const [vehicles, drivers] = await Promise.all([
+        fetchVehicleList(apiToken),
+        fetchDriverAssignments(apiToken),
+      ]);
+      for (const v of vehicles) {
+        vehicleMap.set(v.id, {
+          plate: v.licensePlate ?? undefined,
+          year: v.year ?? undefined,
+        });
+      }
+      driverMap = drivers;
+    } catch (err) {
+      console.error('[Trucks] Samsara fetch failed:', err);
+    }
   }
 
-  let samsaraList: SamsaraVehicleLiveStatus[] = [];
-  try {
-    samsaraList = await fetchVehicleStatsSnapshot(apiToken);
-  } catch (err) {
-    console.error('[Trucks] Samsara fetch failed:', err);
-    return trucks.map(t => ({ ...t, samsaraStatus: null }));
-  }
+  return trucks.map(truck => {
+    const info = truck.samsaraVehicleId ? vehicleMap.get(truck.samsaraVehicleId) : undefined;
+    const driver = truck.samsaraVehicleId ? driverMap.get(truck.samsaraVehicleId) : undefined;
+    const displayStatus: 'Good' | 'Needs attention' =
+      truck.status === 'Overdue' || truck.status === 'Soon' ? 'Needs attention' : 'Good';
 
-  const samsaraMap = new Map<string, SamsaraVehicleLiveStatus>();
-  for (const v of samsaraList) {
-    samsaraMap.set(v.id, v);
-  }
-
-  const dbBySamsaraId = new Map<string | null, (typeof trucks)[0]>();
-  for (const t of trucks) {
-    if (t.samsaraVehicleId) dbBySamsaraId.set(t.samsaraVehicleId, t);
-  }
-
-  const result: TruckWithSamsaraStatus[] = [];
-
-  for (const truck of trucks) {
-    const samsara = truck.samsaraVehicleId ? samsaraMap.get(truck.samsaraVehicleId) : undefined;
-    result.push({
+    return {
       ...truck,
-      samsaraStatus: samsara?.engineState
-        ? {
-            engineState: samsara.engineState,
-            engineStateTime: samsara.engineStateTime,
-            address: samsara.address,
-            speedMph: samsara.speedMph,
-            fuelPercent: samsara.fuelPercent,
-            odometerMiles: samsara.odometerMiles,
-          }
-        : null,
-    });
-  }
-
-  for (const v of samsaraList) {
-    if (dbBySamsaraId.has(v.id)) continue;
-    result.push({
-      id: `samsara-${v.id}`,
-      name: v.name ?? `Vehicle ${v.id}`,
-      samsaraVehicleId: v.id,
-      currentMiles: v.odometerMiles ?? 0,
-      currentMilesUpdatedAt: null,
-      lastOilChangeMiles: null,
-      lastOilChangeAt: null,
-      oilChangeIntervalMiles: 15000,
-      milesSinceLastOilChange: 0,
-      milesUntilNextOilChange: 15000,
-      status: 'Good',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      samsaraStatus: v.engineState
-        ? {
-            engineState: v.engineState,
-            engineStateTime: v.engineStateTime,
-            address: v.address,
-            speedMph: v.speedMph,
-            fuelPercent: v.fuelPercent,
-            odometerMiles: v.odometerMiles,
-          }
-        : null,
-    });
-  }
-
-  result.sort((a, b) => a.name.localeCompare(b.name));
-  return result;
+      plate: info?.plate ?? null,
+      driver: driver ?? null,
+      year: info?.year ?? null,
+      displayStatus,
+    };
+  });
 }
 
 /**

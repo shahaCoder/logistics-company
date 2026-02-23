@@ -24,6 +24,20 @@ export interface SamsaraStatsFeedResponse {
   };
 }
 
+/** Vehicle metadata from GET /fleet/vehicles (plate, year, make, model) */
+export interface SamsaraVehicleInfo {
+  id: string;
+  name?: string;
+  licensePlate?: string;
+  year?: string;
+  make?: string;
+  model?: string;
+  vin?: string;
+}
+
+/** Driver assignment: vehicleId -> driver name */
+export type VehicleDriverMap = Map<string, string>;
+
 /** Live status from Samsara snapshot (engine, GPS, fuel, odometer) */
 export interface SamsaraVehicleLiveStatus {
   id: string;
@@ -58,6 +72,102 @@ interface SamsaraStatsSnapshotResponse {
     endCursor?: string;
     hasNextPage?: boolean;
   };
+}
+
+/**
+ * Fetch vehicle list from Samsara API
+ * GET /fleet/vehicles - returns id, name, licensePlate, year, make, model, vin
+ */
+export async function fetchVehicleList(apiToken: string): Promise<SamsaraVehicleInfo[]> {
+  const all: SamsaraVehicleInfo[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const params = new URLSearchParams();
+    if (cursor) params.set('after', cursor);
+    const url = `${SAMSARA_API_BASE}/fleet/vehicles${params.toString() ? '?' + params : ''}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Samsara API error (${response.status}): ${errorText}`);
+    }
+
+    const data = (await response.json()) as {
+      data?: Array<{ id: string; name?: string; licensePlate?: string; year?: string; make?: string; model?: string; vin?: string }>;
+      pagination?: { endCursor?: string; hasNextPage?: boolean };
+    };
+    if (!data.data) break;
+
+    for (const v of data.data) {
+      all.push({
+        id: v.id,
+        name: v.name,
+        licensePlate: v.licensePlate,
+        year: v.year,
+        make: v.make,
+        model: v.model,
+        vin: v.vin,
+      });
+    }
+
+    cursor = data.pagination?.hasNextPage ? data.pagination.endCursor : undefined;
+  } while (cursor);
+
+  return all;
+}
+
+/**
+ * Fetch current driver assignments (vehicleId -> driver name)
+ * GET /fleet/driver-vehicle-assignments with startTime/endTime
+ */
+export async function fetchDriverAssignments(apiToken: string): Promise<VehicleDriverMap> {
+  const map: VehicleDriverMap = new Map();
+  const now = new Date();
+  const startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const endTime = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+  try {
+    const url = `${SAMSARA_API_BASE}/fleet/driver-vehicle-assignments?startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) return map;
+
+    const data = (await response.json()) as {
+      data?: Array<{
+        driver?: { id: string; name?: string };
+        vehicleAssignments?: Array<{ vehicle?: { id: string }; endTime?: string | null }>;
+      }>;
+    };
+
+    if (!data.data) return map;
+
+    for (const driver of data.data) {
+      const driverName = driver.driver?.name ?? driver.driver?.id ?? 'Unknown';
+      for (const a of driver.vehicleAssignments ?? []) {
+        const vid = a.vehicle?.id;
+        if (vid && (!a.endTime || new Date(a.endTime) > now)) {
+          map.set(vid, driverName);
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return map;
 }
 
 /**

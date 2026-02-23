@@ -4,37 +4,17 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface SamsaraStatus {
-  engineState: "On" | "Off" | "Idle";
-  engineStateTime?: string;
-  address?: string;
-  speedMph?: number;
-  fuelPercent?: number;
-  odometerMiles?: number;
-}
-
 interface Truck {
   id: string;
   name: string;
   samsaraVehicleId: string | null;
-  currentMiles: number;
-  currentMilesUpdatedAt: string | null;
-  lastOilChangeMiles: number | null;
-  lastOilChangeAt: string | null;
-  oilChangeIntervalMiles: number;
-  milesSinceLastOilChange: number;
-  milesUntilNextOilChange: number;
-  status: "Good" | "Soon" | "Overdue";
-  samsaraStatus?: SamsaraStatus | null;
+  plate: string | null;
+  driver: string | null;
+  year: string | null;
+  displayStatus: "Good" | "Needs attention";
 }
 
-function getTruckStatus(truck: Truck): "good" | "needs attention" {
-  if (truck.status === "Overdue") return "needs attention";
-  if (truck.status === "Soon") return "needs attention";
-  return "good";
-}
-
-type SortField = "name" | "engine" | "status" | null;
+type SortField = "name" | "plate" | "driver" | "year" | "status" | null;
 type SortDirection = "asc" | "desc";
 
 export default function TrucksPage() {
@@ -83,11 +63,15 @@ export default function TrucksPage() {
     fetchTrucks();
   }, [fetchTrucks]);
 
-  const filteredTrucks = trucks.filter(
-    (truck) =>
-      truck.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      (truck.samsaraStatus?.address?.toLowerCase().includes(debouncedSearch.toLowerCase()) ?? false)
-  );
+  const filteredTrucks = trucks.filter((truck) => {
+    const q = debouncedSearch.toLowerCase();
+    return (
+      truck.name.toLowerCase().includes(q) ||
+      (truck.plate?.toLowerCase().includes(q) ?? false) ||
+      (truck.driver?.toLowerCase().includes(q) ?? false) ||
+      (truck.year?.toLowerCase().includes(q) ?? false)
+    );
+  });
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -107,13 +91,21 @@ export default function TrucksPage() {
         aVal = a.name;
         bVal = b.name;
         break;
-      case "engine":
-        aVal = a.samsaraStatus?.engineState ?? "";
-        bVal = b.samsaraStatus?.engineState ?? "";
+      case "plate":
+        aVal = a.plate ?? "";
+        bVal = b.plate ?? "";
+        break;
+      case "driver":
+        aVal = a.driver ?? "";
+        bVal = b.driver ?? "";
+        break;
+      case "year":
+        aVal = a.year ?? "";
+        bVal = b.year ?? "";
         break;
       case "status":
-        aVal = getTruckStatus(a);
-        bVal = getTruckStatus(b);
+        aVal = a.displayStatus;
+        bVal = b.displayStatus;
         break;
     }
     if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
@@ -149,21 +141,6 @@ export default function TrucksPage() {
     );
   };
 
-  const engineBadge = (s: SamsaraStatus | null | undefined) => {
-    if (!s?.engineState) return <span className="text-slate-400 text-xs">—</span>;
-    const colors =
-      s.engineState === "On"
-        ? "bg-emerald-100 text-emerald-800"
-        : s.engineState === "Idle"
-          ? "bg-amber-100 text-amber-800"
-          : "bg-slate-100 text-slate-600";
-    return (
-      <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded ${colors}`}>
-        {s.engineState}
-      </span>
-    );
-  };
-
   return (
     <div
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
@@ -172,7 +149,7 @@ export default function TrucksPage() {
       <div className="mb-5">
         <h1 className="text-xl font-semibold text-slate-900">Trucks</h1>
         <p className="mt-1 text-xs text-slate-500">
-          Fleet list with live status from Samsara (engine, location, fuel)
+          Fleet list with data from Samsara (plate, driver, year)
         </p>
       </div>
 
@@ -185,7 +162,7 @@ export default function TrucksPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by truck name or location..."
+          placeholder="Search by truck name, plate, driver, or year..."
           className="w-full border border-slate-300 rounded-md px-3 py-1.5 text-xs bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
         />
       </div>
@@ -211,28 +188,37 @@ export default function TrucksPage() {
                   </th>
                   <th
                     className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
-                    onClick={() => handleSort("engine")}
+                    onClick={() => handleSort("plate")}
                   >
                     <div className="flex items-center">
-                      ENGINE
-                      <SortIcon field="engine" />
+                      PLATE
+                      <SortIcon field="plate" />
                     </div>
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    LOCATION
+                  <th
+                    className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort("driver")}
+                  >
+                    <div className="flex items-center">
+                      DRIVER
+                      <SortIcon field="driver" />
+                    </div>
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    MILES
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                    FUEL
+                  <th
+                    className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort("year")}
+                  >
+                    <div className="flex items-center">
+                      YEAR
+                      <SortIcon field="year" />
+                    </div>
                   </th>
                   <th
                     className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
                     onClick={() => handleSort("status")}
                   >
                     <div className="flex items-center">
-                      OIL STATUS
+                      STATUS
                       <SortIcon field="status" />
                     </div>
                   </th>
@@ -252,58 +238,37 @@ export default function TrucksPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">{engineBadge(truck.samsaraStatus)}</td>
-                    <td className="px-4 py-3">
-                      <div className="text-xs text-slate-900 max-w-[180px] truncate" title={truck.samsaraStatus?.address}>
-                        {truck.samsaraStatus?.address ?? "—"}
-                      </div>
-                      {truck.samsaraStatus?.speedMph != null && truck.samsaraStatus.speedMph > 0 && (
-                        <div className="text-[10px] text-slate-500">{truck.samsaraStatus.speedMph} mph</div>
-                      )}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-900">
+                      {truck.plate ?? "—"}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-xs text-slate-900 font-medium">
-                        {truck.samsaraStatus?.odometerMiles ?? truck.currentMiles}
-                      </div>
-                      {truck.currentMilesUpdatedAt && (
-                        <div className="text-[10px] text-slate-400">
-                          Updated {new Date(truck.currentMilesUpdatedAt).toLocaleDateString()}
-                        </div>
-                      )}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-900">
+                      {truck.driver ?? "Unassigned"}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {truck.samsaraStatus?.fuelPercent != null ? (
-                        <span className="text-xs text-slate-900">{truck.samsaraStatus.fuelPercent}%</span>
-                      ) : (
-                        <span className="text-slate-400 text-xs">—</span>
-                      )}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-900">
+                      {truck.year ?? "—"}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-0.5 text-xs font-medium rounded ${
-                          getTruckStatus(truck) === "needs attention"
+                          truck.displayStatus === "Needs attention"
                             ? "bg-amber-100 text-amber-800"
                             : "bg-emerald-100 text-emerald-800"
                         }`}
                       >
-                        {truck.status === "Overdue" ? "Overdue" : truck.status === "Soon" ? "Soon" : "Good"}
+                        {truck.displayStatus}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right">
-                      {!truck.id.startsWith("samsara-") ? (
-                        <Link
-                          href={`/internal-driver-portal-7v92nx/trucks/${truck.id}`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          View
-                        </Link>
-                      ) : (
-                        <span className="text-xs text-slate-400">Samsara only</span>
-                      )}
+                      <Link
+                        href={`/internal-driver-portal-7v92nx/trucks/${truck.id}`}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View
+                      </Link>
                     </td>
                   </tr>
                 ))}
