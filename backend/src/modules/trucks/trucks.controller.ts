@@ -5,6 +5,7 @@ import {
   getAllTrucks,
   getAllTrucksWithSamsaraStatus,
   getTruckById,
+  getTruckByIdWithSamsara,
   createTruck,
   resetOilChange,
   updateTruck,
@@ -49,12 +50,13 @@ router.get('/trucks', async (req: AuthRequest, res: Response) => {
 
 /**
  * GET /api/admin/trucks/:id
- * Get truck by ID
+ * Get truck by ID. Query: ?live=1 to include Samsara data (plate, driver, year, make, model, vin)
  */
 router.get('/trucks/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const truck = await getTruckById(id);
+    const live = req.query.live === '1' || req.query.live === 'true';
+    const truck = live ? await getTruckByIdWithSamsara(id) : await getTruckById(id);
 
     if (!truck) {
       return res.status(404).json({ error: 'Truck not found' });

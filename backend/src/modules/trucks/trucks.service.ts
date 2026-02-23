@@ -140,9 +140,38 @@ export async function getAllTrucksWithSamsaraStatus(): Promise<TruckWithSamsaraS
 }
 
 /**
- * Get truck by ID
+ * Get truck by ID (optionally with Samsara: plate, driver, year, make, model, vin)
  */
-export async function getTruckById(id: string) {
+export async function getTruckById(id: string): Promise<Awaited<ReturnType<typeof getTruckByIdInternal>> | null> {
+  return getTruckByIdInternal(id, false);
+}
+
+export async function getTruckByIdWithSamsara(id: string) {
+  return getTruckByIdInternal(id, true);
+}
+
+async function getTruckByIdInternal(
+  id: string,
+  withSamsara: boolean
+): Promise<{
+  id: string;
+  name: string;
+  samsaraVehicleId: string | null;
+  currentMiles: number;
+  currentMilesUpdatedAt: Date | null;
+  lastOilChangeMiles: number | null;
+  lastOilChangeAt: Date | null;
+  oilChangeIntervalMiles: number;
+  milesSinceLastOilChange: number;
+  milesUntilNextOilChange: number;
+  status: 'Good' | 'Soon' | 'Overdue';
+  plate?: string | null;
+  driver?: string | null;
+  year?: string | null;
+  make?: string | null;
+  model?: string | null;
+  vin?: string | null;
+} | null> {
   const truck = await prisma.truck.findUnique({
     where: { id },
   });
@@ -152,11 +181,39 @@ export async function getTruckById(id: string) {
   }
 
   const computed = computeTruckFields(truck);
-
-  return {
+  const base = {
     ...truck,
     ...computed,
   };
+
+  if (!withSamsara || !truck.samsaraVehicleId) {
+    return base;
+  }
+
+  const apiToken = getSamsaraApiToken();
+  if (!apiToken) return base;
+
+  try {
+    const [vehicles, drivers] = await Promise.all([
+      fetchVehicleList(apiToken),
+      fetchDriverAssignments(apiToken),
+    ]);
+    const vehicle = vehicles.find((v) => v.id === truck.samsaraVehicleId);
+    const driver = drivers.get(truck.samsaraVehicleId!);
+
+    return {
+      ...base,
+      plate: vehicle?.licensePlate ?? null,
+      driver: driver ?? null,
+      year: vehicle?.year ?? null,
+      make: vehicle?.make ?? null,
+      model: vehicle?.model ?? null,
+      vin: vehicle?.vin ?? null,
+    };
+  } catch (err) {
+    console.error('[Trucks] Samsara fetch for truck detail failed:', err);
+    return base;
+  }
 }
 
 /**
