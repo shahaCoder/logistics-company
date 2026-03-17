@@ -1031,7 +1031,6 @@ Notes:  ${form.notes || "-"}
     </div>
   );
 }
-
 /* --------- UI helpers --------- */
 function Badge({
   title,
@@ -1120,3 +1119,4 @@ function MapIcon() {
     </svg>
   );
 }
+
