@@ -16,6 +16,9 @@ type DamageExpense = {
   responsibleDriverId: string | null;
   status: string;
   photos?: string[] | null;
+  invoices?: string[] | null;
+  repairEstimates?: string[] | null;
+  receipts?: string[] | null;
 };
 
 export default function DamageExpenseDetailsPage() {
