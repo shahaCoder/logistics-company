@@ -307,4 +307,65 @@ model Truck {
   @@index([createdAt]) // Для сортировки
 }
 
+enum VehicleType {
+  TRUCK
+  TRAILER
+}
+
+enum DamageStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum DriverLiabilityType {
+  NONE
+  PARTIAL
+  FULL
+}
+
+enum DamageSeverity {
+  MINOR
+  MAJOR
+  CRITICAL
+}
+
+model DamageExpense {
+  id                  String              @id @default(cuid())
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  dateReported        DateTime
+  vehicleId           String
+  vehicleType         VehicleType
+  category            String
+  description         String?
+
+  totalCost           Decimal
+  companyShare        Decimal
+  driverShare         Decimal
+
+  responsibleDriverId String?
+  driverLiabilityType DriverLiabilityType
+
+  status              DamageStatus        @default(OPEN)
+
+  photos              Json?              // Array of image URLs
+
+  invoices            Json?              // Invoice documents (PDF/images)
+  repairEstimates     Json?              // Repair estimates
+  receipts            Json?              // Final receipts
+
+  severity            DamageSeverity     @default(MINOR)
+  paid                Boolean            @default(false)
+
+  insuranceClaimNumber String?
+  insuranceCoveredAmount Decimal?
+  insuranceDeductible    Decimal?
+  insuranceStatus        String?
+
+  @@index([dateReported])
+  @@index([vehicleId])
+  @@index([status, dateReported])
+}
 

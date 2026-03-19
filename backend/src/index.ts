@@ -11,6 +11,7 @@ import { publicRouter as requestsPublicRouter, adminRouter as requestsAdminRoute
 import trucksRouter from './modules/trucks/trucks.controller.js';
 import oilChangeRouter from './modules/oil-change/oil-change.controller.js';
 import adminUsersRouter from './modules/admin-users/admin-users.controller.js';
+import damageExpensesRouter from './modules/damage-expenses/damage-expenses.controller.js';
 import { startSamsaraSyncJob } from './services/samsara-sync.service.js';
 import { isRedisEnabled } from './services/cache.service.js';
 
@@ -139,6 +140,8 @@ app.use('/api/admin/requests', requestsAdminRouter);
 app.use('/api/admin', trucksRouter);
 // Admin oil-change routes
 app.use('/api/admin', oilChangeRouter);
+// Damage expenses routes
+app.use('/api/admin', damageExpensesRouter);
 // Admin users (list/create/update admins, profile)
 app.use('/api/admin', adminUsersRouter);
 

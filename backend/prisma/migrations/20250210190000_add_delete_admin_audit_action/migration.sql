@@ -1,1 +1,0 @@
-ALTER TYPE "AuditAction" ADD VALUE 'DELETE_ADMIN';
