@@ -145,6 +145,21 @@ export default function AdminLayout({
           isActive: pathname?.includes("/trucks"),
         },
         {
+          href: "/internal-driver-portal-7v92nx/damage-expenses",
+          label: "Damage expenses",
+          icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-7 4h8a2 2 0 002-2v-7.586a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 5H7a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+          ),
+          isActive: pathname?.includes("/damage-expenses"),
+        },
+        {
           href: "/internal-driver-portal-7v92nx/oil-change",
           label: "Maintenance",
           icon: (
