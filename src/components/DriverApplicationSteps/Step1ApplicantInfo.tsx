@@ -313,6 +313,62 @@ export default function Step1ApplicantInfo({
           </p>
         </div>
 
+        {/* US Status (Optional) */}
+        <div className="mt-2">
+          <label className="block text-sm font-medium text-gray-800 mb-1">
+            US Status <span className="text-gray-500 text-xs">(Optional)</span>
+          </label>
+          <select
+            value={watch("usStatus") || ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              setValue(
+                "usStatus",
+                (v ? v : undefined) as any,
+                { shouldValidate: true }
+              );
+            }}
+            className={`w-full bg-white border rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent ${
+              errors.usStatus ? "border-red-500" : "border-gray-300"
+            }`}
+          >
+            <option value="">Select status</option>
+            <option value="US_CITIZEN">US Citizen</option>
+            <option value="GREEN_CARD_HOLDER">Green Card Holder</option>
+            <option value="WORK_PERMIT">Work Permit</option>
+            <option value="OTHER">Other</option>
+          </select>
+          {errors.usStatus?.message && (
+            <p className="text-red-500 text-xs mt-1">
+              {String(errors.usStatus.message)}
+            </p>
+          )}
+
+          <div className="mt-3">
+            <label className="block text-sm font-medium text-gray-800 mb-1">
+              Proof document <span className="text-gray-500 text-xs">(Optional)</span>
+            </label>
+            <input
+              type="file"
+              accept="application/pdf,image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setValue("usStatusDocument", file, { shouldValidate: true });
+                } else {
+                  setValue("usStatusDocument", undefined, { shouldValidate: false });
+                }
+              }}
+              className={`w-full text-[12px] text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-red-600 file:px-3 file:py-1.5 file:text-[12px] file:font-medium file:text-white hover:file:bg-red-700`}
+            />
+            {errors.usStatusDocument?.message && (
+              <p className="text-red-500 text-xs mt-1">
+                {String(errors.usStatusDocument.message)}
+              </p>
+            )}
+          </div>
+        </div>
+
         {/* Contact Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>

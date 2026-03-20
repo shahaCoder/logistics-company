@@ -163,6 +163,7 @@ export async function createDriverApplication(
         truckYear: dto.truckYear || null,
         truckMake: dto.truckMake || null,
         alcoholDrugReturnToDuty: dto.alcoholDrugReturnToDuty ?? null,
+        usStatus: dto.usStatus ?? null,
         applicantIp: meta.applicantIp,
         userAgent: meta.userAgent,
       },
@@ -231,6 +232,10 @@ export async function createDriverApplication(
     let medicalCardUrl: string | undefined;
     let medicalCardPublicId: string | undefined;
 
+    // Upload US status proof document (optional)
+    let usStatusDocumentUrl: string | undefined;
+    let usStatusDocumentPublicId: string | undefined;
+
     if (files.medicalCard) {
       // Determine file type from mimetype
       const isPDF = files.medicalCard.mimetype === 'application/pdf' || 
@@ -256,8 +261,50 @@ export async function createDriverApplication(
       uploadPromises.push(upload);
     }
 
+    // Upload optional US status proof document (image or PDF)
+    if (files.usStatusDocument) {
+      const isPDF =
+        files.usStatusDocument.mimetype === 'application/pdf' ||
+        files.usStatusDocument.originalname?.toLowerCase().endsWith('.pdf');
+      const resourceType = isPDF ? 'raw' : 'image';
+
+      const upload = uploadToApplicationFolder(
+        files.usStatusDocument.buffer,
+        app.id,
+        'us-status-document',
+        resourceType
+      )
+        .then((result) => {
+          usStatusDocumentUrl = result.url;
+          usStatusDocumentPublicId = result.publicId;
+        })
+        .catch((error) => {
+          console.error('Error uploading US status document:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          if (
+            errorMessage.includes('Cloudinary is not configured') ||
+            errorMessage.includes('api_key')
+          ) {
+            throw new Error('File upload service is not configured. Please contact support.');
+          }
+          throw new Error(`Failed to upload US status document: ${errorMessage}`);
+        });
+
+      uploadPromises.push(upload);
+    }
+
     // Wait for all file uploads
     await Promise.all(uploadPromises);
+
+    if (usStatusDocumentUrl || usStatusDocumentPublicId) {
+      await tx.driverApplication.update({
+        where: { id: app.id },
+        data: {
+          usStatusDocumentUrl: usStatusDocumentUrl ?? null,
+          usStatusDocumentPublicId: usStatusDocumentPublicId ?? null,
+        },
+      });
+    }
 
     // Create driver license record
     await tx.driverLicense.create({

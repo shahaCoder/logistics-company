@@ -32,6 +32,13 @@ enum AdminRole {
   VIEWER
 }
 
+enum USStatus {
+  US_CITIZEN
+  GREEN_CARD_HOLDER
+  WORK_PERMIT
+  OTHER
+}
+
 model DriverApplication {
   id           String   @id @default(cuid())
   createdAt    DateTime @default(now())
@@ -71,6 +78,11 @@ model DriverApplication {
 
   // Alcohol & Drug Test
   alcoholDrugReturnToDuty Boolean? // Documentation of return-to-duty completion
+
+  // Optional: US status + optional proof document
+  usStatus                USStatus?
+  usStatusDocumentUrl     String?
+  usStatusDocumentPublicId String?
 
   // Relations
   previousAddresses PreviousAddress[]

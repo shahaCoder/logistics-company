@@ -42,6 +42,7 @@ const allowedMimeTypes: Record<string, string[]> = {
   licenseFront: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
   licenseBack: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
   medicalCard: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
+  usStatusDocument: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
   consentAuthorization: ['image/jpeg', 'image/png', 'image/jpg'],
   consentAlcoholDrug: ['image/jpeg', 'image/png', 'image/jpg'],
   consentSafetyPerformance: ['image/jpeg', 'image/png', 'image/jpg'],
@@ -71,6 +72,7 @@ const uploadFields = [
   { name: 'licenseFront', maxCount: 1 },
   { name: 'licenseBack', maxCount: 1 },
   { name: 'medicalCard', maxCount: 1 },
+  { name: 'usStatusDocument', maxCount: 1 },
   { name: 'consentAuthorization', maxCount: 1 },
   { name: 'consentAlcoholDrug', maxCount: 1 },
   { name: 'consentSafetyPerformance', maxCount: 1 },
@@ -217,6 +219,7 @@ router.post(
         licenseFront: uploadedFiles?.['licenseFront']?.[0],
         licenseBack: uploadedFiles?.['licenseBack']?.[0],
         medicalCard: uploadedFiles?.['medicalCard']?.[0],
+        usStatusDocument: uploadedFiles?.['usStatusDocument']?.[0],
         consentSignatures: {
           AUTHORIZATION: uploadedFiles?.['consentAuthorization']?.[0],
           ALCOHOL_DRUG: uploadedFiles?.['consentAlcoholDrug']?.[0],
@@ -239,6 +242,15 @@ router.post(
       }
       if (files.medicalCard && files.medicalCard.buffer) {
         fileValidationPromises.push(validateFileContent('medicalCard', files.medicalCard.buffer, allowedMimeTypes.medicalCard));
+      }
+      if (files.usStatusDocument && files.usStatusDocument.buffer) {
+        fileValidationPromises.push(
+          validateFileContent(
+            'usStatusDocument',
+            files.usStatusDocument.buffer,
+            allowedMimeTypes.usStatusDocument
+          )
+        );
       }
       
       // Validate consent signature files

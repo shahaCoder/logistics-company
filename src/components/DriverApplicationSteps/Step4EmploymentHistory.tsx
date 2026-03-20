@@ -48,9 +48,7 @@ export default function Step4EmploymentHistory({
 
   const removeEmploymentRecord = (index: number) => {
     const current = employmentRecords || [];
-    if (current.length > 1) {
-      setValue("employmentRecords", current.filter((_, i) => i !== index));
-    }
+    setValue("employmentRecords", current.filter((_, i) => i !== index));
   };
 
   const updateEmploymentRecord = (
@@ -79,6 +77,9 @@ export default function Step4EmploymentHistory({
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
         Step 4 – Employment Record (Previous 3 Years)
       </h2>
+      <p className="text-xs text-gray-500 -mt-6 mb-4">
+        Employment history is optional. You may leave it empty.
+      </p>
 
       <div className="space-y-6">
         {employmentRecords.map((record, index) => {
@@ -92,7 +93,7 @@ export default function Step4EmploymentHistory({
               <h3 className="text-lg font-semibold text-gray-900">
                 Item {index + 1}
               </h3>
-              {employmentRecords.length > 1 && (
+              {employmentRecords.length > 0 && (
                 <button
                   type="button"
                   onClick={() => removeEmploymentRecord(index)}
@@ -106,7 +107,7 @@ export default function Step4EmploymentHistory({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-800 mb-1">
-                  Employer Name <span className="text-red-600">*</span>
+                  Employer Name
                 </label>
                 <input
                   type="text"
@@ -178,7 +179,7 @@ export default function Step4EmploymentHistory({
 
               <div>
                 <label className="block text-sm font-medium text-gray-800 mb-1">
-                  Address Line 1 <span className="text-red-600">*</span>
+                  Address Line 1
                 </label>
                 <input
                   type="text"
@@ -202,7 +203,7 @@ export default function Step4EmploymentHistory({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-1">
-                    Country <span className="text-red-600">*</span>
+                    Country
                   </label>
                   <select
                     value={record.country || "US"}
@@ -265,7 +266,7 @@ export default function Step4EmploymentHistory({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-1">
-                    City <span className="text-red-600">*</span>
+                    City
                   </label>
                   <input
                     type="text"
@@ -292,7 +293,7 @@ export default function Step4EmploymentHistory({
                   <>
                     <div>
                       <label className="block text-sm font-medium text-gray-800 mb-1">
-                        State <span className="text-red-600">*</span>
+                        State
                       </label>
                       <select
                         value={record.state}
@@ -319,7 +320,7 @@ export default function Step4EmploymentHistory({
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-800 mb-1">
-                        Zip Code <span className="text-red-600">*</span>
+                        Zip Code
                       </label>
                       <input
                         type="text"
@@ -343,7 +344,7 @@ export default function Step4EmploymentHistory({
                 ) : (
                   <div>
                     <label className="block text-sm font-medium text-gray-800 mb-1">
-                      State/Province/Region <span className="text-red-600">*</span>
+                      State/Province/Region
                     </label>
                     <input
                       type="text"

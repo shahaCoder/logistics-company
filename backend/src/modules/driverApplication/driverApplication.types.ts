@@ -80,7 +80,12 @@ export const DriverApplicationDTOSchema = z.object({
   medicalCardExpiresAt: z.string().optional(),
 
   // Employment History
-  employmentRecords: z.array(EmploymentRecordSchema),
+  employmentRecords: z.array(EmploymentRecordSchema).optional(),
+
+  // Optional US status
+  usStatus: z
+    .enum(["US_CITIZEN", "GREEN_CARD_HOLDER", "WORK_PERMIT", "OTHER"])
+    .optional(),
 
   // Legal Consents
   legalConsents: z.array(LegalConsentSchema),
@@ -97,6 +102,7 @@ export interface DriverApplicationFiles {
   licenseFront?: Express.Multer.File;
   licenseBack?: Express.Multer.File;
   medicalCard?: Express.Multer.File;
+  usStatusDocument?: Express.Multer.File;
   consentSignatures?: { [key: string]: Express.Multer.File | undefined };
 }
 

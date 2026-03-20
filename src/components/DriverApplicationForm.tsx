@@ -181,7 +181,23 @@ const fullFormSchema = z.object({
   ),
 
   // Step 4
-  employmentRecords: z.array(employmentRecordSchema).min(1, "At least one employment record is required"),
+  employmentRecords: z.array(employmentRecordSchema).optional(),
+
+  // Optional: US status + optional proof document
+  usStatus: z
+    .enum(["US_CITIZEN", "GREEN_CARD_HOLDER", "WORK_PERMIT", "OTHER"])
+    .optional(),
+  usStatusDocument: z
+    .any()
+    .optional()
+    .refine(
+      (file) => {
+        if (!file) return true;
+        if (file instanceof File) return file.size > 0;
+        return false;
+      },
+      "US status document must be a valid file"
+    ),
 
   // Step 5 - Authorization
   authorizationSignature: z.string().optional(),
@@ -296,8 +312,8 @@ export type DriverApplicationFormData = z.infer<typeof fullFormSchema>;
 
 const TOTAL_STEPS = 9;
 
-const FORM_STORAGE_KEY = "driverApplicationFormData.v1";
-const STEP_STORAGE_KEY = "driverApplicationCurrentStep.v1";
+const FORM_STORAGE_KEY = "driverApplicationFormData.v2";
+const STEP_STORAGE_KEY = "driverApplicationCurrentStep.v2";
 
 const sanitizeFormDataForStorage = (
   data: DriverApplicationFormData
@@ -306,6 +322,7 @@ const sanitizeFormDataForStorage = (
     licenseFrontFile,
     licenseBackFile,
     medicalCardFile,
+    usStatusDocument,
     authorizationSignatureFile,
     alcoholDrugSignatureFile,
     pspSignatureFile,
@@ -382,18 +399,7 @@ export default function DriverApplicationForm() {
       livedAtCurrentMoreThan3Years: false,
       hasOtherLicensesLast3Years: false,
       endorsements: [],
-      employmentRecords: [
-        {
-          employerName: "",
-          addressLine1: "",
-          country: "US",
-          city: "",
-          state: "",
-          zip: "",
-          wasSubjectToFMCSR: true,
-          wasSafetySensitive: true,
-        },
-      ],
+      employmentRecords: [],
       alcoholDrugPositive: false,
       alcoholConcentration: false,
       refusedTest: false,
@@ -949,8 +955,14 @@ export default function DriverApplicationForm() {
     try {
       // Flush any pending drawn signature so file is in form state before we read it
       if (typeof window !== 'undefined') {
+        // Ensure signature canvases flush their latest drawn data first
+        await saveAllSignatures();
         window.dispatchEvent(new CustomEvent('driver-app-signature-flush'));
-        await new Promise((r) => setTimeout(r, 600));
+
+        // Text-based signatures generate signature files with a delay (1s..2.5s).
+        // Backend requires the signature FILE for accepted consents, so we must wait
+        // long enough to ensure the File is actually present in form state.
+        await new Promise((r) => setTimeout(r, 3000));
       }
       // Re-read form state after flush (signature file might have been set by canvas)
       const latestData = getValues() as DriverApplicationFormData;
@@ -983,6 +995,7 @@ export default function DriverApplicationForm() {
         currentZip: latestData.currentZip,
         livedAtCurrentMoreThan3Years: latestData.livedAtCurrentMoreThan3Years,
         previousAddresses: latestData.previousAddresses || [],
+        usStatus: latestData.usStatus || undefined,
         license: {
           licenseNumber: latestData.licenseNumber,
           state: latestData.licenseState,
@@ -995,7 +1008,7 @@ export default function DriverApplicationForm() {
             : null,
         },
         medicalCardExpiresAt: latestData.medicalCardExpiresAt || null,
-        employmentRecords: latestData.employmentRecords.map((record) => ({
+        employmentRecords: (latestData.employmentRecords ?? []).map((record) => ({
           employerName: record.employerName,
           employerPhone: record.employerPhone || "",
           employerFax: record.employerFax || "",
@@ -1055,12 +1068,19 @@ export default function DriverApplicationForm() {
 
       // Append JSON as string
       Object.keys(payload).forEach((key) => {
-        if (key === "previousAddresses" || key === "employmentRecords" || key === "legalConsents") {
-          formData.append(key, JSON.stringify((payload as any)[key]));
+        const value = (payload as any)[key];
+        if (value === undefined) return;
+
+        if (
+          key === "previousAddresses" ||
+          key === "employmentRecords" ||
+          key === "legalConsents"
+        ) {
+          formData.append(key, JSON.stringify(value));
         } else if (key === "license") {
-          formData.append("license", JSON.stringify((payload as any)[key]));
+          formData.append("license", JSON.stringify(value));
         } else {
-          formData.append(key, (payload as any)[key]);
+          formData.append(key, value as any);
         }
       });
 
@@ -1073,6 +1093,10 @@ export default function DriverApplicationForm() {
       }
       if (latestData.medicalCardFile) {
         formData.append("medicalCard", latestData.medicalCardFile);
+      }
+
+      if (latestData.usStatusDocument) {
+        formData.append("usStatusDocument", latestData.usStatusDocument);
       }
       
       // Append signature files (use latestData so flushed signatures are included)
@@ -1437,6 +1461,10 @@ export default function DriverApplicationForm() {
                 }
                 
                 // Validate current step first
+                // Force signature canvases to save before validating (draw mode can be async)
+                await saveAllSignatures();
+                await new Promise((r) => setTimeout(r, 1200));
+
                 const stepValid = await validateCurrentStep();
                 if (!stepValid) {
                   setSubmitError("Please fill in all required fields before submitting.");
