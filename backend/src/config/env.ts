@@ -31,6 +31,7 @@ const envSchema = z.object({
   SMTP_HOST: z.string().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
+  RESEND_API_KEY: z.string().optional(),
   
   // Telegram (optional)
   TELEGRAM_BOT_TOKEN: z.string().optional(),

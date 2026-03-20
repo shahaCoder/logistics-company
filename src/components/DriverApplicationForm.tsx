@@ -953,6 +953,36 @@ export default function DriverApplicationForm() {
     setSubmitError(null);
 
     try {
+      const buildSignatureFileFromText = async (
+        text: string,
+        fileName: string
+      ): Promise<File | undefined> => {
+        if (typeof window === "undefined") return undefined;
+        const trimmed = (text || "").trim();
+        if (!trimmed || trimmed === "Drawn signature") return undefined;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 600;
+        canvas.height = 200;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return undefined;
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#000000";
+        ctx.font = "48px Dancing Script, cursive";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(trimmed.toUpperCase(), canvas.width / 2, canvas.height / 2);
+
+        const blob = await new Promise<Blob | null>((resolve) =>
+          canvas.toBlob((b) => resolve(b), "image/png")
+        );
+        if (!blob) return undefined;
+
+        return new File([blob], fileName, { type: "image/png" });
+      };
+
       // Flush any pending drawn signature so file is in form state before we read it
       if (typeof window !== 'undefined') {
         // Ensure signature canvases flush their latest drawn data first
@@ -966,6 +996,44 @@ export default function DriverApplicationForm() {
       }
       // Re-read form state after flush (signature file might have been set by canvas)
       const latestData = getValues() as DriverApplicationFormData;
+
+      // Hard guarantee: backend requires FILE signatures for all accepted consents.
+      // If user typed name and file wasn't generated in time, generate it now.
+      if (!latestData.authorizationSignatureFile && latestData.authorizationSignature) {
+        const f = await buildSignatureFileFromText(
+          latestData.authorizationSignature,
+          "authorization-signature.png"
+        );
+        if (f) latestData.authorizationSignatureFile = f;
+      }
+      if (!latestData.alcoholDrugSignatureFile && latestData.alcoholDrugSignature) {
+        const f = await buildSignatureFileFromText(
+          latestData.alcoholDrugSignature,
+          "alcohol-drug-signature.png"
+        );
+        if (f) latestData.alcoholDrugSignatureFile = f;
+      }
+      if (!latestData.pspSignatureFile && latestData.pspSignature) {
+        const f = await buildSignatureFileFromText(
+          latestData.pspSignature,
+          "psp-signature.png"
+        );
+        if (f) latestData.pspSignatureFile = f;
+      }
+      if (!latestData.clearinghouseSignatureFile && latestData.clearinghouseSignature) {
+        const f = await buildSignatureFileFromText(
+          latestData.clearinghouseSignature,
+          "clearinghouse-signature.png"
+        );
+        if (f) latestData.clearinghouseSignatureFile = f;
+      }
+      if (!latestData.mvrSignatureFile && latestData.mvrSignature) {
+        const f = await buildSignatureFileFromText(
+          latestData.mvrSignature,
+          "mvr-signature.png"
+        );
+        if (f) latestData.mvrSignatureFile = f;
+      }
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       

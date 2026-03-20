@@ -1,47 +1,13 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { Resend } from 'resend';
 
-// Получаем путь к текущему файлу и директорию
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const resendApiKey = process.env.RESEND_API_KEY;
+const emailFrom = process.env.EMAIL_FROM || 'noreply@glco.us';
 
-// Загружаем .env из корня backend директории
-dotenv.config({ path: join(__dirname, '../../.env') });
-
-const smtpHost = process.env.SMTP_HOST;
-const smtpPort = Number(process.env.SMTP_PORT) || 465;
-const smtpSecure = process.env.SMTP_SECURE === 'true';
-const smtpUser = process.env.SMTP_USER;
-const smtpPass = process.env.SMTP_PASSWORD;
-const emailFrom = process.env.EMAIL_FROM || 'noreply.glcous@gmail.com';
-
-// ВРЕМЕННЫЕ логи для проверки
-console.log('[EmailService] SMTP_HOST =', smtpHost);
-console.log('[EmailService] SMTP_USER =', smtpUser);
-console.log('[EmailService] SMTP_PASS set =', !!smtpPass);
-
-if (!smtpHost || !smtpUser || !smtpPass) {
-  console.error('[EmailService] ❌ SMTP env vars are missing!', {
-    smtpHost,
-    smtpUser,
-    hasPass: !!smtpPass,
-  });
-  // Можно либо упасть, либо бросить ошибку, но точно НЕ использовать тест конфиг
-  // Чтобы сразу увидеть проблему, кидаем ошибку:
-  throw new Error('SMTP configuration is missing. Check .env');
+if (!resendApiKey) {
+  throw new Error('RESEND_API_KEY is missing. Check backend .env');
 }
 
-export const mailer = nodemailer.createTransport({
-  host: smtpHost,
-  port: smtpPort,
-  secure: smtpSecure,
-  auth: {
-    user: smtpUser,
-    pass: smtpPass,
-  },
-});
+const resend = new Resend(resendApiKey);
 
 export async function sendApplicationConfirmation(
   email: string,
@@ -49,9 +15,9 @@ export async function sendApplicationConfirmation(
 ) {
   if (!email) return;
 
-  await mailer.sendMail({
+  await resend.emails.send({
     from: emailFrom,
-    to: email,
+    to: [email],
     subject: 'Your Application Has Been Received – Global Cooperation LLC',
     html: `
       <p>Hi ${firstName || 'Driver'},</p>
