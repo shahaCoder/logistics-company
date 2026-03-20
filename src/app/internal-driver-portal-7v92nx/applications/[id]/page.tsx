@@ -68,6 +68,11 @@ interface Application {
   id: string;
   firstName: string;
   lastName: string;
+  applicantType?: "COMPANY_DRIVER" | "OWNER_OPERATOR" | null;
+  truckYear?: string | null;
+  truckMake?: string | null;
+  usStatus?: "US_CITIZEN" | "GREEN_CARD_HOLDER" | "WORK_PERMIT" | "OTHER" | null;
+  usStatusDocumentUrl?: string | null;
   dateOfBirth: string;
   phone: string;
   email: string;
@@ -135,6 +140,18 @@ interface Application {
     role: string;
   } | null;
 }
+
+const US_STATUS_LABELS: Record<string, string> = {
+  US_CITIZEN: "US Citizen",
+  GREEN_CARD_HOLDER: "Green Card Holder",
+  WORK_PERMIT: "Work Permit",
+  OTHER: "Other",
+};
+
+const APPLICANT_TYPE_LABELS: Record<string, string> = {
+  COMPANY_DRIVER: "Company Driver",
+  OWNER_OPERATOR: "Owner Operator",
+};
 
 const CONSENT_LABELS: Record<string, string> = {
   AUTHORIZATION: "Authorization & Certification",
@@ -345,6 +362,26 @@ export default function ApplicationDetailPage() {
       // Applicant Information
       addText("Applicant Information", 11, true);
       yPos += sectionSpacing;
+      addText(
+        `Applicant Type: ${
+          application.applicantType
+            ? APPLICANT_TYPE_LABELS[application.applicantType] || application.applicantType
+            : "Not specified"
+        }`,
+        9
+      );
+      if (application.applicantType === "OWNER_OPERATOR") {
+        addText(`Truck Year: ${application.truckYear || "Not specified"}`, 9);
+        addText(`Truck Make: ${application.truckMake || "Not specified"}`, 9);
+      }
+      addText(
+        `US Status: ${
+          application.usStatus
+            ? US_STATUS_LABELS[application.usStatus] || application.usStatus
+            : "Not specified"
+        }`,
+        9
+      );
       addText(`Name: ${application.firstName} ${application.lastName}`, 9);
       addText(`Date of Birth: ${formatDateUS(application.dateOfBirth)}`, 9);
       addText(`Phone: ${application.phone}`, 9);
@@ -657,6 +694,38 @@ export default function ApplicationDetailPage() {
             </h2>
             <div className="grid grid-cols-2 gap-3">
               <div>
+                <label className="text-xs font-medium text-slate-500">Applicant Type</label>
+                <p className="text-xs text-slate-900 mt-0.5">
+                  {application.applicantType
+                    ? APPLICANT_TYPE_LABELS[application.applicantType] || application.applicantType
+                    : "Not specified"}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-500">US Status</label>
+                <p className="text-xs text-slate-900 mt-0.5">
+                  {application.usStatus
+                    ? US_STATUS_LABELS[application.usStatus] || application.usStatus
+                    : "Not specified"}
+                </p>
+              </div>
+              {application.applicantType === "OWNER_OPERATOR" && (
+                <>
+                  <div>
+                    <label className="text-xs font-medium text-slate-500">Truck Year</label>
+                    <p className="text-xs text-slate-900 mt-0.5">
+                      {application.truckYear || "Not provided"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-500">Truck Make</label>
+                    <p className="text-xs text-slate-900 mt-0.5">
+                      {application.truckMake || "Not provided"}
+                    </p>
+                  </div>
+                </>
+              )}
+              <div>
                 <label className="text-xs font-medium text-slate-500">First Name</label>
                 <p className="text-xs text-slate-900 mt-0.5">{application.firstName}</p>
               </div>
@@ -709,6 +778,22 @@ export default function ApplicationDetailPage() {
               )}
             </div>
             </div>
+
+            {application.usStatusDocumentUrl && (
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <label className="text-xs font-medium text-slate-500">US Status Document</label>
+                <div className="mt-1">
+                  <a
+                    href={application.usStatusDocumentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors"
+                  >
+                    Open Document
+                  </a>
+                </div>
+              </div>
+            )}
 
             <div className="mt-4 pt-4 border-t border-slate-200">
               <label className="text-xs font-medium text-slate-500">Current Address</label>

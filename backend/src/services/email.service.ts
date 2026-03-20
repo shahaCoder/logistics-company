@@ -3,11 +3,7 @@ import { Resend } from 'resend';
 const resendApiKey = process.env.RESEND_API_KEY;
 const emailFrom = process.env.EMAIL_FROM || 'noreply@glco.us';
 
-if (!resendApiKey) {
-  throw new Error('RESEND_API_KEY is missing. Check backend .env');
-}
-
-const resend = new Resend(resendApiKey);
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export async function sendApplicationConfirmation(
   email: string,
@@ -15,7 +11,11 @@ export async function sendApplicationConfirmation(
 ) {
   if (!email) return;
 
-  await resend.emails.send({
+  if (!resend) {
+    throw new Error('RESEND_API_KEY is missing. Cannot send confirmation email.');
+  }
+
+  const { data, error } = await resend.emails.send({
     from: emailFrom,
     to: [email],
     subject: 'Your Application Has Been Received – Global Cooperation LLC',
@@ -27,5 +27,13 @@ export async function sendApplicationConfirmation(
       <p>Best regards,<br/>Global Cooperation LLC</p>
     `,
   });
+
+  if (error) {
+    throw new Error(`Resend API error: ${error.message}`);
+  }
+
+  if (!data?.id) {
+    throw new Error('Resend API did not return message id');
+  }
 }
 
